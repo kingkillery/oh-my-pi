@@ -1,4 +1,4 @@
-"""Structured JSON logging for robomp."""
+"""Logging configuration for robomp — JSON to file, pretty ANSI to stdout."""
 
 from __future__ import annotations
 
@@ -38,9 +38,60 @@ _RESERVED = frozenset(
     }
 )
 
+# ── ANSI helpers ──────────────────────────────────────────────────────────────
+
+_RST = "\033[0m"
+_DIM = "\033[2m"
+
+_LEVEL_COLOR: dict[str, str] = {
+    "DEBUG":    "\033[34m",    # blue
+    "INFO":     "\033[32m",    # green
+    "WARNING":  "\033[33m",    # yellow
+    "ERROR":    "\033[31m",    # red
+    "CRITICAL": "\033[1;31m",  # bold red
+}
+
+# Fields that uvicorn injects and that are not useful in pretty output.
+_PRETTY_SKIP = _RESERVED | {"color_message", "color_levelname"}
+
+
+class PrettyFormatter(logging.Formatter):
+    """Human-readable single-line formatter with ANSI colour.
+
+    Output shape:
+        HH:MM:SS  LEVEL     logger.name           message  key=val key2=val2
+    """
+
+    def format(self, record: logging.LogRecord) -> str:  # noqa: A003
+        ts = time.strftime("%H:%M:%S", time.gmtime(record.created))
+        color = _LEVEL_COLOR.get(record.levelname, "")
+        level = f"{color}{record.levelname:<8}{_RST}"
+        # Strip the package prefix to save width; keeps uvicorn.*, httpx, etc.
+        name = record.name.removeprefix("robomp.")
+        logger_col = f"{_DIM}{name:<22}{_RST}"
+        msg = record.getMessage()
+
+        extras: list[str] = []
+        for key, val in record.__dict__.items():
+            if key in _PRETTY_SKIP or key.startswith("_"):
+                continue
+            extras.append(f"{key}={val}")
+
+        line = f"{_DIM}{ts}{_RST}  {level}  {logger_col}  {msg}"
+        if extras:
+            line += f"  {_DIM}{' '.join(extras)}{_RST}"
+        if record.exc_info:
+            line += "\n" + self.formatException(record.exc_info)
+        if record.stack_info:
+            line += "\n" + self.formatStack(record.stack_info)
+        return line
+
+
+# ── JSON formatter (kept for file handler) ────────────────────────────────────
+
 
 class JsonFormatter(logging.Formatter):
-    def format(self, record: logging.LogRecord) -> str:
+    def format(self, record: logging.LogRecord) -> str:  # noqa: A003
         payload: dict[str, Any] = {
             "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(record.created)),
             "level": record.levelname,
@@ -60,11 +111,13 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(payload, default=str)
 
 
+# ── Setup ─────────────────────────────────────────────────────────────────────
+
 _INITIALIZED = False
 
 
 def configure_logging(log_dir: Path | None = None, level: int = logging.INFO) -> None:
-    """Idempotently configure structured logging to stdout and an optional file."""
+    """Idempotently configure logging: pretty ANSI to stdout, JSON to file."""
     global _INITIALIZED
     if _INITIALIZED:
         return
@@ -74,7 +127,7 @@ def configure_logging(log_dir: Path | None = None, level: int = logging.INFO) ->
         root.removeHandler(handler)
 
     stream = logging.StreamHandler(sys.stdout)
-    stream.setFormatter(JsonFormatter())
+    stream.setFormatter(PrettyFormatter())
     root.addHandler(stream)
 
     if log_dir is not None:

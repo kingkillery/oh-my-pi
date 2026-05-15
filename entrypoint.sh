@@ -48,6 +48,14 @@ chown -R root:omp /data/cache /data/workspaces/_pool
 chmod -R u=rwX,g=rwsX,o= /data/cache /data/workspaces/_pool
 chmod 0700 /data/logs
 
+# Wait briefly for staged agent config to appear (bind mount race fix)
+for _ in $(seq 1 50); do
+    if [ -e /srv/agent-home-stage/.agent/AGENTS.md ] || [ -d /srv/agent-home-stage/.agent/rules ] || [ -e /srv/agent-home-stage/.omp/agent/models.yml ]; then
+        break
+    fi
+    sleep 0.1
+done
+
 rm -rf /srv/agent-home/.agent /srv/agent-home/.omp/agent
 mkdir -p /srv/agent-home/.agent /srv/agent-home/.omp/agent
 if [ -e /srv/agent-home-stage/.agent ]; then
