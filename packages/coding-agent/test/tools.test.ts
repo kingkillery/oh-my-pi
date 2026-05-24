@@ -1160,6 +1160,39 @@ function b() {
 			expect(result.details?.wallTimeMs).toBeGreaterThanOrEqual(0);
 		});
 
+		it("should allow cwd inside the workspace boundary", async () => {
+			const subdir = path.join(testDir, "subdir");
+			fs.mkdirSync(subdir);
+
+			const result = await bashTool.execute("test-call-8-cwd-inside", { command: "pwd", cwd: subdir });
+
+			expect(getTextOutput(result).trim()).toBe(fs.realpathSync(subdir));
+		});
+
+		it("should reject cwd outside the workspace boundary", async () => {
+			await expect(
+				bashTool.execute("test-call-8-cwd-outside", { command: "pwd", cwd: os.tmpdir() }),
+			).rejects.toThrow(/outside the workspace boundary/);
+		});
+
+		it("should reject cwd symlinks that escape the workspace boundary", async () => {
+			if (process.platform === "win32") {
+				return;
+			}
+
+			const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "coding-agent-outside-"));
+			const linkDir = path.join(testDir, "outside-link");
+			fs.symlinkSync(outsideDir, linkDir, "dir");
+
+			try {
+				await expect(
+					bashTool.execute("test-call-8-cwd-symlink-outside", { command: "pwd", cwd: linkDir }),
+				).rejects.toThrow(/outside the workspace boundary/);
+			} finally {
+				fs.rmSync(outsideDir, { recursive: true, force: true });
+			}
+		});
+
 		it("should expose built-in interceptor defaults truthfully", () => {
 			const defaultSettings = Settings.isolated({ "bashInterceptor.enabled": true });
 			const explicitEmptySettings = Settings.isolated({

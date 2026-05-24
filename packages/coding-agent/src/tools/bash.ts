@@ -1,4 +1,5 @@
 import * as fs from "node:fs";
+import * as path from "node:path";
 import type {
 	AgentTool,
 	AgentToolContext,
@@ -182,6 +183,25 @@ function normalizeBashEnv(env: Record<string, string> | undefined): Record<strin
 		normalized[key] = value;
 	}
 	return normalized;
+}
+
+function isWithinDirectory(candidate: string, directory: string): boolean {
+	const relative = path.relative(directory, candidate);
+	return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+function assertBashCwdInsideWorkspace(
+	commandCwd: string,
+	workspaceRoots: readonly string[],
+	workspaceDisplay: string,
+): void {
+	const resolvedCwd = path.resolve(commandCwd);
+	for (const root of workspaceRoots) {
+		if (isWithinDirectory(resolvedCwd, root)) return;
+	}
+	throw new ToolError(
+		`Working directory "${commandCwd}" is outside the workspace boundary "${workspaceDisplay}". Use only relative paths or explicit workspace subdirectories.`,
+	);
 }
 
 function escapeBashEnvValueForDisplay(value: string): string {
@@ -757,7 +777,11 @@ export class BashTool implements AgentTool<typeof bashSchemaBase | typeof bashSc
 		// instead of the cached pre-mutation snapshot.
 		invalidateGithubCacheForBashCommand(command);
 
-		const commandCwd = cwd ? resolveToCwd(cwd, this.session.cwd) : this.session.cwd;
+		const workspaceRoot = path.resolve(this.session.cwd);
+		const workspaceRoots = [workspaceRoot];
+		const workspaceDisplay = workspaceRoot;
+		let commandCwd = cwd ? resolveToCwd(cwd, this.session.cwd) : this.session.cwd;
+		assertBashCwdInsideWorkspace(commandCwd, workspaceRoots, workspaceDisplay);
 		let cwdStat: fs.Stats;
 		try {
 			cwdStat = await fs.promises.stat(commandCwd);
@@ -770,6 +794,12 @@ export class BashTool implements AgentTool<typeof bashSchemaBase | typeof bashSc
 		if (!cwdStat.isDirectory()) {
 			throw new ToolError(`Working directory is not a directory: ${commandCwd}`);
 		}
+		const workspaceRealRoot = await fs.promises.realpath(workspaceRoot);
+		if (workspaceRealRoot !== workspaceRoot) {
+			workspaceRoots.push(workspaceRealRoot);
+		}
+		commandCwd = await fs.promises.realpath(commandCwd);
+		assertBashCwdInsideWorkspace(commandCwd, workspaceRoots, workspaceDisplay);
 
 		// Clamp to reasonable range: 1s - 3600s (1 hour)
 		const requestedTimeoutSec = rawTimeout;
