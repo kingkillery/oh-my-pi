@@ -133,6 +133,8 @@ Split a job across workers and get typed results back. task fans out into isolat
 
 _[Watch the capture ↗](https://omp.sh/clips/irc.mp4)_
 
+For durable top-level workstreams, `/background <name>` promotes the active session into a named background agent. Reopen the switcher with `/backgrounds`, `/agents`, or `ctrl+shift+b`. See [Background agents](docs/background-agents.md).
+
 ### 06 · Read a pdf on arxiv, why not?
 
 web_search chains fourteen ranked providers and hands whatever URLs it finds straight to read. Arxiv PDFs, GitHub pages, Stack Overflow threads come back as structured markdown with anchors intact — the same tool surface you use on local files. Cite, follow, quote, never lose where you came from.
