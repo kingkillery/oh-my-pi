@@ -128,4 +128,29 @@ describe("SessionSelectorComponent scope toggle", () => {
 		expect(selected).toHaveLength(1);
 		expect(selected[0]?.path).toBe("__new_session__:test query");
 	});
+
+	it("prepends a virtual new background agent item when a search query is entered in background mode", () => {
+		const folder = [createSession("local", "Local", "/work/current")];
+		const selected: SessionInfo[] = [];
+		const selector = new SessionSelectorComponent(
+			folder,
+			session => selected.push(session),
+			() => {},
+			() => {},
+			{ mode: "backgroundInstances" },
+		);
+
+		// Type "test background" into search input
+		for (const char of "test background") {
+			selector.handleInput(char);
+		}
+
+		const rendered = selector.render(120).join("\n");
+		expect(rendered).toContain('Launch new background agent: "test background"');
+
+		// Press Enter to select the virtual item at index 0
+		selector.handleInput("\n");
+		expect(selected).toHaveLength(1);
+		expect(selected[0]?.path).toBe("__new_background__:test background");
+	});
 });

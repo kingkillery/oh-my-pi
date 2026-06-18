@@ -253,6 +253,20 @@ class SessionList implements Component {
 				size: 0,
 			};
 			merged = [newSessionItem, ...merged];
+		} else if (trimmed && this.#mode === "backgroundInstances") {
+			const newBgItem: SessionInfo = {
+				path: `__new_background__:${trimmed}`,
+				id: "__new_background__",
+				cwd: "",
+				title: `Launch new background agent: "${trimmed}"`,
+				firstMessage: trimmed,
+				allMessagesText: "",
+				created: new Date(),
+				modified: new Date(),
+				messageCount: 0,
+				size: 0,
+			};
+			merged = [newBgItem, ...merged];
 		}
 		this.#filteredSessions = merged;
 		this.#selectedIndex = Math.min(this.#selectedIndex, Math.max(0, this.#filteredSessions.length - 1));
@@ -299,7 +313,7 @@ class SessionList implements Component {
 			if (this.#mode === "backgroundInstances") {
 				lines.push(
 					truncateToWidth(
-						theme.fg("muted", "  No background agents yet. Run /background from a session to add one."),
+						theme.fg("muted", "  No background agents yet. Type a query and press Enter to launch one."),
 						width,
 					),
 				);
@@ -359,11 +373,16 @@ class SessionList implements Component {
 			const maxWidth = rowWidth - cursorWidth; // Account for cursor width
 
 			if (this.#mode === "backgroundInstances") {
-				const displayName = backgroundInstanceDisplayName(session);
-				const truncatedName = truncateToWidth(displayName, maxWidth);
-				sessionLines.push(cursor + (isSelected ? theme.bold(truncatedName) : truncatedName));
-				const preview = session.title && session.title !== displayName ? session.title : normalizedMessage;
-				sessionLines.push(`  ${theme.fg("dim", truncateToWidth(preview, maxWidth))}`);
+				if (session.id === "__new_background__") {
+					const truncatedTitle = truncateToWidth(session.title ?? "", maxWidth);
+					sessionLines.push(cursor + (isSelected ? theme.bold(truncatedTitle) : truncatedTitle));
+				} else {
+					const displayName = backgroundInstanceDisplayName(session);
+					const truncatedName = truncateToWidth(displayName, maxWidth);
+					sessionLines.push(cursor + (isSelected ? theme.bold(truncatedName) : truncatedName));
+					const preview = session.title && session.title !== displayName ? session.title : normalizedMessage;
+					sessionLines.push(`  ${theme.fg("dim", truncateToWidth(preview, maxWidth))}`);
+				}
 			} else if (session.title) {
 				const truncatedTitle = truncateToWidth(session.title, maxWidth);
 				const titleLine = cursor + (isSelected ? theme.bold(truncatedTitle) : truncatedTitle);
@@ -379,7 +398,7 @@ class SessionList implements Component {
 				sessionLines.push(messageLine);
 			}
 
-			if (session.id === "__new_session__") {
+			if (session.id === "__new_session__" || session.id === "__new_background__") {
 				sessionLines.push(""); // Blank line between sessions
 				continue;
 			}

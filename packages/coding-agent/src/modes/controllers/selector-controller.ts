@@ -3,7 +3,7 @@ import { PASTE_CODE_LOGIN_PROVIDERS } from "@oh-my-pi/pi-ai";
 import { getOAuthProviders } from "@oh-my-pi/pi-ai/oauth";
 import type { OAuthProvider } from "@oh-my-pi/pi-ai/oauth/types";
 import type { Component, OverlayHandle } from "@oh-my-pi/pi-tui";
-import { Input, Loader, Spacer, setTuiTight, Text } from "@oh-my-pi/pi-tui";
+import { Input, Loader, Spacer, setTuiTight, Text, truncateToWidth } from "@oh-my-pi/pi-tui";
 import { getAgentDbPath, getProjectDir, normalizePathForComparison } from "@oh-my-pi/pi-utils";
 import { formatModelSelectorValue } from "../../config/model-resolver";
 import { getRoleInfo } from "../../config/model-roles";
@@ -882,7 +882,12 @@ export class SelectorController {
 				backgroundSessions,
 				async (session: SessionInfo) => {
 					done();
-					await this.handleResumeSession(session.path);
+					if (session.path.startsWith("__new_background__:")) {
+						const query = session.path.slice("__new_background__:".length);
+						await this.handleNewBackgroundSession(query);
+					} else {
+						await this.handleResumeSession(session.path);
+					}
 				},
 				() => {
 					done();
@@ -975,6 +980,36 @@ export class SelectorController {
 		this.ctx.renderInitialMessages({ clearTerminalHistory: true });
 		await this.ctx.reloadTodos();
 		this.ctx.showStatus("Started new session");
+
+		// If we are waiting for user input, submit the query!
+		if (this.ctx.onInputCallback) {
+			this.ctx.editor.setText("");
+			this.ctx.onInputCallback(
+				this.ctx.startPendingSubmission({
+					text: query,
+					streamingBehavior: "steer",
+				}),
+			);
+		}
+	}
+
+	async handleNewBackgroundSession(query: string): Promise<void> {
+		this.ctx.clearTransientSessionUi();
+
+		// Switch/Reset session via AgentSession's newSession()
+		await this.ctx.session.newSession();
+
+		const name = truncateToWidth(query.trim() || "Background agent", 40);
+		await this.ctx.session.backgroundCurrentSession(name);
+
+		this.#refreshSessionTerminalTitle();
+		this.ctx.updateEditorBorderColor();
+
+		// Clear and re-render the chat
+		this.ctx.chatContainer.clear();
+		this.ctx.renderInitialMessages({ clearTerminalHistory: true });
+		await this.ctx.reloadTodos();
+		this.ctx.showStatus(`Started new background agent: ${name}`);
 
 		// If we are waiting for user input, submit the query!
 		if (this.ctx.onInputCallback) {

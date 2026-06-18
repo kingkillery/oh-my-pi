@@ -322,6 +322,7 @@ export interface InteractiveModeContext {
 	showBackgroundInstanceSelector(): Promise<void>;
 	handleResumeSession(sessionPath: string): Promise<void>;
 	handleNewSession(query: string): Promise<void>;
+	handleNewBackgroundSession(query: string): Promise<void>;
 	handleSessionDeleteCommand(): Promise<void>;
 	showOAuthSelector(mode: "login" | "logout", providerId?: string): Promise<void>;
 	showResetUsageSelector(): Promise<void>;
