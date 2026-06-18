@@ -556,50 +556,50 @@ describe("InputController double-tap ← gesture", () => {
 		controller.setupKeyHandlers();
 		return {
 			ctx,
-			showAgentHub: ctx.showAgentHub as Spy,
+			showSessionSelector: ctx.showSessionSelector as Spy,
 			unfocusSession: ctx.unfocusSession as Spy,
 			tap: () => editor.onLeftAtStart?.(),
 		};
 	}
 
-	it("opens the Agent Hub on a deliberate double-tap", () => {
+	it("opens the Session Selector on a deliberate double-tap", () => {
 		const now = vi.spyOn(Date, "now");
-		const { showAgentHub, tap } = setup();
+		const { showSessionSelector, tap } = setup();
 		now.mockReturnValue(1_000);
 		tap();
 		now.mockReturnValue(1_200); // 200ms later — a human double-tap
 		tap();
-		expect(showAgentHub).toHaveBeenCalledTimes(1);
+		expect(showSessionSelector).toHaveBeenCalledTimes(1);
 	});
 
 	it("ignores a terminal-synthesized burst of ← arrows arriving together", () => {
 		const now = vi.spyOn(Date, "now");
-		const { showAgentHub, tap } = setup();
+		const { showSessionSelector, tap } = setup();
 		// A "click to move cursor" burst delivers every arrow in one stdin read,
 		// so all taps share the same millisecond timestamp.
 		now.mockReturnValue(1_000);
 		for (let i = 0; i < 6; i++) tap();
-		expect(showAgentHub).not.toHaveBeenCalled();
+		expect(showSessionSelector).not.toHaveBeenCalled();
 	});
 
 	it("ignores a second tap closer than the human-plausible minimum gap", () => {
 		const now = vi.spyOn(Date, "now");
-		const { showAgentHub, tap } = setup();
+		const { showSessionSelector, tap } = setup();
 		now.mockReturnValue(1_000);
 		tap();
 		now.mockReturnValue(1_010); // 10ms later — too fast to be deliberate
 		tap();
-		expect(showAgentHub).not.toHaveBeenCalled();
+		expect(showSessionSelector).not.toHaveBeenCalled();
 	});
 
 	it("returns a focused subagent view to the main session on a deliberate double-tap", () => {
 		const now = vi.spyOn(Date, "now");
-		const { showAgentHub, unfocusSession, tap } = setup("Agent1");
+		const { showSessionSelector, unfocusSession, tap } = setup("Agent1");
 		now.mockReturnValue(1_000);
 		tap();
 		now.mockReturnValue(1_200);
 		tap();
 		expect(unfocusSession).toHaveBeenCalledTimes(1);
-		expect(showAgentHub).not.toHaveBeenCalled();
+		expect(showSessionSelector).not.toHaveBeenCalled();
 	});
 });

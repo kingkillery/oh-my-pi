@@ -1103,6 +1103,7 @@ export async function runRootCommand(
 		return;
 	}
 
+	let newSessionQuery: string | undefined;
 	// Handle --resume (no value): show session picker
 	if (parsedArgs.resume === true && !parsedArgs.fork) {
 		const folderSessions = await logger.time("SessionManager.list", SessionManager.list, cwd, parsedArgs.sessionDir);
@@ -1128,22 +1129,26 @@ export async function runRootCommand(
 			writeStartupNotice(parsedArgs, `${chalk.dim("No session selected")}\n`);
 			return;
 		}
-		// Resuming a session from another project: switch the process into that
-		// project's directory and refresh cwd-derived caches before the session is
-		// built, so settings discovery, plugins, and capabilities all scope to it.
-		if (selected.cwd && normalizePathForComparison(selected.cwd) !== normalizePathForComparison(getProjectDir())) {
-			// Let the original (launch-cwd) plugin-root preload settle first so its
-			// late resolution can't clobber the re-warm we trigger below.
-			await pluginPreloadPromise.catch(() => {});
-			setProjectDir(selected.cwd);
-			clearPluginRootsAndCaches();
-			resetCapabilities();
-			cwd = getProjectDir();
-			// Re-scope project settings (.claude/settings.yml etc.) to the resumed
-			// project in place so the session is built with its configuration.
-			await settingsInstance.reloadForCwd(cwd);
+		if ("newSessionQuery" in selected) {
+			newSessionQuery = selected.newSessionQuery;
+		} else {
+			// Resuming a session from another project: switch the process into that
+			// project's directory and refresh cwd-derived caches before the session is
+			// built, so settings discovery, plugins, and capabilities all scope to it.
+			if (selected.cwd && normalizePathForComparison(selected.cwd) !== normalizePathForComparison(getProjectDir())) {
+				// Let the original (launch-cwd) plugin-root preload settle first so its
+				// late resolution can't clobber the re-warm we trigger below.
+				await pluginPreloadPromise.catch(() => {});
+				setProjectDir(selected.cwd);
+				clearPluginRootsAndCaches();
+				resetCapabilities();
+				cwd = getProjectDir();
+				// Re-scope project settings (.claude/settings.yml etc.) to the resumed
+				// project in place so the session is built with its configuration.
+				await settingsInstance.reloadForCwd(cwd);
+			}
+			sessionManager = await SessionManager.open(selected.path);
 		}
-		sessionManager = await SessionManager.open(selected.path);
 	}
 
 	await pluginPreloadPromise;
@@ -1251,17 +1256,23 @@ export async function runRootCommand(
 						}),
 					)
 				: undefined;
-		const { initialMessage, initialImages } = buildInitialMessage({
+		let { initialMessage, initialImages } = buildInitialMessage({
 			parsed: initialArgs,
 			fileText: processedFiles?.text,
 			fileImages: processedFiles?.images,
 			stdinContent: pipedInput,
 		});
+		if (newSessionQuery !== undefined) {
+			initialMessage = newSessionQuery;
+		}
 
+		const isReallyResuming = Boolean(
+			(parsedArgs.continue || parsedArgs.resume || parsedArgs.fork) && newSessionQuery === undefined,
+		);
 		const showStartupSplash = shouldShowStartupSplash({
 			configured: settingsInstance.get("startup.showSplash"),
 			isInteractive,
-			resuming: Boolean(parsedArgs.continue || parsedArgs.resume || parsedArgs.fork),
+			resuming: isReallyResuming,
 			quiet: settingsInstance.get("startup.quiet"),
 			timing: Boolean($env.PI_TIMING),
 			stdinIsTTY: process.stdin.isTTY,
@@ -1355,7 +1366,7 @@ export async function runRootCommand(
 				setToolUIContext,
 				lspServers,
 				mcpManager,
-				Boolean(parsedArgs.continue || parsedArgs.resume || parsedArgs.fork),
+				isReallyResuming,
 				deps.forceSetupWizard === true,
 				showStartupSplash,
 				eventBus,

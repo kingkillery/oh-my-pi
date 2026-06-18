@@ -104,4 +104,28 @@ describe("SessionSelectorComponent scope toggle", () => {
 		expect(rendered).toContain("(all projects)");
 		expect(rendered).toContain("other-project");
 	});
+
+	it("prepends a virtual new session item when a search query is entered", () => {
+		const folder = [createSession("local", "Local", "/work/current")];
+		const selected: SessionInfo[] = [];
+		const selector = new SessionSelectorComponent(
+			folder,
+			session => selected.push(session),
+			() => {},
+			() => {},
+		);
+
+		// Type "test query" into search input
+		for (const char of "test query") {
+			selector.handleInput(char);
+		}
+
+		const rendered = selector.render(120).join("\n");
+		expect(rendered).toContain('Start a new session: "test query"');
+
+		// Press Enter to select the virtual item at index 0
+		selector.handleInput("\n");
+		expect(selected).toHaveLength(1);
+		expect(selected[0]?.path).toBe("__new_session__:test query");
+	});
 });

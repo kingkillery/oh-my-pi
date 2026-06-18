@@ -363,18 +363,16 @@ export class InputController {
 			this.ctx.editor.setCustomKeyHandler(key, () => this.ctx.showAgentHub());
 		}
 
-		// Double-tap left arrow on an empty editor: opens the agent hub from the
+		// Double-tap left arrow on an empty editor: opens the session selector from the
 		// main session, or returns the focused subagent view to the main session.
-		// Focused ←← intentionally matches Esc. From the main session the gesture
-		// stays inert when there are no subagents (requireContent); the explicit
-		// hub key still opens the empty roster.
+		// Focused ←← intentionally matches Esc.
 		this.ctx.editor.onLeftAtStart = () => {
 			if (this.ctx.focusedAgentId) {
 				this.#handleFocusedLeftTap();
 				return;
 			}
 			if (this.#detectLeftDoubleTap()) {
-				this.ctx.showAgentHub({ requireContent: true });
+				this.ctx.showSessionSelector();
 			}
 		};
 

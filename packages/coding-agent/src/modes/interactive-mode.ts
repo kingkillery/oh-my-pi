@@ -3671,6 +3671,13 @@ export class InteractiveMode implements InteractiveModeContext {
 		return this.#selectorController.handleResumeSession(sessionPath);
 	}
 
+	handleNewSession(query: string): Promise<void> {
+		this.#btwController.dispose();
+		this.#omfgController.dispose();
+		this.resetObserverRegistry();
+		return this.#selectorController.handleNewSession(query);
+	}
+
 	handleSessionDeleteCommand(): Promise<void> {
 		return this.#selectorController.handleSessionDeleteCommand();
 	}

@@ -14,8 +14,8 @@ import { FileSessionStorage } from "../session/session-storage";
 export async function selectSession(
 	sessions: SessionInfo[],
 	options?: { allSessions?: SessionInfo[]; startInAllScope?: boolean },
-): Promise<SessionInfo | null> {
-	const { promise, resolve } = Promise.withResolvers<SessionInfo | null>();
+): Promise<SessionInfo | { newSessionQuery: string } | null> {
+	const { promise, resolve } = Promise.withResolvers<SessionInfo | { newSessionQuery: string } | null>();
 	const ui = new TUI(new ProcessTerminal());
 	let resolved = false;
 	const storage = new FileSessionStorage();
@@ -38,7 +38,12 @@ export async function selectSession(
 				if (!resolved) {
 					resolved = true;
 					ui.stop();
-					resolve(session);
+					if (session.path.startsWith("__new_session__:")) {
+						const query = session.path.slice("__new_session__:".length);
+						resolve({ newSessionQuery: query });
+					} else {
+						resolve(session);
+					}
 				}
 			},
 			() => {

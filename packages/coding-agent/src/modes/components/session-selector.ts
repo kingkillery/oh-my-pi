@@ -237,7 +237,24 @@ class SessionList implements Component {
 
 	#filterSessions(query: string): void {
 		const fuzzy = rankSessionSearchMatches(this.#allSessions, query);
-		this.#filteredSessions = this.#mergeHistoryMatches(query, fuzzy);
+		let merged = this.#mergeHistoryMatches(query, fuzzy);
+		const trimmed = query.trim();
+		if (trimmed && this.#mode === "sessions") {
+			const newSessionItem: SessionInfo = {
+				path: `__new_session__:${trimmed}`,
+				id: "__new_session__",
+				cwd: "",
+				title: `Start a new session: "${trimmed}"`,
+				firstMessage: `Launch a new session with prompt: "${trimmed}"`,
+				allMessagesText: "",
+				created: new Date(),
+				modified: new Date(),
+				messageCount: 0,
+				size: 0,
+			};
+			merged = [newSessionItem, ...merged];
+		}
+		this.#filteredSessions = merged;
 		this.#selectedIndex = Math.min(this.#selectedIndex, Math.max(0, this.#filteredSessions.length - 1));
 	}
 
@@ -352,12 +369,19 @@ class SessionList implements Component {
 				const titleLine = cursor + (isSelected ? theme.bold(truncatedTitle) : truncatedTitle);
 				sessionLines.push(titleLine);
 
-				const truncatedPreview = truncateToWidth(normalizedMessage, maxWidth);
-				sessionLines.push(`  ${theme.fg("dim", truncatedPreview)}`);
+				if (session.id !== "__new_session__") {
+					const truncatedPreview = truncateToWidth(normalizedMessage, maxWidth);
+					sessionLines.push(`  ${theme.fg("dim", truncatedPreview)}`);
+				}
 			} else {
 				const truncatedMsg = truncateToWidth(normalizedMessage, maxWidth);
 				const messageLine = cursor + (isSelected ? theme.bold(truncatedMsg) : truncatedMsg);
 				sessionLines.push(messageLine);
+			}
+
+			if (session.id === "__new_session__") {
+				sessionLines.push(""); // Blank line between sessions
+				continue;
 			}
 
 			// Metadata line: date + file size + lifecycle status (+ project dir in

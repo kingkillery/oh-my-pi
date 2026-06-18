@@ -822,7 +822,12 @@ export class SelectorController {
 				sessions,
 				async (session: SessionInfo) => {
 					done();
-					await this.handleResumeSession(session.path);
+					if (session.path.startsWith("__new_session__:")) {
+						const query = session.path.slice("__new_session__:".length);
+						await this.handleNewSession(query);
+					} else {
+						await this.handleResumeSession(session.path);
+					}
 				},
 				() => {
 					done();
@@ -954,6 +959,33 @@ export class SelectorController {
 		this.ctx.renderInitialMessages({ clearTerminalHistory: true });
 		await this.ctx.reloadTodos();
 		this.ctx.showStatus(movedProject ? `Resumed session in ${shortenPath(newCwd)}` : "Resumed session");
+	}
+
+	async handleNewSession(query: string): Promise<void> {
+		this.ctx.clearTransientSessionUi();
+
+		// Switch/Reset session via AgentSession's newSession()
+		await this.ctx.session.newSession();
+
+		this.#refreshSessionTerminalTitle();
+		this.ctx.updateEditorBorderColor();
+
+		// Clear and re-render the chat
+		this.ctx.chatContainer.clear();
+		this.ctx.renderInitialMessages({ clearTerminalHistory: true });
+		await this.ctx.reloadTodos();
+		this.ctx.showStatus("Started new session");
+
+		// If we are waiting for user input, submit the query!
+		if (this.ctx.onInputCallback) {
+			this.ctx.editor.setText("");
+			this.ctx.onInputCallback(
+				this.ctx.startPendingSubmission({
+					text: query,
+					streamingBehavior: "steer",
+				}),
+			);
+		}
 	}
 
 	async handleSessionDeleteCommand(): Promise<void> {
