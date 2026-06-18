@@ -153,4 +153,18 @@ describe("SessionSelectorComponent scope toggle", () => {
 		expect(selected).toHaveLength(1);
 		expect(selected[0]?.path).toBe("__new_background__:test background");
 	});
+
+	it("renders explicitly colored sessions with their stored accent", () => {
+		const colored = { ...createSession("local", "Local", "/work/current"), color: "#a855f7" };
+		const selector = new SessionSelectorComponent(
+			[colored],
+			() => {},
+			() => {},
+			() => {},
+		);
+
+		const rendered = selector.render(120).join("\n");
+		expect(rendered).toContain("Local");
+		expect(rendered).toContain("38;2;168;85;247");
+	});
 });

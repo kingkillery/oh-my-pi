@@ -304,6 +304,7 @@ export interface BackgroundInstanceState {
 	status: "active" | "archived";
 	model?: string;
 	role?: string;
+	color?: string;
 }
 
 interface DiskQueueOptions {
@@ -806,6 +807,7 @@ export class SessionManager {
 			id: this.#sessionId,
 			title: this.#header.title ?? this.#sessionName,
 			titleSource: this.#header.titleSource ?? this.#titleSource,
+			color: this.#header.color,
 			timestamp,
 			cwd: this.#cwd,
 			parentSession: parentSessionId,
@@ -1119,6 +1121,32 @@ export class SessionManager {
 		return true;
 	}
 
+	getSessionColor(): string | undefined {
+		return this.#header.color;
+	}
+
+	async setSessionColor(color: string | undefined): Promise<void> {
+		if (color) {
+			this.#header.color = color;
+			const background = this.getBackgroundInstance();
+			if (background) {
+				this.appendBackgroundInstance({ ...background, color });
+				return;
+			}
+		} else {
+			delete this.#header.color;
+			const background = this.getBackgroundInstance();
+			if (background) {
+				this.appendBackgroundInstance({ ...background, color: undefined });
+				return;
+			}
+		}
+
+		if (this.#persist && this.#sessionFile && this.#storage.existsSync(this.#sessionFile)) {
+			await this.#rewriteAtomically();
+		}
+	}
+
 	/**
 	 * Append a foreign (host-authored) entry verbatim, preserving its
 	 * `id`/`parentId`. Used by collab guests to mirror the host session.
@@ -1198,6 +1226,7 @@ export class SessionManager {
 				status: entry.status,
 				model: entry.model,
 				role: entry.role,
+				color: entry.color,
 			};
 		}
 		return undefined;
@@ -1219,6 +1248,7 @@ export class SessionManager {
 			status: "active",
 			model: input.model,
 			role: input.role,
+			color: this.getSessionColor(),
 		});
 		return true;
 	}
@@ -1588,6 +1618,7 @@ export class SessionManager {
 		manager.#resetToNewSession({ parentSession: sourceHeader?.id }, options?.sessionFile);
 		manager.#header.title = sourceHeader?.title;
 		manager.#header.titleSource = sourceHeader?.titleSource;
+		manager.#header.color = sourceHeader?.color;
 		manager.#sessionName = manager.#header.title;
 		manager.#titleSource = manager.#header.titleSource;
 		manager.#entries = history;

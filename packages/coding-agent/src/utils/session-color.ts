@@ -140,3 +140,56 @@ export function getSessionAccentAnsi(hex: string | undefined): string | undefine
 	if (!hex) return undefined;
 	return Bun.color(hex, "ansi-16m") ?? undefined;
 }
+
+const NAMED_SESSION_COLORS: Record<string, string> = {
+	red: "#ef4444",
+	orange: "#f97316",
+	amber: "#f59e0b",
+	yellow: "#eab308",
+	lime: "#84cc16",
+	green: "#22c55e",
+	emerald: "#10b981",
+	teal: "#14b8a6",
+	cyan: "#06b6d4",
+	blue: "#3b82f6",
+	indigo: "#6366f1",
+	violet: "#8b5cf6",
+	purple: "#a855f7",
+	fuchsia: "#d946ef",
+	pink: "#ec4899",
+	rose: "#f43f5e",
+	gray: "#6b7280",
+	grey: "#6b7280",
+};
+
+export type SessionColorInput = { type: "set"; hex: string } | { type: "clear" } | { type: "invalid"; message: string };
+
+function normalizeHexColor(input: string): string | undefined {
+	const hex = input.startsWith("#") ? input : `#${input}`;
+	const short = /^#([0-9a-f]{3})$/i.exec(hex);
+	if (short) {
+		const [r, g, b] = short[1]!;
+		return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+	}
+	if (/^#[0-9a-f]{6}$/i.test(hex)) return hex.toLowerCase();
+	return undefined;
+}
+
+export function parseSessionColorInput(input: string): SessionColorInput {
+	const trimmed = input.trim().toLowerCase();
+	if (!trimmed) {
+		return { type: "invalid", message: "Usage: /color <name|#rrggbb|clear>" };
+	}
+	if (trimmed === "clear" || trimmed === "reset" || trimmed === "auto" || trimmed === "none") {
+		return { type: "clear" };
+	}
+	const named = NAMED_SESSION_COLORS[trimmed];
+	if (named) return { type: "set", hex: named };
+	const hex = normalizeHexColor(trimmed);
+	if (hex) return { type: "set", hex };
+	return {
+		type: "invalid",
+		message:
+			"Unknown color. Use one of red, orange, yellow, green, cyan, blue, purple, pink, gray, #rgb, #rrggbb, or clear.",
+	};
+}

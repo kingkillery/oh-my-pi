@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { getThemeByName } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
 
-import { getSessionAccentHex } from "@oh-my-pi/pi-coding-agent/utils/session-color";
+import { getSessionAccentHex, parseSessionColorInput } from "@oh-my-pi/pi-coding-agent/utils/session-color";
 import { hexToHsv, relativeLuminance } from "@oh-my-pi/pi-utils";
 
 const NO_THEME_COLORS: string[] = [];
@@ -108,5 +108,24 @@ describe("getSessionAccentHex with real Theme", () => {
 				expect(dist).toBeGreaterThanOrEqual(10);
 			}
 		}
+	});
+});
+
+describe("parseSessionColorInput", () => {
+	it("accepts named colors and normalizes hex colors", () => {
+		expect(parseSessionColorInput("purple")).toEqual({ type: "set", hex: "#a855f7" });
+		expect(parseSessionColorInput("#0af")).toEqual({ type: "set", hex: "#00aaff" });
+		expect(parseSessionColorInput("336699")).toEqual({ type: "set", hex: "#336699" });
+	});
+
+	it("recognizes clear aliases", () => {
+		expect(parseSessionColorInput("clear")).toEqual({ type: "clear" });
+		expect(parseSessionColorInput("auto")).toEqual({ type: "clear" });
+	});
+
+	it("rejects invalid colors with usage text", () => {
+		const result = parseSessionColorInput("not-a-color");
+		expect(result.type).toBe("invalid");
+		if (result.type === "invalid") expect(result.message).toContain("Unknown color");
 	});
 });

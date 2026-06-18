@@ -30,6 +30,7 @@ import type { AgentSession, FreshSessionResult } from "../session/agent-session"
 import { formatShakeSummary, type ShakeMode } from "../session/shake-types";
 import { urlHyperlinkAlways } from "../tui";
 import { getChangelogPath, parseChangelog } from "../utils/changelog";
+import { parseSessionColorInput } from "../utils/session-color";
 import { buildContextReportText } from "./helpers/context-report";
 import { formatDuration } from "./helpers/format";
 import { createMarketplaceManager } from "./helpers/marketplace-manager";
@@ -1508,6 +1509,41 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 			}
 			runtime.ctx.editor.setText("");
 			await runtime.ctx.handleRenameCommand(title);
+		},
+	},
+	{
+		name: "color",
+		description: "Set the current session color",
+		inlineHint: "<color|clear>",
+		allowArgs: true,
+		handle: async (command, runtime) => {
+			const parsed = parseSessionColorInput(command.args);
+			if (parsed.type === "invalid") return usage(parsed.message, runtime);
+			if (parsed.type === "clear") {
+				await runtime.sessionManager.setSessionColor(undefined);
+				await runtime.output("Session color cleared.");
+			} else {
+				await runtime.sessionManager.setSessionColor(parsed.hex);
+				await runtime.output(`Session color set to ${parsed.hex}.`);
+			}
+			return commandConsumed();
+		},
+		handleTui: async (command, runtime) => {
+			const parsed = parseSessionColorInput(command.args);
+			runtime.ctx.editor.setText("");
+			if (parsed.type === "invalid") {
+				runtime.ctx.showError(parsed.message);
+				return;
+			}
+			if (parsed.type === "clear") {
+				await runtime.ctx.sessionManager.setSessionColor(undefined);
+				runtime.ctx.showStatus("Session color cleared");
+			} else {
+				await runtime.ctx.sessionManager.setSessionColor(parsed.hex);
+				runtime.ctx.showStatus(`Session color set to ${parsed.hex}`);
+			}
+			runtime.ctx.statusLine.invalidate();
+			runtime.ctx.updateEditorBorderColor();
 		},
 	},
 	{

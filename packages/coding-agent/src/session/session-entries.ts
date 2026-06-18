@@ -11,6 +11,7 @@ export interface SessionHeader {
 	id: string;
 	title?: string; // Auto-generated title from first message
 	titleSource?: "auto" | "user";
+	color?: string;
 	timestamp: string;
 	cwd: string;
 	parentSession?: string;
@@ -19,6 +20,7 @@ export interface SessionHeader {
 		status: "active" | "archived";
 		model?: string;
 		role?: string;
+		color?: string;
 	};
 }
 
@@ -104,6 +106,7 @@ export interface BackgroundInstanceEntry extends SessionEntryBase {
 	status: "active" | "archived";
 	model?: string;
 	role?: string;
+	color?: string;
 }
 
 /** Label entry for user-defined bookmarks/markers on entries. */

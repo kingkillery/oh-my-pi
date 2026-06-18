@@ -27,6 +27,7 @@ export interface SessionInfo {
 	/** Working directory where the session was started. Empty string for old sessions. */
 	cwd: string;
 	title?: string;
+	color?: string;
 	/** Path to the parent session (if this session was forked). */
 	parentSessionPath?: string;
 	backgroundInstance?: {
@@ -34,6 +35,7 @@ export interface SessionInfo {
 		status: "active" | "archived";
 		model?: string;
 		role?: string;
+		color?: string;
 	};
 	created: Date;
 	modified: Date;
@@ -160,7 +162,7 @@ function extractBackgroundInstanceFromContent(content: string): SessionInfo["bac
 
 function normalizeBackgroundInstance(value: unknown): SessionInfo["backgroundInstance"] | undefined {
 	if (!value || typeof value !== "object") return undefined;
-	const candidate = value as { name?: unknown; status?: unknown; model?: unknown; role?: unknown };
+	const candidate = value as { name?: unknown; status?: unknown; model?: unknown; role?: unknown; color?: unknown };
 	if (candidate.status === "archived") return undefined;
 	if (candidate.status !== "active" || typeof candidate.name !== "string") return undefined;
 	return {
@@ -168,6 +170,7 @@ function normalizeBackgroundInstance(value: unknown): SessionInfo["backgroundIns
 		status: candidate.status,
 		model: typeof candidate.model === "string" ? candidate.model : undefined,
 		role: typeof candidate.role === "string" ? candidate.role : undefined,
+		color: typeof candidate.color === "string" ? candidate.color : undefined,
 	};
 }
 
@@ -298,6 +301,7 @@ interface SessionListHeader {
 	parentSession?: string;
 	timestamp?: string;
 	backgroundInstance?: unknown;
+	color?: string;
 }
 
 function parseSessionListHeader(
@@ -314,6 +318,7 @@ function parseSessionListHeader(
 			parentSession: typeof parsedHeader.parentSession === "string" ? parsedHeader.parentSession : undefined,
 			timestamp: typeof parsedHeader.timestamp === "string" ? parsedHeader.timestamp : undefined,
 			backgroundInstance: parsedHeader.backgroundInstance,
+			color: typeof parsedHeader.color === "string" ? parsedHeader.color : undefined,
 		};
 	}
 
@@ -331,6 +336,7 @@ function parseSessionListHeader(
 		title: extractStringProperty(firstLine, "title"),
 		parentSession: extractStringProperty(firstLine, "parentSession"),
 		timestamp: extractStringProperty(firstLine, "timestamp"),
+		color: extractStringProperty(firstLine, "color"),
 	};
 }
 
@@ -408,6 +414,7 @@ async function scanSessionFile(
 			title: header.title ?? shortSummary,
 			parentSessionPath: header.parentSession,
 			backgroundInstance,
+			color: header.color,
 			created: new Date(header.timestamp ?? ""),
 			modified: mtime,
 			messageCount,

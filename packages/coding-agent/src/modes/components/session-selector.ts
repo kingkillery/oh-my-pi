@@ -22,6 +22,7 @@ import {
 	type SessionStatus,
 } from "../../session/session-listing";
 import { shortenPath } from "../../tools/render-utils";
+import { getSessionAccentAnsi } from "../../utils/session-color";
 import { DynamicBorder } from "./dynamic-border";
 import { HookSelectorComponent } from "./hook-selector";
 
@@ -46,6 +47,11 @@ function formatSessionStatus(status: SessionStatus | undefined): string | undefi
 		default:
 			return undefined;
 	}
+}
+
+function sessionColorStyle(session: SessionInfo): ((text: string) => string) | undefined {
+	const ansi = getSessionAccentAnsi(session.color ?? session.backgroundInstance?.color);
+	return ansi ? (text: string) => `${ansi}${text}\x1b[39m` : undefined;
 }
 
 /** Returns the IDs of sessions whose recorded prompts match a query, best first. */
@@ -371,21 +377,25 @@ class SessionList implements Component {
 			const cursorWidth = visibleWidth(cursorSymbol);
 			const cursor = isSelected ? theme.fg("accent", cursorSymbol) : padding(cursorWidth);
 			const maxWidth = rowWidth - cursorWidth; // Account for cursor width
+			const styleSessionText = sessionColorStyle(session);
 
 			if (this.#mode === "backgroundInstances") {
 				if (session.id === "__new_background__") {
 					const truncatedTitle = truncateToWidth(session.title ?? "", maxWidth);
-					sessionLines.push(cursor + (isSelected ? theme.bold(truncatedTitle) : truncatedTitle));
+					const styledTitle = styleSessionText ? styleSessionText(truncatedTitle) : truncatedTitle;
+					sessionLines.push(cursor + (isSelected ? theme.bold(styledTitle) : styledTitle));
 				} else {
 					const displayName = backgroundInstanceDisplayName(session);
 					const truncatedName = truncateToWidth(displayName, maxWidth);
-					sessionLines.push(cursor + (isSelected ? theme.bold(truncatedName) : truncatedName));
+					const styledName = styleSessionText ? styleSessionText(truncatedName) : truncatedName;
+					sessionLines.push(cursor + (isSelected ? theme.bold(styledName) : styledName));
 					const preview = session.title && session.title !== displayName ? session.title : normalizedMessage;
 					sessionLines.push(`  ${theme.fg("dim", truncateToWidth(preview, maxWidth))}`);
 				}
 			} else if (session.title) {
 				const truncatedTitle = truncateToWidth(session.title, maxWidth);
-				const titleLine = cursor + (isSelected ? theme.bold(truncatedTitle) : truncatedTitle);
+				const styledTitle = styleSessionText ? styleSessionText(truncatedTitle) : truncatedTitle;
+				const titleLine = cursor + (isSelected ? theme.bold(styledTitle) : styledTitle);
 				sessionLines.push(titleLine);
 
 				if (session.id !== "__new_session__") {
@@ -394,7 +404,8 @@ class SessionList implements Component {
 				}
 			} else {
 				const truncatedMsg = truncateToWidth(normalizedMessage, maxWidth);
-				const messageLine = cursor + (isSelected ? theme.bold(truncatedMsg) : truncatedMsg);
+				const styledMsg = styleSessionText ? styleSessionText(truncatedMsg) : truncatedMsg;
+				const messageLine = cursor + (isSelected ? theme.bold(styledMsg) : styledMsg);
 				sessionLines.push(messageLine);
 			}
 
