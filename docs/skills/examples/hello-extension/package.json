@@ -2,7 +2,7 @@
   "name": "hello-extension",
   "version": "1.0.0",
   "description": "Minimal oh-my-pi extension example",
-  "homepage": "https://omp.sh",
+  "homepage": "https://oh-my-pi.pkking.computer",
   "omp": {
     "extensions": ["./index.ts"]
   }

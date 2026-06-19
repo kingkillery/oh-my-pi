@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="https://github.com/can1357/oh-my-pi/blob/main/assets/hero.png?raw=true" alt="omp">
+  <img src="https://github.com/kingkillery/oh-my-pi/blob/main/assets/hero.png?raw=true" alt="omp">
 </p>
 
 <p align="center">
   <strong>A coding agent with the IDE wired in.</strong>
-  <strong><a href="https://omp.sh">omp.sh</a></strong>
+  <strong><a href="https://oh-my-pi.pkking.computer">oh-my-pi.pkking.computer</a></strong>
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@oh-my-pi/pi-coding-agent"><img src="https://img.shields.io/npm/v/@oh-my-pi/pi-coding-agent?style=flat&colorA=222222&colorB=CB3837" alt="npm version"></a>
-  <a href="https://github.com/can1357/oh-my-pi/blob/main/packages/coding-agent/CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-keep-E05735?style=flat&colorA=222222" alt="Changelog"></a>
-  <a href="https://github.com/can1357/oh-my-pi/actions"><img src="https://img.shields.io/github/actions/workflow/status/can1357/oh-my-pi/ci.yml?style=flat&colorA=222222&colorB=3FB950" alt="CI"></a>
-  <a href="https://github.com/can1357/oh-my-pi/blob/main/LICENSE"><img src="https://img.shields.io/github/license/can1357/oh-my-pi?style=flat&colorA=222222&colorB=58A6FF" alt="License"></a>
+  <a href="https://github.com/kingkillery/oh-my-pi/blob/main/packages/coding-agent/CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-keep-E05735?style=flat&colorA=222222" alt="Changelog"></a>
+  <a href="https://github.com/kingkillery/oh-my-pi/actions"><img src="https://img.shields.io/github/actions/workflow/status/kingkillery/oh-my-pi/ci.yml?style=flat&colorA=222222&colorB=3FB950" alt="CI"></a>
+  <a href="https://github.com/kingkillery/oh-my-pi/blob/main/LICENSE"><img src="https://img.shields.io/github/license/kingkillery/oh-my-pi?style=flat&colorA=222222&colorB=58A6FF" alt="License"></a>
   <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&colorA=222222&logo=typescript&logoColor=white" alt="TypeScript"></a>
   <a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/Rust-DEA584?style=flat&colorA=222222&logo=rust&logoColor=white" alt="Rust"></a>
   <a href="https://bun.sh"><img src="https://img.shields.io/badge/runtime-Bun-f472b6?style=flat&colorA=222222" alt="Bun"></a>
@@ -31,7 +31,7 @@ The most capable agent surface that ships. Continuously tuned by real-world use 
 **macOS · Linux**
 
 ```sh
-curl -fsSL https://omp.sh/install | sh
+curl -fsSL https://oh-my-pi.pkking.computer/install.sh | sh
 ```
 
 **Homebrew**
@@ -49,13 +49,13 @@ bun install -g @oh-my-pi/pi-coding-agent
 **Windows (PowerShell)**
 
 ```powershell
-irm https://omp.sh/install.ps1 | iex
+irm https://oh-my-pi.pkking.computer/install.ps1 | iex
 ```
 
 **Pinned versions (mise)**
 
 ```sh
-mise use -g github:can1357/oh-my-pi
+mise use -g github:kingkillery/oh-my-pi
 ```
 
 macOS · Linux · Windows · bun ≥ 1.3.14
@@ -133,7 +133,7 @@ Split a job across workers and get typed results back. task fans out into isolat
 
 _[Watch the capture ↗](https://omp.sh/clips/irc.mp4)_
 
-For durable top-level workstreams, `/background <name>` promotes the active session into a named background agent. Reopen the switcher with `/backgrounds`, `/agents`, or `ctrl+shift+b`. See [Background agents](docs/background-agents.md).
+For durable top-level workstreams, `/background <name>` promotes the active session into a named background agent. Reopen the switcher from inside OMP with `/backgrounds`, `/agents`, or `ctrl+shift+b`, or launch it directly from your shell with `omp bg`. See [Background agents](docs/background-agents.md).
 
 ### 06 · Read a pdf on arxiv, why not?
 
@@ -260,7 +260,7 @@ Stealth's on by default, so pages see a normal user instead of a headless bot. T
 
 Setting-gated, off by default: `github`, `inspect_image`, `tts`, `checkpoint`, `rewind`, `search_tool_bm25`, `retain`, `recall`, `reflect`. Flip them on once, scoped per project.
 
-[Full reference →](https://omp.sh/docs/tools)
+[Full reference →](https://oh-my-pi.pkking.computer/docs/tools)
 
 ## Forty-plus providers, hundreds of models, _one /model away_.
 
@@ -293,7 +293,7 @@ Ollama `local` · Ollama Cloud · LM Studio `local` · llama.cpp `local` · vLLM
 - **Path-scoped models** — Scope `enabledModels` and `disabledProviders` entries to a `path:` prefix to pin a different model set on one repo without touching the global config. Scoped entries cover the path and everything under it.
 - **Round-robin credentials** — Stack API keys per provider and the runtime rotates with session affinity and per-credential backoff. Useful when one key would burn its quota by lunch.
 
-Full provider & routing reference at [omp.sh/docs/providers](https://omp.sh/docs/providers).
+Full provider & routing reference at [oh-my-pi.pkking.computer/docs/providers](https://oh-my-pi.pkking.computer/docs/providers).
 
 ## Fourteen backends. _One tool the agent already knows_.
 
@@ -341,7 +341,7 @@ Vuln lookups answer with vendor data, not blog summaries.
 - **OSV** — open source vuln feed
 - **CISA KEV** — known exploited vulns
 
-[`web_search` reference ↗](https://omp.sh/docs/tools#web_search)
+[`web_search` reference ↗](https://oh-my-pi.pkking.computer/docs/tools#web_search)
 
 ## Roughly **~55,000** lines of Rust, doing the work other harnesses shell out for.
 
@@ -442,13 +442,13 @@ The [Agent Client Protocol](https://github.com/zed-industries/agent-client-proto
 | `write`                       | `fs/write_text_file`                |
 | `edit, bash`                  | `session/request_permission`        |
 
-Full reference: [omp.sh/docs/sdk](https://omp.sh/docs/sdk).
+Full reference: [oh-my-pi.pkking.computer/docs/sdk](https://oh-my-pi.pkking.computer/docs/sdk).
 
 ## A harness worth keeping is one you _don't_ outgrow.
 
-Pick it up at **[omp.sh](https://omp.sh)**.
+Pick it up at **[oh-my-pi.pkking.computer](https://oh-my-pi.pkking.computer)**.
 
-omp is a fork of [Pi](https://github.com/badlogic/pi-mono) by [Mario Zechner](https://github.com/mariozechner), rewritten as a coding-first surface: sessions, subagents, slash commands, extensions — all TypeScript, all MIT, all on [GitHub](https://github.com/can1357/oh-my-pi). Shape it from config, hook it from outside, or read the source when you need to.
+omp is a fork of [Pi](https://github.com/badlogic/pi-mono) by [Mario Zechner](https://github.com/mariozechner), rewritten as a coding-first surface: sessions, subagents, slash commands, extensions — all TypeScript, all MIT, all on [GitHub](https://github.com/kingkillery/oh-my-pi). Shape it from config, hook it from outside, or read the source when you need to.
 
 ### Primitives
 
@@ -542,9 +542,9 @@ MIT. See [LICENSE](LICENSE).
 
 _made for terminals that stay open_
 
-- [omp.sh](https://omp.sh)
-- [GitHub](https://github.com/can1357/oh-my-pi)
-- [Changelog](https://github.com/can1357/oh-my-pi/blob/main/packages/coding-agent/CHANGELOG.md)
+- [oh-my-pi.pkking.computer](https://oh-my-pi.pkking.computer)
+- [GitHub](https://github.com/kingkillery/oh-my-pi)
+- [Changelog](https://github.com/kingkillery/oh-my-pi/blob/main/packages/coding-agent/CHANGELOG.md)
 - [npm](https://www.npmjs.com/package/@oh-my-pi/pi-coding-agent)
 - [Discord](https://discord.gg/4NMW9cdXZa)
-- [MIT](https://github.com/can1357/oh-my-pi/blob/main/LICENSE)
+- [MIT](https://github.com/kingkillery/oh-my-pi/blob/main/LICENSE)
