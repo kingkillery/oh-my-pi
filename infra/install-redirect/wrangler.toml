@@ -1,0 +1,12 @@
+name = "oh-my-pi-install-redirect"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+workers_dev = false
+
+# Bind only the install one-liner paths on the fork host. Everything else on the
+# zone is left untouched.
+routes = [
+	{ pattern = "oh-my-pi.pkking.computer/install", zone_name = "pkking.computer" },
+	{ pattern = "oh-my-pi.pkking.computer/install.sh", zone_name = "pkking.computer" },
+	{ pattern = "oh-my-pi.pkking.computer/install.ps1", zone_name = "pkking.computer" },
+]

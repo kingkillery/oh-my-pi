@@ -1,12 +1,12 @@
 # OMP Coding Agent Installer for Windows
-# Usage: irm https://raw.githubusercontent.com/can1357/oh-my-pi/main/scripts/install.ps1 | iex
+# Usage: irm https://oh-my-pi.pkking.computer/install.ps1 | iex
 #
 # Or with options:
-#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/can1357/oh-my-pi/main/scripts/install.ps1))) -Source
-#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/can1357/oh-my-pi/main/scripts/install.ps1))) -Binary
-#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/can1357/oh-my-pi/main/scripts/install.ps1))) -Source -Ref v3.20.1
-#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/can1357/oh-my-pi/main/scripts/install.ps1))) -Source -Ref main
-#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/can1357/oh-my-pi/main/scripts/install.ps1))) -Binary -Ref v3.20.1
+#   & ([scriptblock]::Create((irm https://oh-my-pi.pkking.computer/install.ps1))) -Source
+#   & ([scriptblock]::Create((irm https://oh-my-pi.pkking.computer/install.ps1))) -Binary
+#   & ([scriptblock]::Create((irm https://oh-my-pi.pkking.computer/install.ps1))) -Source -Ref v16.1.6
+#   & ([scriptblock]::Create((irm https://oh-my-pi.pkking.computer/install.ps1))) -Source -Ref main
+#   & ([scriptblock]::Create((irm https://oh-my-pi.pkking.computer/install.ps1))) -Binary -Ref v16.1.6
 
 param(
     [switch]$Source,
@@ -16,7 +16,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$Repo = "can1357/oh-my-pi"
+$Repo = "kingkillery/oh-my-pi"
 $Package = "@oh-my-pi/pi-coding-agent"
 $InstallDir = if ($env:PI_INSTALL_DIR) { $env:PI_INSTALL_DIR } else { "$env:LOCALAPPDATA\omp" }
 $BinaryName = "omp-windows-x64.exe"
@@ -287,20 +287,21 @@ if ($Ref -and -not $Source -and -not $Binary) {
     $Source = $true
 }
 
+# Source installs without a ref build from the fork's main branch (the fork has
+# no npm package of its own; `catalog:` deps only resolve inside the workspace).
+if ($Source -and -not $Ref) {
+    $Ref = "main"
+}
+
 if ($Source) {
     if (-not (Test-BunInstalled)) {
         Install-Bun
     }
     Assert-BunVersion $MinimumBunVersion
     Install-ViaBun
-} elseif ($Binary) {
-    Install-Binary
 } else {
-    # Default: use bun if available, otherwise binary
-    if (Test-BunInstalled) {
-        Assert-BunVersion $MinimumBunVersion
-        Install-ViaBun
-    } else {
-        Install-Binary
-    }
+    # Default: prebuilt binary from the fork's GitHub releases. The fork has no
+    # npm package, so the binary is the canonical distributable. Use -Source to
+    # build from the fork's main branch with bun instead.
+    Install-Binary
 }

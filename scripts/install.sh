@@ -2,7 +2,7 @@
 set -e
 
 # OMP Coding Agent Installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/can1357/oh-my-pi/main/scripts/install.sh | sh
+# Usage: curl -fsSL https://oh-my-pi.pkking.computer/install.sh | sh
 #
 # Options:
 #   --source       Install via bun (installs bun if needed)
@@ -10,7 +10,7 @@ set -e
 #   --ref <ref>    Install specific tag/commit/branch
 #   -r <ref>       Shorthand for --ref
 
-REPO="can1357/oh-my-pi"
+REPO="kingkillery/oh-my-pi"
 PACKAGE="@oh-my-pi/pi-coding-agent"
 INSTALL_DIR="${PI_INSTALL_DIR:-$HOME/.local/bin}"
 MIN_BUN_VERSION="1.3.14"
@@ -61,9 +61,15 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-# If a ref is provided, default to source install
+# If a ref is provided, default to source install.
 if [ -n "$REF" ] && [ -z "$MODE" ]; then
     MODE="source"
+fi
+
+# Source installs without a ref build from the fork's main branch (the fork has
+# no npm package of its own; `catalog:` deps only resolve inside the workspace).
+if [ "$MODE" = "source" ] && [ -z "$REF" ]; then
+    REF="main"
 fi
 
 # Check if bun is available
@@ -253,12 +259,9 @@ case "$MODE" in
         install_binary
         ;;
     *)
-        # Default: use bun if available, otherwise binary
-        if has_bun; then
-            require_bun_version
-            install_via_bun
-        else
-            install_binary
-        fi
+        # Default: prebuilt binary from the fork's GitHub releases. The fork has
+        # no npm package, so the binary is the canonical distributable. Use
+        # `--source` to build from the fork's main branch with bun instead.
+        install_binary
         ;;
 esac
