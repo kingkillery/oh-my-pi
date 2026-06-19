@@ -451,7 +451,7 @@ class SessionList implements Component {
 
 		// Add keybinding hint
 		lines.push("");
-		const deleteHint = this.#mode === "backgroundInstances" ? "" : "Del delete · ";
+		const deleteHint = "Del delete · ";
 		lines.push(
 			theme.fg(
 				"muted",
@@ -568,7 +568,7 @@ export class SessionSelectorComponent extends Container {
 
 		this.#messageContainer = new Container();
 		this.#mode = options.mode ?? "sessions";
-		this.#onDelete = this.#mode === "backgroundInstances" ? undefined : options.onDelete;
+		this.#onDelete = options.onDelete;
 		this.#loadAllSessions = options.loadAllSessions;
 		this.#folderSessions = this.#filterSessionsForMode(sessions);
 		this.#globalSessions = options.allSessions ? this.#filterSessionsForMode(options.allSessions) : null;

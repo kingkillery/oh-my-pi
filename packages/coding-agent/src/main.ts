@@ -385,6 +385,7 @@ async function runInteractiveMode(
 	initialImages?: ImageContent[],
 	titleSystemPrompt?: string,
 	joinLink?: string,
+	openBackgrounds?: boolean,
 ): Promise<void> {
 	const mode = new InteractiveMode(
 		session,
@@ -465,6 +466,11 @@ async function runInteractiveMode(
 	// `/join` so collab guards and error rendering stay in one place.
 	if (joinLink !== undefined) {
 		await executeBuiltinSlashCommand(`/join ${joinLink}`, { ctx: mode });
+	}
+
+	// `omp bg`: open the background agent selector immediately after startup.
+	if (openBackgrounds) {
+		await mode.showBackgroundInstanceSelector();
 	}
 
 	if (initialMessage !== undefined) {
@@ -1374,6 +1380,7 @@ export async function runRootCommand(
 				initialImages,
 				titleSystemPrompt,
 				parsedArgs.join,
+				parsedArgs.openBackgrounds,
 			);
 		} else {
 			// Branch-only single-shot runner: keep print-mode code out of normal interactive startup.

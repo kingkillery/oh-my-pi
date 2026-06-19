@@ -46,6 +46,8 @@ export interface Args {
 	fork?: string;
 	/** Collab link to join at startup (set by the `join` subcommand; no CLI flag). */
 	join?: string;
+	/** Open background agent selector immediately after startup (set by the `bg` subcommand). */
+	openBackgrounds?: boolean;
 	models?: string[];
 	tools?: string[];
 	noTools?: boolean;

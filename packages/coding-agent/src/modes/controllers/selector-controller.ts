@@ -897,6 +897,20 @@ export class SelectorController {
 					void this.ctx.shutdown();
 				},
 				{
+					onDelete: async (session: SessionInfo) => {
+						if (!(await this.#detachActiveSessionBeforeDeletion(session.path))) {
+							return false;
+						}
+						const storage = new FileSessionStorage();
+						try {
+							await storage.deleteSessionWithArtifacts(session.path);
+							return true;
+						} catch (err) {
+							throw new Error(`Failed to delete session: ${err instanceof Error ? err.message : String(err)}`, {
+								cause: err,
+							});
+						}
+					},
 					historyMatcher,
 					loadAllSessions: () => SessionManager.listAll(),
 					allSessions,
