@@ -31,7 +31,7 @@ const repoRoot = path.join(import.meta.dir, "..");
 const binariesDir = path.join(repoRoot, "packages", "coding-agent", "binaries");
 
 const isDryRun = process.argv.includes("--dry-run");
-const hfRepo = Bun.env.HF_REPO ?? "kingkillery/oh-my-pi-binaries";
+const hfRepo = Bun.env.HF_REPO ?? "pkkidking/oh-my-pi-binaries";
 const hfRepoType = Bun.env.HF_REPO_TYPE ?? "model";
 
 function arg(flag: string): string | undefined {

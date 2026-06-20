@@ -10,7 +10,7 @@ routes = [
 
 [vars]
 # Private Hugging Face repo that stores the release binaries (free storage + egress).
-HF_REPO = "kingkillery/oh-my-pi-binaries"
+HF_REPO = "pkkidking/oh-my-pi-binaries"
 # "models" (default) or "datasets".
 HF_REPO_TYPE = "models"
 

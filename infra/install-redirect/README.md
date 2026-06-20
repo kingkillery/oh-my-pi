@@ -13,7 +13,7 @@ build host(s) ── publish-binaries-hf.ts ──▶ private HF repo ──▶ 
 
 ## One-time setup
 
-1. **Private HF repo** — create `kingkillery/oh-my-pi-binaries` (type *model*, **private**)
+1. **Private HF repo** — create `pkkidking/oh-my-pi-binaries` (type *model*, **private**)
    at https://huggingface.co/new. Keep the default name or set `HF_REPO` accordingly.
 2. **HF tokens** — at https://huggingface.co/settings/tokens:
    - a **write** token (for publishing) — used as `HF_TOKEN` when running the publish script;
