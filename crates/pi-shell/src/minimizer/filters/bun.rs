@@ -533,9 +533,10 @@ mod tests {
 			 --no-errors-on-unmatched\nChecked 1690 files in 371ms. No fixes \
 			 applied.\n@pk-nerdsaver-ai/pi-utils check: Checked 40 files in 11ms. No fixes \
 			 applied.\n@pk-nerdsaver-ai/pi-utils check: $ tsgo -p tsconfig.json \
-			 --noEmit\n@pk-nerdsaver-ai/pi-utils check: Exited with code 0\n@pk-nerdsaver-ai/pi-coding-agent \
-			 check: Checked 1178 files in 287ms. No fixes applied.\n@pk-nerdsaver-ai/pi-coding-agent check: \
-			 $ tsgo -p tsconfig.json --noEmit\n@pk-nerdsaver-ai/pi-coding-agent check: Exited with code 0\n",
+			 --noEmit\n@pk-nerdsaver-ai/pi-utils check: Exited with code \
+			 0\n@pk-nerdsaver-ai/pi-coding-agent check: Checked 1178 files in 287ms. No fixes \
+			 applied.\n@pk-nerdsaver-ai/pi-coding-agent check: $ tsgo -p tsconfig.json \
+			 --noEmit\n@pk-nerdsaver-ai/pi-coding-agent check: Exited with code 0\n",
 			0,
 		);
 
@@ -555,8 +556,8 @@ mod tests {
 		let out = filter(
 			&ctx,
 			"@pk-nerdsaver-ai/pi-utils check: Checked 40 files in 11ms. No fixes \
-			 applied.\n@pk-nerdsaver-ai/pi-utils check: Exited with code 0\n[Command timed out after 300 \
-			 seconds]\n",
+			 applied.\n@pk-nerdsaver-ai/pi-utils check: Exited with code 0\n[Command timed out after \
+			 300 seconds]\n",
 			1,
 		);
 
