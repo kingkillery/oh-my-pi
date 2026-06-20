@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from "bun:test";
+import { afterEach, describe, expect, it, vi } from "bun:test";
 import type { InteractiveModeContext } from "@pk-nerdsaver-ai/pi-coding-agent/modes/types";
 import { executeBuiltinSlashCommand } from "@pk-nerdsaver-ai/pi-coding-agent/slash-commands/builtin-registry";
+import * as backgroundAgentName from "@pk-nerdsaver-ai/pi-coding-agent/utils/background-agent-name";
 
 function createRuntimeHarness() {
 	const setText = vi.fn();
@@ -8,10 +9,22 @@ function createRuntimeHarness() {
 	const showBackgroundInstanceSelector = vi.fn(async () => undefined);
 	const showStatus = vi.fn();
 	const showWarning = vi.fn();
-	const sessionManager = { getSessionName: vi.fn((): string | undefined => undefined) };
+	const sessionManager = {
+		getSessionName: vi.fn((): string | undefined => undefined),
+		getEntries: vi.fn(() => []),
+	};
+	const session = {
+		backgroundCurrentSession,
+		sessionManager,
+		sessionId: "session-1",
+		modelRegistry: {},
+		agent: { metadataForProvider: vi.fn(() => undefined) },
+	};
 	const ctx = {
 		editor: { setText },
-		session: { backgroundCurrentSession, sessionManager },
+		session,
+		settings: {},
+		titleSystemPrompt: undefined,
 		showBackgroundInstanceSelector,
 		showStatus,
 		showWarning,
@@ -24,9 +37,14 @@ function createRuntimeHarness() {
 		showStatus,
 		showWarning,
 		sessionManager,
+		session,
 		runtime: { ctx } as Parameters<typeof executeBuiltinSlashCommand>[1],
 	};
 }
+
+afterEach(() => {
+	vi.restoreAllMocks();
+});
 
 describe("/background slash commands", () => {
 	it("backgrounds the current session and opens the switcher", async () => {
@@ -51,6 +69,30 @@ describe("/background slash commands", () => {
 		);
 		expect(harness.showBackgroundInstanceSelector).not.toHaveBeenCalled();
 		expect(harness.setText).toHaveBeenCalledWith("");
+	});
+
+	it("derives a better name from the latest user prompt when the session is unnamed", async () => {
+		const harness = createRuntimeHarness();
+		harness.sessionManager.getEntries.mockReturnValue([
+			{
+				type: "message",
+				message: { role: "user", content: "Investigate why npm publish succeeds but npm view returns 404" },
+			},
+		]);
+		vi.spyOn(backgroundAgentName, "generateBackgroundAgentName").mockResolvedValue(
+			"Investigate npm publish visibility",
+		);
+
+		expect(await executeBuiltinSlashCommand("/background", harness.runtime)).toBe(true);
+
+		expect(backgroundAgentName.generateBackgroundAgentName).toHaveBeenCalledWith(
+			"Investigate why npm publish succeeds but npm view returns 404",
+			harness.session,
+			harness.runtime.ctx.settings,
+			undefined,
+		);
+		expect(harness.backgroundCurrentSession).toHaveBeenCalledWith("Investigate npm publish visibility");
+		expect(harness.showStatus).toHaveBeenCalledWith("Backgrounded session as Investigate npm publish visibility");
 	});
 
 	it("opens the background switcher from /backgrounds and /agents without promoting a session", async () => {

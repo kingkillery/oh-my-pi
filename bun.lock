@@ -67,9 +67,9 @@
     },
     "packages/coding-agent": {
       "name": "@pk-nerdsaver-ai/pi-coding-agent",
-      "version": "16.0.6",
+      "version": "16.0.7",
       "bin": {
-        "omp": "src/cli.ts",
+        "omp": "dist/cli.js",
       },
       "dependencies": {
         "@agentclientprotocol/sdk": "catalog:",
@@ -175,6 +175,13 @@
       "devDependencies": {
         "@napi-rs/cli": "catalog:",
         "@types/bun": "catalog:",
+      },
+      "optionalDependencies": {
+        "@pk-nerdsaver-ai/pi-natives-darwin-arm64": "16.0.6",
+        "@pk-nerdsaver-ai/pi-natives-darwin-x64": "16.0.6",
+        "@pk-nerdsaver-ai/pi-natives-linux-arm64": "16.0.6",
+        "@pk-nerdsaver-ai/pi-natives-linux-x64": "16.0.6",
+        "@pk-nerdsaver-ai/pi-natives-win32-x64": "16.0.6",
       },
     },
     "packages/snapcompact": {
@@ -336,7 +343,7 @@
     "@pk-nerdsaver-ai/pi-agent-core": "16.0.6",
     "@pk-nerdsaver-ai/pi-ai": "16.0.6",
     "@pk-nerdsaver-ai/pi-catalog": "16.0.6",
-    "@pk-nerdsaver-ai/pi-coding-agent": "16.0.6",
+    "@pk-nerdsaver-ai/pi-coding-agent": "16.0.7",
     "@pk-nerdsaver-ai/pi-mnemopi": "16.0.6",
     "@pk-nerdsaver-ai/pi-natives": "16.0.6",
     "@pk-nerdsaver-ai/pi-tui": "16.0.6",

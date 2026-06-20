@@ -29,6 +29,7 @@ import type { InteractiveModeContext } from "../modes/types";
 import type { AgentSession, FreshSessionResult } from "../session/agent-session";
 import { formatShakeSummary, type ShakeMode } from "../session/shake-types";
 import { urlHyperlinkAlways } from "../tui";
+import { extractLatestUserPromptText, generateBackgroundAgentName } from "../utils/background-agent-name";
 import { getChangelogPath, parseChangelog } from "../utils/changelog";
 import { parseSessionColorInput } from "../utils/session-color";
 import { buildContextReportText } from "./helpers/context-report";
@@ -1321,7 +1322,18 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 		inlineHint: "[name]",
 		allowArgs: true,
 		handleTui: async (command, runtime) => {
-			const name = command.args.trim() || runtime.ctx.session.sessionManager.getSessionName() || "Background agent";
+			const explicitName = command.args.trim();
+			const existingName = runtime.ctx.session.sessionManager.getSessionName();
+			const seed = extractLatestUserPromptText(runtime.ctx.session.sessionManager.getEntries());
+			const name =
+				explicitName ||
+				existingName ||
+				(await generateBackgroundAgentName(
+					seed,
+					runtime.ctx.session,
+					runtime.ctx.settings,
+					runtime.ctx.titleSystemPrompt,
+				));
 			const ok = await runtime.ctx.session.backgroundCurrentSession(name);
 			if (!ok) {
 				runtime.ctx.showWarning("Could not background session: name is empty after sanitization.");

@@ -1119,6 +1119,12 @@ export class SessionManager {
 		this.#titleSource = source;
 		this.#header.title = title;
 		this.#header.titleSource = source;
+		const background = this.getBackgroundInstance();
+		if (background) {
+			this.appendBackgroundInstance({ ...background, name: title });
+			this.#notifySessionNameListeners();
+			return true;
+		}
 
 		if (this.#persist && this.#sessionFile && this.#storage.existsSync(this.#sessionFile)) {
 			await this.#rewriteAtomically();

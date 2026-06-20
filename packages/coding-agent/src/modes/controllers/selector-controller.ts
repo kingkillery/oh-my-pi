@@ -3,7 +3,7 @@ import { PASTE_CODE_LOGIN_PROVIDERS } from "@pk-nerdsaver-ai/pi-ai";
 import { getOAuthProviders } from "@pk-nerdsaver-ai/pi-ai/oauth";
 import type { OAuthProvider } from "@pk-nerdsaver-ai/pi-ai/oauth/types";
 import type { Component, OverlayHandle } from "@pk-nerdsaver-ai/pi-tui";
-import { Input, Loader, Spacer, setTuiTight, Text, truncateToWidth } from "@pk-nerdsaver-ai/pi-tui";
+import { Input, Loader, Spacer, setTuiTight, Text } from "@pk-nerdsaver-ai/pi-tui";
 import { getAgentDbPath, getProjectDir, normalizePathForComparison } from "@pk-nerdsaver-ai/pi-utils";
 import { formatModelSelectorValue } from "../../config/model-resolver";
 import { getRoleInfo } from "../../config/model-roles";
@@ -47,6 +47,7 @@ import {
 	setPreferredSearchProvider,
 } from "../../tools";
 import { shortenPath } from "../../tools/render-utils";
+import { generateBackgroundAgentName } from "../../utils/background-agent-name";
 import { copyToClipboard } from "../../utils/clipboard";
 import { setSessionTerminalTitle } from "../../utils/title-generator";
 import { AgentDashboard } from "../components/agent-dashboard";
@@ -1013,7 +1014,12 @@ export class SelectorController {
 		// Switch/Reset session via AgentSession's newSession()
 		await this.ctx.session.newSession();
 
-		const name = truncateToWidth(query.trim() || "Background agent", 40);
+		const name = await generateBackgroundAgentName(
+			query,
+			this.ctx.session,
+			this.ctx.settings,
+			this.ctx.titleSystemPrompt,
+		);
 		await this.ctx.session.backgroundCurrentSession(name);
 
 		this.#refreshSessionTerminalTitle();

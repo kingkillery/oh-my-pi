@@ -142,6 +142,44 @@ describe("SessionManager.list background instances", () => {
 		expect(session ? isBackgroundInstanceSession(session) : false).toBe(true);
 	});
 
+	it("keeps active background metadata in sync with later session renames", async () => {
+		const storage = new MemorySessionStorage();
+		const manager = SessionManager.create("/proj", SESSION_DIR, storage);
+
+		expect(
+			await manager.backgroundCurrentSession({
+				name: "api-worker",
+				model: "anthropic/claude-sonnet-4-6",
+				role: "default",
+			}),
+		).toBe(true);
+		expect(await manager.setSessionName("issue triage worker", "user")).toBe(true);
+
+		const sessionFile = manager.getSessionFile();
+		if (!sessionFile) throw new Error("Expected backgrounded session to have a session file");
+		const entries = (await storage.readText(sessionFile))
+			.trim()
+			.split("\n")
+			.map(row => JSON.parse(row)) as Array<{
+			type?: string;
+			name?: string;
+			status?: string;
+			model?: string;
+			role?: string;
+			backgroundInstance?: { name?: string };
+		}>;
+		const backgroundEntries = entries.filter(entry => entry.type === "background_instance");
+
+		expect(manager.getBackgroundInstance()?.name).toBe("issue triage worker");
+		expect(entries[0]?.backgroundInstance?.name).toBe("issue triage worker");
+		expect(backgroundEntries.at(-1)).toMatchObject({
+			name: "issue triage worker",
+			status: "active",
+			model: "anthropic/claude-sonnet-4-6",
+			role: "default",
+		});
+	});
+
 	it("treats a later archived background entry as inactive", async () => {
 		const storage = seed({ archived: background("active") + user("continue work") + background("archived") });
 

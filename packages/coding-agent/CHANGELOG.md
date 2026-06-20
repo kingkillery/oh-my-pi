@@ -7,6 +7,10 @@
 - Added persistent background agent sessions with /background promotion and a switcher.
 - Added `omp bg` command to launch the background agent switcher directly from the terminal.
 
+### Fixed
+
+- Fixed background agent names to derive from prompts and stay synced when renamed.
+
 ## [16.0.6] - 2026-06-18
 
 ### Added
