@@ -332,6 +332,12 @@ function spawnParamsFor(params: TaskParams, item: TaskItem): TaskParams {
 	} else if ("isolated" in params) {
 		spawn.isolated = params.isolated;
 	}
+	// Batch form carries cwd per-item; flat form carries it top-level.
+	if (item.cwd !== undefined) {
+		spawn.cwd = item.cwd;
+	} else if ("cwd" in params) {
+		spawn.cwd = params.cwd;
+	}
 	return spawn;
 }
 
@@ -1263,8 +1269,16 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
 						}
 					: undefined;
 
+			// Working directory override: relative paths resolve against the parent
+			// session's cwd; absolute paths pass through. Omitted → inherit parent.
+			const spawnCwd = params.cwd
+				? path.isAbsolute(params.cwd)
+					? params.cwd
+					: path.resolve(this.session.cwd, params.cwd)
+				: this.session.cwd;
+
 			const sharedRunOptions = {
-				cwd: this.session.cwd,
+				cwd: spawnCwd,
 				agent: effectiveAgent,
 				task: renderSubagentUserPrompt(assignment),
 				assignment,
