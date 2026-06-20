@@ -165,6 +165,14 @@ impl Process {
 	}
 
 	/// Process group id for this process, when supported by the platform.
+	#[cfg(target_os = "windows")]
+	#[napi]
+	pub const fn group_id(&self) -> Option<i32> {
+		self.inner.group_id()
+	}
+
+	/// Process group id for this process, when supported by the platform.
+	#[cfg(not(target_os = "windows"))]
 	#[napi]
 	pub fn group_id(&self) -> Option<i32> {
 		self.inner.group_id()

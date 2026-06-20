@@ -42,6 +42,7 @@ use std::{
 /// `PI_CONFIG_DIR`, matching `packages/utils/src/dirs.ts`).
 const DEFAULT_CONFIG_DIR: &str = ".omp";
 
+#[cfg(any(target_os = "linux", target_os = "macos", test))]
 /// App name used as the XDG-root subdirectory (`$XDG_STATE_HOME/omp/`),
 /// matching `APP_NAME` in `packages/utils/src/dirs.ts`.
 const APP_NAME: &str = "omp";
@@ -234,6 +235,7 @@ fn xdg_state_logs_from_env(_home: &Path, _config_dir_override: Option<&OsStr>) -
 /// Pure XDG-eligibility computation extracted for unit testing — no env
 /// reads, no fs reads. `omp_dir_exists` decides whether the candidate
 /// `<xdg_state_home>/omp` actually lives on disk.
+#[cfg(any(target_os = "linux", target_os = "macos", test))]
 fn xdg_state_logs(
 	xdg_state_home: Option<&OsStr>,
 	agent_dir_override: Option<&OsStr>,
@@ -257,6 +259,7 @@ fn xdg_state_logs(
 	Some(omp_dir.join("logs"))
 }
 
+#[cfg(any(target_os = "linux", target_os = "macos", test))]
 fn default_agent_dir(home: &Path, config_dir_override: Option<&OsStr>) -> PathBuf {
 	let config_dir = config_dir_override
 		.filter(|s| !s.is_empty())
