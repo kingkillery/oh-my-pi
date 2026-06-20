@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [16.1.9] - 2026-06-20
+
 ### Added
 
 - Added `/subagent` for interactively spawning configured subagents with model, thinking level, optional name/color, task text, and quick `using <alias-or-model>` model selection.
