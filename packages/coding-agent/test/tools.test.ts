@@ -1166,7 +1166,8 @@ function b() {
 
 			const result = await bashTool.execute("test-call-8-cwd-inside", { command: "pwd", cwd: subdir });
 
-			expect(getTextOutput(result).trim()).toBe(fs.realpathSync(subdir));
+			// `pwd` is the first output line; main appends a "Wall time:" suffix.
+			expect(getTextOutput(result).split("\n")[0].trim()).toBe(fs.realpathSync(subdir));
 		});
 
 		it("should reject cwd outside the workspace boundary", async () => {
