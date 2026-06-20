@@ -22,7 +22,16 @@ import {
 } from "@pk-nerdsaver-ai/pi-ai/providers/openai-codex-responses";
 import { FALLBACK_DIALECT, preferredDialect } from "@pk-nerdsaver-ai/pi-catalog/identity";
 import type { Component } from "@pk-nerdsaver-ai/pi-tui";
-import { $env, $flag, getAgentDir, getProjectDir, logger, postmortem, prompt, Snowflake } from "@pk-nerdsaver-ai/pi-utils";
+import {
+	$env,
+	$flag,
+	getAgentDir,
+	getProjectDir,
+	logger,
+	postmortem,
+	prompt,
+	Snowflake,
+} from "@pk-nerdsaver-ai/pi-utils";
 import { INTENT_FIELD } from "@pk-nerdsaver-ai/pi-wire";
 import { ADVISOR_READONLY_TOOL_NAMES, discoverWatchdogFiles } from "./advisor";
 import { type AsyncJob, AsyncJobManager } from "./async";

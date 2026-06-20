@@ -1,4 +1,10 @@
-import type { AssistantMessage, ImageContent, SessionEntry, TextContent, ToolResultMessage } from "@pk-nerdsaver-ai/pi-wire";
+import type {
+	AssistantMessage,
+	ImageContent,
+	SessionEntry,
+	TextContent,
+	ToolResultMessage,
+} from "@pk-nerdsaver-ai/pi-wire";
 import { ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { memo, useEffect, useMemo, useRef, useState } from "react";

@@ -4,7 +4,11 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { getManagedSkillsDir } from "@pk-nerdsaver-ai/pi-coding-agent/autolearn/managed-skills";
 import { type SettingPath, Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
-import { resetActiveSkillsForTests, type Skill, setActiveSkills } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/skills";
+import {
+	resetActiveSkillsForTests,
+	type Skill,
+	setActiveSkills,
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/skills";
 import type { HindsightSessionState } from "@pk-nerdsaver-ai/pi-coding-agent/hindsight/state";
 import type { MnemopiSessionState } from "@pk-nerdsaver-ai/pi-coding-agent/mnemopi/state";
 import { createTools, type ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";

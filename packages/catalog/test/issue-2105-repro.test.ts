@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { getEnvApiKey } from "@pk-nerdsaver-ai/pi-ai/stream";
-import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@pk-nerdsaver-ai/pi-catalog/provider-models/descriptors";
+import {
+	DEFAULT_MODEL_PER_PROVIDER,
+	PROVIDER_DESCRIPTORS,
+} from "@pk-nerdsaver-ai/pi-catalog/provider-models/descriptors";
 import {
 	aimlApiModelManagerOptions,
 	isLikelyAimlApiChatModelId,

@@ -2,10 +2,17 @@ import { afterEach, describe, expect, it, vi } from "bun:test";
 import { AgentBusyError, type AgentTelemetryConfig, type Tracer } from "@pk-nerdsaver-ai/pi-agent-core";
 import { type AssistantMessage, Effort } from "@pk-nerdsaver-ai/pi-ai";
 import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
-import type { ExtensionActions, LoadExtensionsResult } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions/types";
+import type {
+	ExtensionActions,
+	LoadExtensionsResult,
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions/types";
 import type { CreateAgentSessionResult } from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
 import * as sdkModule from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
-import type { AgentSession, AgentSessionEvent, PromptOptions } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import type {
+	AgentSession,
+	AgentSessionEvent,
+	PromptOptions,
+} from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
 import type { AuthStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/auth-storage";
 import {
 	finalizeSubprocessOutput,

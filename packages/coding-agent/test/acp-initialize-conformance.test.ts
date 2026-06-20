@@ -11,7 +11,10 @@ import type { AgentSideConnection, InitializeRequest } from "@agentclientprotoco
 import type { Model } from "@pk-nerdsaver-ai/pi-ai";
 import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import { AcpAgent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/acp/acp-agent";
-import { ACP_TERMINAL_AUTH_FLAG, prepareAcpTerminalAuthArgs } from "@pk-nerdsaver-ai/pi-coding-agent/modes/acp/terminal-auth";
+import {
+	ACP_TERMINAL_AUTH_FLAG,
+	prepareAcpTerminalAuthArgs,
+} from "@pk-nerdsaver-ai/pi-coding-agent/modes/acp/terminal-auth";
 import type { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
 import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
 import { getConfigRootDir, setAgentDir, VERSION } from "@pk-nerdsaver-ai/pi-utils";

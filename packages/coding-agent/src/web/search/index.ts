@@ -4,7 +4,12 @@
  * Single tool supporting Anthropic, Perplexity, Exa, Brave, Jina, Kimi, Gemini, Codex, Tavily, Kagi, Z.AI, SearXNG, and Synthetic
  * providers with provider-specific parameters exposed conditionally.
  */
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import type { AuthStorage } from "@pk-nerdsaver-ai/pi-ai";
 import { prompt } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";

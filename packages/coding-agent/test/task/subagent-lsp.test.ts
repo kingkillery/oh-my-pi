@@ -9,7 +9,11 @@ import type { LoadExtensionsResult } from "@pk-nerdsaver-ai/pi-coding-agent/exte
 import type { PlanModeState } from "@pk-nerdsaver-ai/pi-coding-agent/plan-mode/state";
 import type { CreateAgentSessionOptions, CreateAgentSessionResult } from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
 import * as sdkModule from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
-import type { AgentSession, AgentSessionEvent, PromptOptions } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import type {
+	AgentSession,
+	AgentSessionEvent,
+	PromptOptions,
+} from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
 import { TaskTool } from "@pk-nerdsaver-ai/pi-coding-agent/task";
 import * as discoveryModule from "@pk-nerdsaver-ai/pi-coding-agent/task/discovery";
 import type { AgentDefinition, TaskParams } from "@pk-nerdsaver-ai/pi-coding-agent/task/types";

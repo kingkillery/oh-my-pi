@@ -8,7 +8,15 @@ import {
 	convertResponsesInputContent,
 } from "@pk-nerdsaver-ai/pi-ai/providers/openai-shared";
 import { NON_VISION_IMAGE_PLACEHOLDER } from "@pk-nerdsaver-ai/pi-ai/providers/vision-guard";
-import type { Api, AssistantMessage, Context, Model, ModelSpec, ToolResultMessage, Usage } from "@pk-nerdsaver-ai/pi-ai/types";
+import type {
+	Api,
+	AssistantMessage,
+	Context,
+	Model,
+	ModelSpec,
+	ToolResultMessage,
+	Usage,
+} from "@pk-nerdsaver-ai/pi-ai/types";
 import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import type { ResolvedOpenAICompat } from "@pk-nerdsaver-ai/pi-catalog/types";
 

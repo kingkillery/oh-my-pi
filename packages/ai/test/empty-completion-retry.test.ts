@@ -7,7 +7,10 @@
  */
 import { describe, expect, it } from "bun:test";
 import type { AssistantMessage, AssistantMessageEvent, Context, Usage } from "@pk-nerdsaver-ai/pi-ai/types";
-import { MAX_EMPTY_COMPLETION_RETRIES, withEmptyCompletionRetry } from "@pk-nerdsaver-ai/pi-ai/utils/empty-completion-retry";
+import {
+	MAX_EMPTY_COMPLETION_RETRIES,
+	withEmptyCompletionRetry,
+} from "@pk-nerdsaver-ai/pi-ai/utils/empty-completion-retry";
 import { AssistantMessageEventStream } from "@pk-nerdsaver-ai/pi-ai/utils/event-stream";
 
 const CTX = {} as Context;

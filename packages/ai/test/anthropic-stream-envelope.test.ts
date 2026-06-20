@@ -6,7 +6,13 @@ import {
 	type AnthropicMessagesClientLike,
 	type AnthropicRequestOptions,
 } from "@pk-nerdsaver-ai/pi-ai/providers/anthropic-client";
-import type { AssistantMessageEvent, Context, Model, ModelSpec, ProviderSessionState } from "@pk-nerdsaver-ai/pi-ai/types";
+import type {
+	AssistantMessageEvent,
+	Context,
+	Model,
+	ModelSpec,
+	ProviderSessionState,
+} from "@pk-nerdsaver-ai/pi-ai/types";
 import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 
 const model: Model<"anthropic-messages"> = buildModel({

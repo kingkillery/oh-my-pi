@@ -15,9 +15,21 @@
  *   - Questions may time out and auto-select the recommended option (configurable, disabled in plan mode)
  */
 
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import type { ToolExample } from "@pk-nerdsaver-ai/pi-ai";
-import { type Component, Markdown, type MarkdownTheme, renderInlineMarkdown, TERMINAL, Text } from "@pk-nerdsaver-ai/pi-tui";
+import {
+	type Component,
+	Markdown,
+	type MarkdownTheme,
+	renderInlineMarkdown,
+	TERMINAL,
+	Text,
+} from "@pk-nerdsaver-ai/pi-tui";
 import { prompt, untilAborted } from "@pk-nerdsaver-ai/pi-utils";
 import { type as arkType } from "arktype";
 import type { RenderResultOptions } from "../extensibility/custom-tools/types";

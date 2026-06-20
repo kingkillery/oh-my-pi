@@ -1,4 +1,9 @@
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import type { Component } from "@pk-nerdsaver-ai/pi-tui";
 import { Text } from "@pk-nerdsaver-ai/pi-tui";
 import { prompt } from "@pk-nerdsaver-ai/pi-utils";

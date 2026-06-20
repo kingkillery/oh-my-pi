@@ -19,7 +19,15 @@ import type {
 	WriteResult,
 } from "@pk-nerdsaver-ai/pi-catalog/discovery/cursor-gen/agent_pb";
 import type { Effort } from "@pk-nerdsaver-ai/pi-catalog/effort";
-import type { Api, FetchImpl, KnownApi, Model, Provider, ThinkingBudgets, Usage } from "@pk-nerdsaver-ai/pi-catalog/types";
+import type {
+	Api,
+	FetchImpl,
+	KnownApi,
+	Model,
+	Provider,
+	ThinkingBudgets,
+	Usage,
+} from "@pk-nerdsaver-ai/pi-catalog/types";
 import type { Type } from "arktype";
 import type { ZodType, z } from "zod/v4";
 import type { ApiKey } from "./auth-retry";

@@ -1,4 +1,9 @@
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import { instrumentedCompleteSimple, resolveTelemetry } from "@pk-nerdsaver-ai/pi-agent-core";
 import { type Api, completeSimple, type ImageContent, type Model, type ToolExample } from "@pk-nerdsaver-ai/pi-ai";
 import { prompt } from "@pk-nerdsaver-ai/pi-utils";

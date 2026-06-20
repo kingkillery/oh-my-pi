@@ -1,6 +1,10 @@
 import { countTokens } from "@pk-nerdsaver-ai/pi-agent-core";
 import type { CompactionSettings } from "@pk-nerdsaver-ai/pi-agent-core/compaction";
-import { effectiveReserveTokens, estimateTokens, resolveThresholdTokens } from "@pk-nerdsaver-ai/pi-agent-core/compaction";
+import {
+	effectiveReserveTokens,
+	estimateTokens,
+	resolveThresholdTokens,
+} from "@pk-nerdsaver-ai/pi-agent-core/compaction";
 import type { Tool as AiTool, Model } from "@pk-nerdsaver-ai/pi-ai";
 import { toolWireSchema } from "@pk-nerdsaver-ai/pi-ai/utils/schema";
 import { formatNumber } from "@pk-nerdsaver-ai/pi-utils";

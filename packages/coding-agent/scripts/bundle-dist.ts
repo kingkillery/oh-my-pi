@@ -12,7 +12,13 @@ const shebang = "#!/usr/bin/env bun\n";
 // Native / optional / platform-specific deps that are never bundled — installed on
 // demand (transformers/fastembed/onnxruntime) or shipped as their own artifact
 // (native addon, mupdf).
-const ALWAYS_EXTERNAL = ["mupdf", "@pk-nerdsaver-ai/pi-natives", "@huggingface/transformers", "fastembed", "onnxruntime-node"];
+const ALWAYS_EXTERNAL = [
+	"mupdf",
+	"@pk-nerdsaver-ai/pi-natives",
+	"@huggingface/transformers",
+	"fastembed",
+	"onnxruntime-node",
+];
 
 // Heavy, lazily-used third-party leaf deps. Each is a declared `dependency`, so the
 // published package resolves it from node_modules at runtime; bundling only embeds a

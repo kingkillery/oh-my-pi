@@ -1,4 +1,9 @@
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import { prompt } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
 import checkpointDescription from "../prompts/tools/checkpoint.md" with { type: "text" };

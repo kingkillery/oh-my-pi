@@ -7,6 +7,15 @@
  */
 
 import { describe, expect, it } from "bun:test";
+import type {
+	AttributeValue,
+	Context as OtelContext,
+	Span,
+	SpanOptions,
+	SpanStatus,
+	TimeInput,
+	Tracer,
+} from "@opentelemetry/api";
 import { agentLoop, agentLoopDetailed } from "@pk-nerdsaver-ai/pi-agent-core/agent-loop";
 import {
 	type AgentRunSummary,
@@ -20,15 +29,6 @@ import type { AgentEvent, AgentLoopConfig, AgentMessage, AgentTool } from "@pk-n
 import type { AssistantMessage, Message } from "@pk-nerdsaver-ai/pi-ai";
 import { z } from "@pk-nerdsaver-ai/pi-ai";
 import { createMockModel } from "@pk-nerdsaver-ai/pi-ai/providers/mock";
-import type {
-	AttributeValue,
-	Context as OtelContext,
-	Span,
-	SpanOptions,
-	SpanStatus,
-	TimeInput,
-	Tracer,
-} from "@opentelemetry/api";
 import { createUserMessage } from "./helpers";
 
 interface RecordedSpan {

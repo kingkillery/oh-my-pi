@@ -2,7 +2,12 @@ import { mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import { formatHashlineHeader } from "@pk-nerdsaver-ai/hashline";
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import { type GrepMatch, GrepOutputMode, type GrepResult, grep } from "@pk-nerdsaver-ai/pi-natives";
 import type { Component } from "@pk-nerdsaver-ai/pi-tui";
 import { Text } from "@pk-nerdsaver-ai/pi-tui";

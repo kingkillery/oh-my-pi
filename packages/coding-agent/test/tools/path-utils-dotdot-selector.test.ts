@@ -1,5 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { parseLineRangeChunk, parseLineRanges, splitPathAndSel } from "@pk-nerdsaver-ai/pi-coding-agent/tools/path-utils";
+import {
+	parseLineRangeChunk,
+	parseLineRanges,
+	splitPathAndSel,
+} from "@pk-nerdsaver-ai/pi-coding-agent/tools/path-utils";
 import { ToolError } from "@pk-nerdsaver-ai/pi-coding-agent/tools/tool-errors";
 
 describe("`..` range selector alias", () => {

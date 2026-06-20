@@ -15,7 +15,10 @@ import { WebSearchTab } from "@pk-nerdsaver-ai/pi-coding-agent/modes/setup-wizar
 import { SetupWizardComponent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/setup-wizard/wizard-overlay";
 import { initTheme, theme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
 import type { InteractiveModeContext } from "@pk-nerdsaver-ai/pi-coding-agent/modes/types";
-import { SEARCH_PROVIDER_OPTIONS, SEARCH_PROVIDER_PREFERENCES } from "@pk-nerdsaver-ai/pi-coding-agent/web/search/types";
+import {
+	SEARCH_PROVIDER_OPTIONS,
+	SEARCH_PROVIDER_PREFERENCES,
+} from "@pk-nerdsaver-ai/pi-coding-agent/web/search/types";
 
 function fakeContextWithConfiguredModel(): InteractiveModeContext {
 	return {

@@ -17,7 +17,10 @@
  * moonshot discovery mapper and stamps default thinking metadata.
  */
 import { describe, expect, it } from "bun:test";
-import { type OpenAICompletionsOptions, streamOpenAICompletions } from "@pk-nerdsaver-ai/pi-ai/providers/openai-completions";
+import {
+	type OpenAICompletionsOptions,
+	streamOpenAICompletions,
+} from "@pk-nerdsaver-ai/pi-ai/providers/openai-completions";
 import type { AssistantMessage, Context } from "@pk-nerdsaver-ai/pi-ai/types";
 import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import { Effort } from "@pk-nerdsaver-ai/pi-catalog/effort";

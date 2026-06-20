@@ -1,5 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import type { ResponseCreateParamsStreaming, ResponseInput } from "@pk-nerdsaver-ai/pi-ai/providers/openai-responses-wire";
+import type {
+	ResponseCreateParamsStreaming,
+	ResponseInput,
+} from "@pk-nerdsaver-ai/pi-ai/providers/openai-responses-wire";
 import {
 	applyChatCompletionsCompatPolicy,
 	applyResponsesCompatPolicy,

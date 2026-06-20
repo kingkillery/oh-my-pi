@@ -1,6 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import { convertAnthropicMessages } from "@pk-nerdsaver-ai/pi-ai/providers/anthropic";
-import type { AssistantMessage, DeveloperMessage, Message, Model, ModelSpec, UserMessage } from "@pk-nerdsaver-ai/pi-ai/types";
+import type {
+	AssistantMessage,
+	DeveloperMessage,
+	Message,
+	Model,
+	ModelSpec,
+	UserMessage,
+} from "@pk-nerdsaver-ai/pi-ai/types";
 import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 
 /**

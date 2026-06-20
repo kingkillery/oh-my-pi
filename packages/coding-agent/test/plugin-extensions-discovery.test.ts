@@ -6,7 +6,10 @@ import { discoverAndLoadExtensions } from "@pk-nerdsaver-ai/pi-coding-agent/exte
 import { getAgentDir, getPluginsDir, setAgentDir, TempDir } from "@pk-nerdsaver-ai/pi-utils";
 
 const currentPiCodingAgentPath = Bun.resolveSync("@pk-nerdsaver-ai/pi-coding-agent", import.meta.dir);
-const currentPiExtensionsPath = Bun.resolveSync("@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions", import.meta.dir);
+const currentPiExtensionsPath = Bun.resolveSync(
+	"@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions",
+	import.meta.dir,
+);
 
 describe("plugin extension discovery", () => {
 	let projectDir: TempDir;

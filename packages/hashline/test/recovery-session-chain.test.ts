@@ -10,7 +10,12 @@
  * surface the standard session-chain banner.
  */
 import { describe, expect, it } from "bun:test";
-import { InMemorySnapshotStore, parsePatch, RECOVERY_SESSION_REPLAY_WARNING, Recovery } from "@pk-nerdsaver-ai/hashline";
+import {
+	InMemorySnapshotStore,
+	parsePatch,
+	RECOVERY_SESSION_REPLAY_WARNING,
+	Recovery,
+} from "@pk-nerdsaver-ai/hashline";
 
 const PATH = "/tmp/__hashline-recovery-session-chain__.ts";
 

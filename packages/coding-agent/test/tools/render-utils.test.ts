@@ -15,7 +15,11 @@ import {
 	shortenPath,
 	truncateDiffByHunk,
 } from "@pk-nerdsaver-ai/pi-coding-agent/tools/render-utils";
-import { getKeybindings, setKeybindings, type KeybindingsManager as TuiKeybindingsManager } from "@pk-nerdsaver-ai/pi-tui";
+import {
+	getKeybindings,
+	setKeybindings,
+	type KeybindingsManager as TuiKeybindingsManager,
+} from "@pk-nerdsaver-ai/pi-tui";
 
 describe("parse error formatting", () => {
 	it("deduplicates parse errors while preserving order", () => {

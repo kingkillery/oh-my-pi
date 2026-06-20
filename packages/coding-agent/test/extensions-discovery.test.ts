@@ -3,7 +3,10 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { resetSettingsForTest, Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
 import { initializeWithSettings } from "@pk-nerdsaver-ai/pi-coding-agent/discovery";
-import { discoverAndLoadExtensions, loadExtensions } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions/loader";
+import {
+	discoverAndLoadExtensions,
+	loadExtensions,
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions/loader";
 import { getProjectAgentDir, TempDir } from "@pk-nerdsaver-ai/pi-utils";
 import { filterUserScoped } from "./utils/filter-user-extensions";
 

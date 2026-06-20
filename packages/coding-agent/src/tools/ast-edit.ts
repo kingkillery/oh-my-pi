@@ -1,6 +1,11 @@
 import * as path from "node:path";
 import { formatHashlineHeader } from "@pk-nerdsaver-ai/hashline";
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import type { ToolExample } from "@pk-nerdsaver-ai/pi-ai";
 import { type AstReplaceChange, type AstReplaceFileChange, astEdit } from "@pk-nerdsaver-ai/pi-natives";
 import type { Component } from "@pk-nerdsaver-ai/pi-tui";

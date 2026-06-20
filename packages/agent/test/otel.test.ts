@@ -6,6 +6,14 @@
  * lifecycle hook dispatch.
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
+import { context, SpanStatusCode, trace } from "@opentelemetry/api";
+import { AsyncLocalStorageContextManager } from "@opentelemetry/context-async-hooks";
+import {
+	BasicTracerProvider,
+	InMemorySpanExporter,
+	type ReadableSpan,
+	SimpleSpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
 import { agentLoop } from "@pk-nerdsaver-ai/pi-agent-core/agent-loop";
 import {
 	type AgentTelemetryConfig,
@@ -20,19 +28,17 @@ import {
 	resolveTelemetry,
 	type TelemetryHookContext,
 } from "@pk-nerdsaver-ai/pi-agent-core/telemetry";
-import type { AgentContext, AgentEvent, AgentLoopConfig, AgentMessage, AgentTool } from "@pk-nerdsaver-ai/pi-agent-core/types";
+import type {
+	AgentContext,
+	AgentEvent,
+	AgentLoopConfig,
+	AgentMessage,
+	AgentTool,
+} from "@pk-nerdsaver-ai/pi-agent-core/types";
 import type { Message } from "@pk-nerdsaver-ai/pi-ai";
 import { z } from "@pk-nerdsaver-ai/pi-ai";
 import { createMockModel } from "@pk-nerdsaver-ai/pi-ai/providers/mock";
 import type { EventStream } from "@pk-nerdsaver-ai/pi-ai/utils/event-stream";
-import { context, SpanStatusCode, trace } from "@opentelemetry/api";
-import { AsyncLocalStorageContextManager } from "@opentelemetry/context-async-hooks";
-import {
-	BasicTracerProvider,
-	InMemorySpanExporter,
-	type ReadableSpan,
-	SimpleSpanProcessor,
-} from "@opentelemetry/sdk-trace-base";
 import { createUserMessage } from "./helpers";
 
 const MOCK_IDENT = { id: "mock-model", provider: "mock-provider" } as const;

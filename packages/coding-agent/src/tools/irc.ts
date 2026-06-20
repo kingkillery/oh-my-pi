@@ -9,7 +9,12 @@
  * drains pending messages; `list` shows every addressable peer.
  */
 
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import type { ToolExample } from "@pk-nerdsaver-ai/pi-ai";
 import { type Component, Text } from "@pk-nerdsaver-ai/pi-tui";
 import { formatAge, formatDuration, prompt } from "@pk-nerdsaver-ai/pi-utils";

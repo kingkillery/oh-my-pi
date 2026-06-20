@@ -4,7 +4,10 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { stripVTControlCharacters } from "node:util";
 import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
-import { StatusLineComponent, type StatusLineSettings } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/status-line";
+import {
+	StatusLineComponent,
+	type StatusLineSettings,
+} from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/status-line";
 import { STATUS_LINE_PRESETS } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/status-line/presets";
 import { initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
 import * as git from "@pk-nerdsaver-ai/pi-coding-agent/utils/git";

@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "bun:test";
 import { getOAuthProviders } from "@pk-nerdsaver-ai/pi-ai/registry/oauth";
 import { getEnvApiKey } from "@pk-nerdsaver-ai/pi-ai/stream";
-import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@pk-nerdsaver-ai/pi-catalog/provider-models/descriptors";
+import {
+	DEFAULT_MODEL_PER_PROVIDER,
+	PROVIDER_DESCRIPTORS,
+} from "@pk-nerdsaver-ai/pi-catalog/provider-models/descriptors";
 import { zenmuxModelManagerOptions } from "@pk-nerdsaver-ai/pi-catalog/provider-models/openai-compat";
 import type { FetchImpl } from "@pk-nerdsaver-ai/pi-catalog/types";
 

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { AppendOnlyContextManager, AppendOnlyLog, StablePrefix } from "@pk-nerdsaver-ai/pi-agent-core/append-only-context";
+import {
+	AppendOnlyContextManager,
+	AppendOnlyLog,
+	StablePrefix,
+} from "@pk-nerdsaver-ai/pi-agent-core/append-only-context";
 import type { AgentContext, AgentTool } from "@pk-nerdsaver-ai/pi-agent-core/types";
 import type { Message, Tool, ToolExample } from "@pk-nerdsaver-ai/pi-ai";
 import { INTENT_FIELD } from "@pk-nerdsaver-ai/pi-wire";

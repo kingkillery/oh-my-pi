@@ -6,7 +6,10 @@ import {
 	type DiscoverableToolSearchIndex,
 } from "@pk-nerdsaver-ai/pi-coding-agent/tool-discovery/tool-index";
 import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
-import { renderSearchToolBm25Description, SearchToolBm25Tool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/search-tool-bm25";
+import {
+	renderSearchToolBm25Description,
+	SearchToolBm25Tool,
+} from "@pk-nerdsaver-ai/pi-coding-agent/tools/search-tool-bm25";
 
 type DiscoveryToolSession = ToolSession & {
 	isMCPDiscoveryEnabled: () => boolean;

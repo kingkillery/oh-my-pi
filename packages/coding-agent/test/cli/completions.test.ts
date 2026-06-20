@@ -1,6 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { buildSpec, type CompletionSpec, generateCompletion } from "@pk-nerdsaver-ai/pi-coding-agent/cli/completion-gen";
+import {
+	buildSpec,
+	type CompletionSpec,
+	generateCompletion,
+} from "@pk-nerdsaver-ai/pi-coding-agent/cli/completion-gen";
 import type { CliConfig, CommandCtor } from "@pk-nerdsaver-ai/pi-utils/cli";
 
 const repoRoot = path.resolve(import.meta.dir, "..", "..", "..", "..");

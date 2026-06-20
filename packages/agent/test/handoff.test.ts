@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "bun:test";
 import type { AgentMessage, AgentTool } from "@pk-nerdsaver-ai/pi-agent-core";
-import { AUTO_HANDOFF_THRESHOLD_FOCUS, generateHandoff, renderHandoffPrompt } from "@pk-nerdsaver-ai/pi-agent-core/compaction";
+import {
+	AUTO_HANDOFF_THRESHOLD_FOCUS,
+	generateHandoff,
+	renderHandoffPrompt,
+} from "@pk-nerdsaver-ai/pi-agent-core/compaction";
 import type { AssistantMessage, Model, ToolCall } from "@pk-nerdsaver-ai/pi-ai";
 import * as ai from "@pk-nerdsaver-ai/pi-ai";
 import { Effort } from "@pk-nerdsaver-ai/pi-ai";

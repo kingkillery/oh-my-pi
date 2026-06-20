@@ -1,6 +1,14 @@
 import { describe, expect, it } from "bun:test";
 import { complete } from "@pk-nerdsaver-ai/pi-ai/stream";
-import type { Api, AssistantMessage, Context, Message, Model, Tool, ToolResultMessage } from "@pk-nerdsaver-ai/pi-ai/types";
+import type {
+	Api,
+	AssistantMessage,
+	Context,
+	Message,
+	Model,
+	Tool,
+	ToolResultMessage,
+} from "@pk-nerdsaver-ai/pi-ai/types";
 import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
 import { z } from "zod/v4";
 import { e2eApiKey } from "./oauth";

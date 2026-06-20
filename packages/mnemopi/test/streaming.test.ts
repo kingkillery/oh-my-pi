@@ -4,7 +4,13 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { initBeam } from "@pk-nerdsaver-ai/pi-mnemopi/core/beam";
-import { DeltaSync, EventType, MemoryEvent, MemoryStream, SyncCheckpoint } from "@pk-nerdsaver-ai/pi-mnemopi/core/streaming";
+import {
+	DeltaSync,
+	EventType,
+	MemoryEvent,
+	MemoryStream,
+	SyncCheckpoint,
+} from "@pk-nerdsaver-ai/pi-mnemopi/core/streaming";
 
 describe("MemoryEvent", () => {
 	it("serializes and restores Python-shaped events", () => {

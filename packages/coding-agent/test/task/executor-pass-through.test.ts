@@ -11,7 +11,11 @@ import type { ToolPathWithSource } from "@pk-nerdsaver-ai/pi-coding-agent/extens
 import type { LoadExtensionsResult } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions/types";
 import type { CreateAgentSessionResult } from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
 import * as sdkModule from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
-import type { AgentSession, AgentSessionEvent, PromptOptions } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import type {
+	AgentSession,
+	AgentSessionEvent,
+	PromptOptions,
+} from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
 import { runSubprocess } from "@pk-nerdsaver-ai/pi-coding-agent/task/executor";
 import type { AgentDefinition } from "@pk-nerdsaver-ai/pi-coding-agent/task/types";
 import { EventBus } from "@pk-nerdsaver-ai/pi-coding-agent/utils/event-bus";

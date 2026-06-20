@@ -8,7 +8,11 @@
 import { describe, expect, it, vi } from "bun:test";
 import type { Args } from "@pk-nerdsaver-ai/pi-coding-agent/cli/args";
 import type { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
-import { createSessionManager, SessionResolutionError, writeStartupNotice } from "@pk-nerdsaver-ai/pi-coding-agent/main";
+import {
+	createSessionManager,
+	SessionResolutionError,
+	writeStartupNotice,
+} from "@pk-nerdsaver-ai/pi-coding-agent/main";
 import * as sessionListingModule from "@pk-nerdsaver-ai/pi-coding-agent/session/session-listing";
 
 function buildResumeArgs(resume: string): Args {

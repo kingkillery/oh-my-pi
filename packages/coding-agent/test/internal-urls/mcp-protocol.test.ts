@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { InternalUrlRouter } from "@pk-nerdsaver-ai/pi-coding-agent/internal-urls";
 import { MCPManager } from "@pk-nerdsaver-ai/pi-coding-agent/mcp/manager";
-import type { MCPResource, MCPResourceReadResult, MCPResourceTemplate } from "@pk-nerdsaver-ai/pi-coding-agent/mcp/types";
+import type {
+	MCPResource,
+	MCPResourceReadResult,
+	MCPResourceTemplate,
+} from "@pk-nerdsaver-ai/pi-coding-agent/mcp/types";
 
 function createMockManager(opts: {
 	servers?: string[];

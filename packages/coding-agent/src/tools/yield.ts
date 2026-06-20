@@ -3,7 +3,12 @@
  *
  * Subagents must call this tool to finish and return structured JSON output.
  */
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import type { TSchema } from "@pk-nerdsaver-ai/pi-ai/types";
 import {
 	dereferenceJsonSchema,

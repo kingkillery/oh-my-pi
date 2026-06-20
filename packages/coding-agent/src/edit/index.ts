@@ -1,7 +1,12 @@
 import { MismatchError as HashlineMismatchError } from "@pk-nerdsaver-ai/hashline";
 import hashlineGrammar from "@pk-nerdsaver-ai/hashline/grammar.lark" with { type: "text" };
 import hashlineDescription from "@pk-nerdsaver-ai/hashline/prompt.md" with { type: "text" };
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import type { ToolExample } from "@pk-nerdsaver-ai/pi-ai";
 import { prompt } from "@pk-nerdsaver-ai/pi-utils";
 import {

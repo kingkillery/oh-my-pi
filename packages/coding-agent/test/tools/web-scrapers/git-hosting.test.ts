@@ -1,5 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { handleGitHub, parseGitHubUrl, stripActionsLogTimestamps } from "@pk-nerdsaver-ai/pi-coding-agent/web/scrapers/github";
+import {
+	handleGitHub,
+	parseGitHubUrl,
+	stripActionsLogTimestamps,
+} from "@pk-nerdsaver-ai/pi-coding-agent/web/scrapers/github";
 import { handleGitHubGist } from "@pk-nerdsaver-ai/pi-coding-agent/web/scrapers/github-gist";
 
 const SKIP = !Bun.env.WEB_FETCH_INTEGRATION;

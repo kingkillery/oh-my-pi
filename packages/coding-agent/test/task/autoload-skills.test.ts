@@ -4,7 +4,11 @@ import type { Skill } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/skill
 import * as skillsModule from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/skills";
 import type { CreateAgentSessionResult } from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
 import * as sdkModule from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
-import type { AgentSession, AgentSessionEvent, PromptOptions } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import type {
+	AgentSession,
+	AgentSessionEvent,
+	PromptOptions,
+} from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
 import { SKILL_PROMPT_MESSAGE_TYPE } from "@pk-nerdsaver-ai/pi-coding-agent/session/messages";
 import { runSubprocess } from "@pk-nerdsaver-ai/pi-coding-agent/task/executor";
 import type { AgentDefinition } from "@pk-nerdsaver-ai/pi-coding-agent/task/types";

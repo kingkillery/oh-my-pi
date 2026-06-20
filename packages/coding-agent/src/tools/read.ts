@@ -3,7 +3,12 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { formatHashlineHeader, formatNumberedLine, formatNumberedLines } from "@pk-nerdsaver-ai/hashline";
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@pk-nerdsaver-ai/pi-agent-core";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import type { ImageContent, TextContent } from "@pk-nerdsaver-ai/pi-ai";
 import { glob, type SummaryResult, summarizeCode } from "@pk-nerdsaver-ai/pi-natives";
 import type { Component } from "@pk-nerdsaver-ai/pi-tui";

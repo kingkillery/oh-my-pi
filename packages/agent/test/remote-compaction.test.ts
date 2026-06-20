@@ -5,7 +5,10 @@ import {
 	createFileOps,
 	DEFAULT_COMPACTION_SETTINGS,
 } from "@pk-nerdsaver-ai/pi-agent-core/compaction";
-import { buildOpenAiNativeHistory, requestOpenAiRemoteCompaction } from "@pk-nerdsaver-ai/pi-agent-core/compaction/openai";
+import {
+	buildOpenAiNativeHistory,
+	requestOpenAiRemoteCompaction,
+} from "@pk-nerdsaver-ai/pi-agent-core/compaction/openai";
 import * as ai from "@pk-nerdsaver-ai/pi-ai";
 import type { AssistantMessage, FetchImpl, Model, ToolResultMessage } from "@pk-nerdsaver-ai/pi-ai/types";
 import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";

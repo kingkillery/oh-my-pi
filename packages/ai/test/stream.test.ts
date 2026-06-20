@@ -6,7 +6,15 @@ import * as path from "node:path";
 import { Effort } from "@pk-nerdsaver-ai/pi-ai";
 import { __resetVertexTokenCache } from "@pk-nerdsaver-ai/pi-ai/providers/google-auth";
 import { complete, getEnvApiKey, stream } from "@pk-nerdsaver-ai/pi-ai/stream";
-import type { Api, Context, ImageContent, Model, OptionsForApi, Tool, ToolResultMessage } from "@pk-nerdsaver-ai/pi-ai/types";
+import type {
+	Api,
+	Context,
+	ImageContent,
+	Model,
+	OptionsForApi,
+	Tool,
+	ToolResultMessage,
+} from "@pk-nerdsaver-ai/pi-ai/types";
 import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
 import { $which } from "@pk-nerdsaver-ai/pi-utils";

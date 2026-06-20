@@ -13,7 +13,12 @@ import { createInitExperimentTool } from "@pk-nerdsaver-ai/pi-coding-agent/autor
 import { createLogExperimentTool } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/tools/log-experiment";
 import { createRunExperimentTool } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/tools/run-experiment";
 import { createUpdateNotesTool } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/tools/update-notes";
-import type { ASIData, LogDetails, NumericMetricMap, RunDetails } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/types";
+import type {
+	ASIData,
+	LogDetails,
+	NumericMetricMap,
+	RunDetails,
+} from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/types";
 import type { ExtensionAPI, ExtensionContext } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions";
 import * as git from "@pk-nerdsaver-ai/pi-coding-agent/utils/git";
 import { TempDir } from "@pk-nerdsaver-ai/pi-utils";

@@ -9,7 +9,10 @@ import {
 	type RpcSessionChangeResult,
 	type RpcSessionChangeSession,
 } from "@pk-nerdsaver-ai/pi-coding-agent/modes/rpc/rpc-mode";
-import { RpcSubagentRegistry, readRpcSubagentTranscript } from "@pk-nerdsaver-ai/pi-coding-agent/modes/rpc/rpc-subagents";
+import {
+	RpcSubagentRegistry,
+	readRpcSubagentTranscript,
+} from "@pk-nerdsaver-ai/pi-coding-agent/modes/rpc/rpc-subagents";
 import type { RpcSubagentFrame } from "@pk-nerdsaver-ai/pi-coding-agent/modes/rpc/rpc-types";
 import {
 	type AgentProgress,

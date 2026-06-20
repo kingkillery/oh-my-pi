@@ -6,7 +6,11 @@ import { AuthStorage, type CredentialDisabledEvent } from "@pk-nerdsaver-ai/pi-a
 import * as oauthUtils from "@pk-nerdsaver-ai/pi-ai/oauth";
 import { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
 import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
-import type { Extension, ExtensionError, ExtensionFactory } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions";
+import type {
+	Extension,
+	ExtensionError,
+	ExtensionFactory,
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions";
 import { ExtensionRunner } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions";
 import { ExtensionRuntime } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions/loader";
 import { createAgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/sdk";

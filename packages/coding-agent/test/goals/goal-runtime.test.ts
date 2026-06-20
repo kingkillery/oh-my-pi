@@ -6,7 +6,12 @@ import {
 	renderGoalPrompt,
 	renderTrustedObjective,
 } from "@pk-nerdsaver-ai/pi-coding-agent/goals/runtime";
-import type { Goal, GoalModeState, GoalRuntimeEvent, GoalTokenUsage } from "@pk-nerdsaver-ai/pi-coding-agent/goals/state";
+import type {
+	Goal,
+	GoalModeState,
+	GoalRuntimeEvent,
+	GoalTokenUsage,
+} from "@pk-nerdsaver-ai/pi-coding-agent/goals/state";
 import { escapeXmlText } from "@pk-nerdsaver-ai/pi-utils";
 
 function createUsage(overrides: Partial<GoalTokenUsage> = {}): GoalTokenUsage {

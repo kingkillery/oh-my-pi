@@ -1,5 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import type { ReadyInfo, WorkerInbound, WorkerOutbound } from "@pk-nerdsaver-ai/pi-coding-agent/tools/browser/tab-protocol";
+import type {
+	ReadyInfo,
+	WorkerInbound,
+	WorkerOutbound,
+} from "@pk-nerdsaver-ai/pi-coding-agent/tools/browser/tab-protocol";
 import { initializeTabWorkerForTest } from "@pk-nerdsaver-ai/pi-coding-agent/tools/browser/tab-supervisor";
 
 class FakeStartupWorker {

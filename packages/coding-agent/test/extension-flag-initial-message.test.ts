@@ -2,7 +2,10 @@ import { describe, expect, it } from "bun:test";
 import { parseArgs } from "@pk-nerdsaver-ai/pi-coding-agent/cli/args";
 import { applyExtensionFlags, type ExtensionFlagSink } from "@pk-nerdsaver-ai/pi-coding-agent/cli/extension-flags";
 import { buildInitialMessage } from "@pk-nerdsaver-ai/pi-coding-agent/cli/initial-message";
-import { ExtensionRuntime, loadExtensionFromFactory } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions/loader";
+import {
+	ExtensionRuntime,
+	loadExtensionFromFactory,
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions/loader";
 import { ExtensionRunner } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions/runner";
 import { EventBus } from "@pk-nerdsaver-ai/pi-coding-agent/utils/event-bus";
 

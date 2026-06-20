@@ -1,7 +1,12 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import { CompactionCancelledError, type CompactionResult } from "@pk-nerdsaver-ai/pi-agent-core/compaction";
 import { CommandController } from "@pk-nerdsaver-ai/pi-coding-agent/modes/controllers/command-controller";
-import { getThemeByName, setThemeInstance, type Theme, theme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import {
+	getThemeByName,
+	setThemeInstance,
+	type Theme,
+	theme,
+} from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
 import type { InteractiveModeContext } from "@pk-nerdsaver-ai/pi-coding-agent/modes/types";
 import { Container, Spacer } from "@pk-nerdsaver-ai/pi-tui";
 

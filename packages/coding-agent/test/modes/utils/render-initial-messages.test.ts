@@ -21,7 +21,14 @@ import type { InteractiveModeContext } from "@pk-nerdsaver-ai/pi-coding-agent/mo
 import { UiHelpers } from "@pk-nerdsaver-ai/pi-coding-agent/modes/utils/ui-helpers";
 import type { SessionContext } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-context";
 import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
-import { type Component, Container, Image, ImageProtocol, setTerminalImageProtocol, TERMINAL } from "@pk-nerdsaver-ai/pi-tui";
+import {
+	type Component,
+	Container,
+	Image,
+	ImageProtocol,
+	setTerminalImageProtocol,
+	TERMINAL,
+} from "@pk-nerdsaver-ai/pi-tui";
 import { TempDir } from "@pk-nerdsaver-ai/pi-utils";
 
 beforeAll(() => {
