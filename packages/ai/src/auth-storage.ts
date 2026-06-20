@@ -10,7 +10,7 @@
 import { Database, type Statement } from "bun:sqlite";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { getAgentDbPath, logger } from "@oh-my-pi/pi-utils";
+import { getAgentDbPath, logger } from "@pk-nerdsaver-ai/pi-utils";
 import type { ApiKeyResolver } from "./auth-retry";
 import { isUsageLimitError } from "./rate-limit-utils";
 import { getProviderDefinition } from "./registry";

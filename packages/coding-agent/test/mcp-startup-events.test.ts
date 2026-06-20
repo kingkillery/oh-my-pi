@@ -3,7 +3,7 @@ import {
 	formatMCPConnectingMessage,
 	isMcpConnectingEvent,
 	MCP_CONNECTING_EVENT_CHANNEL,
-} from "@oh-my-pi/pi-coding-agent/mcp/startup-events";
+} from "@pk-nerdsaver-ai/pi-coding-agent/mcp/startup-events";
 
 // Cross-module contract guard.
 //

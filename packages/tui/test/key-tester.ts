@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
-import { matchesKey } from "@oh-my-pi/pi-tui/keys";
-import { ProcessTerminal } from "@oh-my-pi/pi-tui/terminal";
-import { type Component, TUI } from "@oh-my-pi/pi-tui/tui";
+import { matchesKey } from "@pk-nerdsaver-ai/pi-tui/keys";
+import { ProcessTerminal } from "@pk-nerdsaver-ai/pi-tui/terminal";
+import { type Component, TUI } from "@pk-nerdsaver-ai/pi-tui/tui";
 
 /**
  * Simple key code logger component

@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { DEFAULT_FUZZY_THRESHOLD, executePatchSingle } from "@oh-my-pi/pi-coding-agent/edit";
-import type { FileDiagnosticsResult } from "@oh-my-pi/pi-coding-agent/lsp";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+import { resetSettingsForTest, Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { DEFAULT_FUZZY_THRESHOLD, executePatchSingle } from "@pk-nerdsaver-ai/pi-coding-agent/edit";
+import type { FileDiagnosticsResult } from "@pk-nerdsaver-ai/pi-coding-agent/lsp";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
 
 function makeSession(cwd: string): ToolSession {
 	return {

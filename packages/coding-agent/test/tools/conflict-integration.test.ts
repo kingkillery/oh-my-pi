@@ -2,9 +2,9 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createTools, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { ConflictHistory } from "@oh-my-pi/pi-coding-agent/tools/conflict-detect";
+import { resetSettingsForTest, Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { createTools, type ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { ConflictHistory } from "@pk-nerdsaver-ai/pi-coding-agent/tools/conflict-detect";
 
 function createTestSession(cwd: string, overrides: Partial<ToolSession> = {}): ToolSession {
 	return {

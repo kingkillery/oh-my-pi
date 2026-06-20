@@ -11,8 +11,8 @@ import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { convertBufferWithMarkit, convertFileWithMarkit } from "@oh-my-pi/pi-coding-agent/utils/markit";
-import { zip } from "@oh-my-pi/pi-coding-agent/utils/zip";
+import { convertBufferWithMarkit, convertFileWithMarkit } from "@pk-nerdsaver-ai/pi-coding-agent/utils/markit";
+import { zip } from "@pk-nerdsaver-ai/pi-coding-agent/utils/zip";
 
 const enc = (s: string): Uint8Array => new TextEncoder().encode(s);
 const WML = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";

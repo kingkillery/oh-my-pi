@@ -4,7 +4,7 @@
  * Shows available plugins from all configured marketplaces in a SelectList.
  * Selecting a plugin triggers installation. Esc cancels.
  */
-import { Container, type SelectItem, SelectList } from "@oh-my-pi/pi-tui";
+import { Container, type SelectItem, SelectList } from "@pk-nerdsaver-ai/pi-tui";
 import { getSelectListTheme } from "../theme/theme";
 import { DynamicBorder } from "./dynamic-border";
 

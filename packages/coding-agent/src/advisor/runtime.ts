@@ -1,6 +1,6 @@
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { estimateTokens } from "@oh-my-pi/pi-agent-core/compaction";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
+import { estimateTokens } from "@pk-nerdsaver-ai/pi-agent-core/compaction";
+import { logger } from "@pk-nerdsaver-ai/pi-utils";
 import { formatSessionHistoryMarkdown } from "../session/session-history-format";
 
 /** Minimal slice of `Agent` the runtime drives — satisfied by pi-agent-core `Agent`. */

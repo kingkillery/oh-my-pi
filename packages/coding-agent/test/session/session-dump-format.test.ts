@@ -8,9 +8,9 @@
  * previous `<parameter>`-per-key JSON Schema dump dropped entirely.
  */
 import { describe, expect, it } from "bun:test";
-import type { Model, Usage } from "@oh-my-pi/pi-ai";
-import { formatSessionDumpText } from "@oh-my-pi/pi-coding-agent/session/session-dump-format";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import type { Model, Usage } from "@pk-nerdsaver-ai/pi-ai";
+import { formatSessionDumpText } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-dump-format";
+import { INTENT_FIELD } from "@pk-nerdsaver-ai/pi-wire";
 import { type } from "arktype";
 
 const ZERO_USAGE: Usage = {

@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { initTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { initTheme, theme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
 import {
 	selectStickyTodoWindow,
 	TODO_STRIKE_HOLD_FRAMES,
@@ -11,8 +11,8 @@ import {
 	TodoTool,
 	todoMatchesAnyDescription,
 	todoToolRenderer,
-} from "@oh-my-pi/pi-coding-agent/tools";
-import type { Component } from "@oh-my-pi/pi-tui";
+} from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import type { Component } from "@pk-nerdsaver-ai/pi-tui";
 
 function createSession(initialPhases: TodoPhase[] = []): ToolSession {
 	let phases = initialPhases;
@@ -527,7 +527,7 @@ describe("todoToolRenderer.renderCall malformed-args regression (#2005)", () => 
 			],
 		};
 		const component = todoToolRenderer.renderCall(args, renderOptions, theme);
-		// `Text(text, 0, 0)` from `@oh-my-pi/pi-tui` exposes the content via .render().
+		// `Text(text, 0, 0)` from `@pk-nerdsaver-ai/pi-tui` exposes the content via .render().
 		const rendered = Bun.stripANSI(component.render(120).join("\n"));
 		expect(rendered).toContain("init");
 		expect(rendered).toContain("3 items");

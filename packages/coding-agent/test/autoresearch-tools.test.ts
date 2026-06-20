@@ -1,22 +1,22 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
-import { createSessionRuntime } from "@oh-my-pi/pi-coding-agent/autoresearch/state";
+import type { ImageContent, TextContent } from "@pk-nerdsaver-ai/pi-ai";
+import { createSessionRuntime } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/state";
 import {
 	type AutoresearchStorage,
 	closeAllAutoresearchStorages,
 	openAutoresearchStorage,
 	type SessionRow,
-} from "@oh-my-pi/pi-coding-agent/autoresearch/storage";
-import { createInitExperimentTool } from "@oh-my-pi/pi-coding-agent/autoresearch/tools/init-experiment";
-import { createLogExperimentTool } from "@oh-my-pi/pi-coding-agent/autoresearch/tools/log-experiment";
-import { createRunExperimentTool } from "@oh-my-pi/pi-coding-agent/autoresearch/tools/run-experiment";
-import { createUpdateNotesTool } from "@oh-my-pi/pi-coding-agent/autoresearch/tools/update-notes";
-import type { ASIData, LogDetails, NumericMetricMap, RunDetails } from "@oh-my-pi/pi-coding-agent/autoresearch/types";
-import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import * as git from "@oh-my-pi/pi-coding-agent/utils/git";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/storage";
+import { createInitExperimentTool } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/tools/init-experiment";
+import { createLogExperimentTool } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/tools/log-experiment";
+import { createRunExperimentTool } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/tools/run-experiment";
+import { createUpdateNotesTool } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/tools/update-notes";
+import type { ASIData, LogDetails, NumericMetricMap, RunDetails } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/types";
+import type { ExtensionAPI, ExtensionContext } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions";
+import * as git from "@pk-nerdsaver-ai/pi-coding-agent/utils/git";
+import { TempDir } from "@pk-nerdsaver-ai/pi-utils";
 import { $ } from "bun";
 
 afterEach(() => {

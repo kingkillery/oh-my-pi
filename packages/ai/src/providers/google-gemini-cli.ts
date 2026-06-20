@@ -5,14 +5,14 @@
  */
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { scheduler } from "node:timers/promises";
-import { calculateCost } from "@oh-my-pi/pi-catalog/models";
+import { calculateCost } from "@pk-nerdsaver-ai/pi-catalog/models";
 import {
 	ANTIGRAVITY_SYSTEM_INSTRUCTION,
 	getAntigravityModelWireProfile,
 	getAntigravityUserAgent,
 	getGeminiCliHeaders,
-} from "@oh-my-pi/pi-catalog/wire/gemini-headers";
-import { extractHttpStatusFromError, fetchWithRetry, readSseJson } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-catalog/wire/gemini-headers";
+import { extractHttpStatusFromError, fetchWithRetry, readSseJson } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
 import { ProviderHttpError } from "../errors";
 import type {
@@ -147,7 +147,7 @@ export {
 	getAntigravityUserAgent,
 	getGeminiCliHeaders,
 	getGeminiCliUserAgent,
-} from "@oh-my-pi/pi-catalog/wire/gemini-headers";
+} from "@pk-nerdsaver-ai/pi-catalog/wire/gemini-headers";
 
 // Retry configuration
 const MAX_RETRIES = 3;

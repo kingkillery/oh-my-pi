@@ -10,10 +10,10 @@ import {
 	type AgentToolResult,
 	EventLoopKeepalive,
 	ThinkingLevel,
-} from "@oh-my-pi/pi-agent-core";
-import type { CompactionOutcome } from "@oh-my-pi/pi-agent-core/compaction";
-import type { AssistantMessage, ImageContent, Message, Model, Usage, UsageReport } from "@oh-my-pi/pi-ai";
-import { modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
+} from "@pk-nerdsaver-ai/pi-agent-core";
+import type { CompactionOutcome } from "@pk-nerdsaver-ai/pi-agent-core/compaction";
+import type { AssistantMessage, ImageContent, Message, Model, Usage, UsageReport } from "@pk-nerdsaver-ai/pi-ai";
+import { modelsAreEqual } from "@pk-nerdsaver-ai/pi-catalog/models";
 import type {
 	Component,
 	EditorTheme,
@@ -21,7 +21,7 @@ import type {
 	NativeScrollbackLiveRegion,
 	OverlayHandle,
 	SlashCommand,
-} from "@oh-my-pi/pi-tui";
+} from "@pk-nerdsaver-ai/pi-tui";
 import {
 	Container,
 	clearRenderCache,
@@ -35,7 +35,7 @@ import {
 	Text,
 	TUI,
 	visibleWidth,
-} from "@oh-my-pi/pi-tui";
+} from "@pk-nerdsaver-ai/pi-tui";
 import {
 	APP_NAME,
 	adjustHsv,
@@ -47,7 +47,7 @@ import {
 	postmortem,
 	prompt,
 	setProjectDir,
-} from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-utils";
 import chalk from "chalk";
 import { reset as resetCapabilities } from "../capability";
 import type { CollabGuestLink } from "../collab/guest";

@@ -2,17 +2,17 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:te
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
+import { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
 import {
 	type CreateAgentSessionOptions,
 	createAgentSession,
 	discoverAuthStorage,
 	type ExtensionFactory,
-} from "@oh-my-pi/pi-coding-agent/sdk";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { Snowflake } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
 
 const toolActivationExtension: ExtensionFactory = pi => {

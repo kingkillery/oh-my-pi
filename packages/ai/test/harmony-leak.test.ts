@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import type { AssistantMessage, Model, ToolCall, Usage } from "@oh-my-pi/pi-ai";
+import type { AssistantMessage, Model, ToolCall, Usage } from "@pk-nerdsaver-ai/pi-ai";
 import {
 	createHarmonyAuditEvent,
 	detectHarmonyLeak,
@@ -8,8 +8,8 @@ import {
 	isHarmonyLeakMitigationTarget,
 	recoverHarmonyToolCall,
 	signalListLabel,
-} from "@oh-my-pi/pi-ai/utils/harmony-leak";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+} from "@pk-nerdsaver-ai/pi-ai/utils/harmony-leak";
+import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
 import corpus from "./fixtures/harmony-leak-corpus.json" with { type: "json" };
 
 interface CorpusPositive {

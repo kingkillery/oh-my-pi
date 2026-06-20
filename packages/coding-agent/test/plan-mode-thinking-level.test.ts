@@ -8,13 +8,13 @@
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { Agent, ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, ThinkingLevel } from "@pk-nerdsaver-ai/pi-agent-core";
+import { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { AuthStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/auth-storage";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { TempDir } from "@pk-nerdsaver-ai/pi-utils";
 
 describe("plan mode thinking level", () => {
 	let tempDir: TempDir;

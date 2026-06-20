@@ -4,7 +4,7 @@ import {
 	shouldEnableHyperlinksByDefault,
 	shouldEnableSynchronizedOutputByDefault,
 	synchronizedOutputUserOverride,
-} from "@oh-my-pi/pi-tui/terminal-capabilities";
+} from "@pk-nerdsaver-ai/pi-tui/terminal-capabilities";
 
 describe("synchronizedOutputUserOverride", () => {
 	it("returns null when the user expresses no preference", () => {

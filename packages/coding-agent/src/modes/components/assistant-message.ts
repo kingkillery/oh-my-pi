@@ -1,5 +1,5 @@
-import type { AssistantMessage, ImageContent } from "@oh-my-pi/pi-ai";
-import { Container, Image, type ImageBudget, ImageProtocol, Markdown, Spacer, TERMINAL, Text } from "@oh-my-pi/pi-tui";
+import type { AssistantMessage, ImageContent } from "@pk-nerdsaver-ai/pi-ai";
+import { Container, Image, type ImageBudget, ImageProtocol, Markdown, Spacer, TERMINAL, Text } from "@pk-nerdsaver-ai/pi-tui";
 import type { AssistantThinkingRenderer } from "../../extensibility/extensions/types";
 import { getMarkdownTheme, theme } from "../../modes/theme/theme";
 import { resolveAbortLabel, shouldRenderAbortReason } from "../../session/messages";

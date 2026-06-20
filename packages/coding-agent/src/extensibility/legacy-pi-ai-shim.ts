@@ -1,6 +1,6 @@
 /**
  * Compatibility shim for legacy extensions importing the package root of
- * `@oh-my-pi/pi-ai` (or one of its aliased scopes like `@earendil-works/pi-ai`
+ * `@pk-nerdsaver-ai/pi-ai` (or one of its aliased scopes like `@earendil-works/pi-ai`
  * or `@mariozechner/pi-ai`).
  *
  * pi-ai 15.1.0 removed the historical TypeBox root exports (`Type`, plus the
@@ -8,7 +8,7 @@
  * entrypoint. Legacy extensions still author parameter schemas as
  * `Type.Object({ ... })`, so this file is served by `legacy-pi-compat.ts` in
  * place of the real pi-ai entrypoint whenever a legacy extension imports the
- * bare package root. Subpath imports (`@oh-my-pi/pi-ai/oauth`, etc.)
+ * bare package root. Subpath imports (`@pk-nerdsaver-ai/pi-ai/oauth`, etc.)
  * continue to resolve directly against the bundled pi-ai package.
  *
  * The `Type` runtime and legacy `StringEnum()` helper are borrowed from the
@@ -57,5 +57,5 @@ export function StringEnum<T extends string>(values: readonly T[], options?: Str
 	return schema;
 }
 
-export * from "@oh-my-pi/pi-ai";
+export * from "@pk-nerdsaver-ai/pi-ai";
 export { Type };

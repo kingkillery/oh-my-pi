@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { SqlSessionStorage, type SqlSessionStorageClient } from "@oh-my-pi/pi-coding-agent/session/sql-session-storage";
+import { SqlSessionStorage, type SqlSessionStorageClient } from "@pk-nerdsaver-ai/pi-coding-agent/session/sql-session-storage";
 import { SQL } from "bun";
 
 async function createSqlite(): Promise<{ client: InstanceType<typeof SQL>; storage: SqlSessionStorage }> {

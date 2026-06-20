@@ -10,12 +10,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { HindsightApi } from "@oh-my-pi/pi-coding-agent/hindsight/client";
-import type { HindsightConfig } from "@oh-my-pi/pi-coding-agent/hindsight/config";
-import { HindsightSessionState } from "@oh-my-pi/pi-coding-agent/hindsight/state";
-import { mnemopiBackend } from "@oh-my-pi/pi-coding-agent/mnemopi/backend";
-import { loadMnemopiConfig, type MnemopiBackendConfig } from "@oh-my-pi/pi-coding-agent/mnemopi/config";
+import { resetSettingsForTest, Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { HindsightApi } from "@pk-nerdsaver-ai/pi-coding-agent/hindsight/client";
+import type { HindsightConfig } from "@pk-nerdsaver-ai/pi-coding-agent/hindsight/config";
+import { HindsightSessionState } from "@pk-nerdsaver-ai/pi-coding-agent/hindsight/state";
+import { mnemopiBackend } from "@pk-nerdsaver-ai/pi-coding-agent/mnemopi/backend";
+import { loadMnemopiConfig, type MnemopiBackendConfig } from "@pk-nerdsaver-ai/pi-coding-agent/mnemopi/config";
 import {
 	getMnemopiScopedDbPaths,
 	getMnemopiSessionState,
@@ -23,14 +23,14 @@ import {
 	loadMnemopiCore,
 	MnemopiSessionState,
 	setMnemopiSessionState,
-} from "@oh-my-pi/pi-coding-agent/mnemopi/state";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
-import { MemoryEditTool } from "@oh-my-pi/pi-coding-agent/tools/memory-edit";
-import { MemoryRecallTool } from "@oh-my-pi/pi-coding-agent/tools/memory-recall";
-import { MemoryReflectTool } from "@oh-my-pi/pi-coding-agent/tools/memory-reflect";
-import { MemoryRetainTool } from "@oh-my-pi/pi-coding-agent/tools/memory-retain";
-import { resetMemoryForTests } from "@oh-my-pi/pi-mnemopi";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-coding-agent/mnemopi/state";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools/index";
+import { MemoryEditTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/memory-edit";
+import { MemoryRecallTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/memory-recall";
+import { MemoryReflectTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/memory-reflect";
+import { MemoryRetainTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/memory-retain";
+import { resetMemoryForTests } from "@pk-nerdsaver-ai/pi-mnemopi";
+import { TempDir } from "@pk-nerdsaver-ai/pi-utils";
 
 // Mnemopi is lazy-loaded at runtime; preload it so the sync construction in
 // registerMnemopiState() and getMnemopiScopedDbPaths() can resolve the module.

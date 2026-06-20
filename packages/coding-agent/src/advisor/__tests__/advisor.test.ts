@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "bun:test";
-import type { AgentMessage, AgentTelemetryConfig } from "@oh-my-pi/pi-agent-core";
+import type { AgentMessage, AgentTelemetryConfig } from "@pk-nerdsaver-ai/pi-agent-core";
 import { type } from "arktype";
 import { createAdvisorMessageCard } from "../../modes/components/advisor-message";
 import { getThemeByName } from "../../modes/theme/theme";

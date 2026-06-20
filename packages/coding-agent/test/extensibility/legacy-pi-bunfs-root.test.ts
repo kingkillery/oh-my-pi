@@ -3,7 +3,7 @@ import * as path from "node:path";
 import {
 	__computeBundledSelfPackageRoot,
 	__computeBunfsPackageRoot,
-} from "@oh-my-pi/pi-coding-agent/extensibility/plugins/legacy-pi-compat";
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/plugins/legacy-pi-compat";
 
 // Regression for issue #1514: legacy pi compat shim paths were built from a
 // hardcoded POSIX literal `/$bunfs/root/packages`. On Windows the bunfs root
@@ -43,14 +43,14 @@ describe("legacy pi compat bunfs root computation (issue #1514)", () => {
 	it("derives the npm prebuilt bundle package root from dist import.meta.dir", () => {
 		const computeBundledSelfPackageRoot = __computeBundledSelfPackageRoot;
 
-		const winMetaDir = "C:\\Users\\me\\.bun\\install\\global\\node_modules\\@oh-my-pi\\pi-coding-agent\\dist";
+		const winMetaDir = "C:\\Users\\me\\.bun\\install\\global\\node_modules\\@pk-nerdsaver-ai\\pi-coding-agent\\dist";
 		expect(computeBundledSelfPackageRoot(winMetaDir, path.win32)).toBe(
-			"C:\\Users\\me\\.bun\\install\\global\\node_modules\\@oh-my-pi\\pi-coding-agent",
+			"C:\\Users\\me\\.bun\\install\\global\\node_modules\\@pk-nerdsaver-ai\\pi-coding-agent",
 		);
 
-		const posixMetaDir = "/home/me/.bun/install/global/node_modules/@oh-my-pi/pi-coding-agent/dist";
+		const posixMetaDir = "/home/me/.bun/install/global/node_modules/@pk-nerdsaver-ai/pi-coding-agent/dist";
 		expect(computeBundledSelfPackageRoot(posixMetaDir, path.posix)).toBe(
-			"/home/me/.bun/install/global/node_modules/@oh-my-pi/pi-coding-agent",
+			"/home/me/.bun/install/global/node_modules/@pk-nerdsaver-ai/pi-coding-agent",
 		);
 	});
 

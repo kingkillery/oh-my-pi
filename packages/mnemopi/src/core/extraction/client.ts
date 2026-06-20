@@ -1,4 +1,4 @@
-import { type ApiKey, type FetchImpl, withAuth } from "@oh-my-pi/pi-ai";
+import { type ApiKey, type FetchImpl, withAuth } from "@pk-nerdsaver-ai/pi-ai";
 
 import { getDiagnostics } from "./diagnostics";
 import { EXTRACTION_SYSTEM_PROMPT, EXTRACTION_USER_TEMPLATE } from "./prompts";

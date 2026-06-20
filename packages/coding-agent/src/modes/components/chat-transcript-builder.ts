@@ -11,10 +11,10 @@
  * entry count, but it cannot duplicate or misorder rows the way incremental
  * component reuse could.
  */
-import type { AgentMessage, AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { Usage } from "@oh-my-pi/pi-ai";
-import { Text, type TUI } from "@oh-my-pi/pi-tui";
-import { formatBytes, formatDuration } from "@oh-my-pi/pi-utils";
+import type { AgentMessage, AgentTool } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { Usage } from "@pk-nerdsaver-ai/pi-ai";
+import { Text, type TUI } from "@pk-nerdsaver-ai/pi-tui";
+import { formatBytes, formatDuration } from "@pk-nerdsaver-ai/pi-utils";
 import type { AdvisorMessageDetails } from "../../advisor";
 import { COLLAB_PROMPT_MESSAGE_TYPE, type CollabPromptDetails } from "../../collab/protocol";
 import { settings } from "../../config/settings";

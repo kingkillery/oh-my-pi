@@ -4,17 +4,17 @@
  * paid for. Regression guard for issue #2190.
  */
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import type { Rule } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import type { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ToolPathWithSource } from "@oh-my-pi/pi-coding-agent/extensibility/custom-tools";
-import type { LoadExtensionsResult } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/types";
-import type { CreateAgentSessionResult } from "@oh-my-pi/pi-coding-agent/sdk";
-import * as sdkModule from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession, AgentSessionEvent, PromptOptions } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { runSubprocess } from "@oh-my-pi/pi-coding-agent/task/executor";
-import type { AgentDefinition } from "@oh-my-pi/pi-coding-agent/task/types";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
+import type { Rule } from "@pk-nerdsaver-ai/pi-coding-agent/capability/rule";
+import type { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import type { ToolPathWithSource } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/custom-tools";
+import type { LoadExtensionsResult } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions/types";
+import type { CreateAgentSessionResult } from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
+import * as sdkModule from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
+import type { AgentSession, AgentSessionEvent, PromptOptions } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { runSubprocess } from "@pk-nerdsaver-ai/pi-coding-agent/task/executor";
+import type { AgentDefinition } from "@pk-nerdsaver-ai/pi-coding-agent/task/types";
+import { EventBus } from "@pk-nerdsaver-ai/pi-coding-agent/utils/event-bus";
 
 function createMockSession(onPrompt: (params: { emit: (event: AgentSessionEvent) => void }) => void): AgentSession {
 	const listeners: Array<(event: AgentSessionEvent) => void> = [];

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { buildDirectoryTree, buildWorkspaceTree } from "@oh-my-pi/pi-coding-agent/workspace-tree";
+import { buildDirectoryTree, buildWorkspaceTree } from "@pk-nerdsaver-ai/pi-coding-agent/workspace-tree";
 
 const tempDirs: string[] = [];
 

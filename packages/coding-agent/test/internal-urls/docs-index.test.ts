@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { gzipSync } from "node:zlib";
-import { decodeDocsIndex } from "@oh-my-pi/pi-coding-agent/internal-urls/docs-index";
+import { decodeDocsIndex } from "@pk-nerdsaver-ai/pi-coding-agent/internal-urls/docs-index";
 
 // The embed path only runs in compiled binaries / the npm bundle; dev tests
 // otherwise exercise the disk fallback (empty placeholder), so a regression in

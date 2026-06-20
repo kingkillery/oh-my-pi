@@ -1,16 +1,16 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { Effort } from "@oh-my-pi/pi-ai";
+import type { ThinkingLevel } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { Effort } from "@pk-nerdsaver-ai/pi-ai";
 import {
 	detectMacOSAppearance,
 	MacAppearanceObserver,
 	type HighlightColors as NativeHighlightColors,
 	highlightCode as nativeHighlightCode,
 	supportsLanguage as nativeSupportsLanguage,
-} from "@oh-my-pi/pi-natives";
-import type { EditorTheme, MarkdownTheme, SelectListTheme, SettingsListTheme, SymbolTheme } from "@oh-my-pi/pi-tui";
-import { adjustHsv, colorLuma, getCustomThemesDir, isEnoent, logger, relativeLuminance } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-natives";
+import type { EditorTheme, MarkdownTheme, SelectListTheme, SettingsListTheme, SymbolTheme } from "@pk-nerdsaver-ai/pi-tui";
+import { adjustHsv, colorLuma, getCustomThemesDir, isEnoent, logger, relativeLuminance } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
 import chalk from "chalk";
 import { LRUCache } from "lru-cache/raw";

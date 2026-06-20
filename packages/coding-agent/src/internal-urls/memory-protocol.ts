@@ -1,6 +1,6 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { getAgentDir, isEnoent } from "@oh-my-pi/pi-utils";
+import { getAgentDir, isEnoent } from "@pk-nerdsaver-ai/pi-utils";
 import { getMemoryRoot } from "../memories";
 import { AgentRegistry } from "../registry/agent-registry";
 import { validateRelativePath } from "./skill-protocol";

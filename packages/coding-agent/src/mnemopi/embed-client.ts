@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { $env, isBunTestRuntime, isCompiledBinary, logger, workerHostEntry } from "@oh-my-pi/pi-utils";
+import { $env, isBunTestRuntime, isCompiledBinary, logger, workerHostEntry } from "@pk-nerdsaver-ai/pi-utils";
 import type { Subprocess } from "bun";
 import type { MnemopiEmbedModelId, MnemopiEmbedWorkerInbound, MnemopiEmbedWorkerOutbound } from "./embed-protocol";
 

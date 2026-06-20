@@ -2,8 +2,8 @@ import type { Dirent } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import * as natives from "@oh-my-pi/pi-natives";
-import { getWorktreeDir, hashPath, logger, Snowflake } from "@oh-my-pi/pi-utils";
+import * as natives from "@pk-nerdsaver-ai/pi-natives";
+import { getWorktreeDir, hashPath, logger, Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 import * as git from "../utils/git";
 import { mapWithConcurrencyLimit } from "./parallel";
 

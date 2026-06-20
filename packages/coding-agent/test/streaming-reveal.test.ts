@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
+import type { AssistantMessage } from "@pk-nerdsaver-ai/pi-ai";
 import {
 	buildDisplayMessage,
 	CATCHUP_FRAMES,
@@ -8,7 +8,7 @@ import {
 	STREAMING_REVEAL_FRAME_MS,
 	StreamingRevealController,
 	visibleUnits,
-} from "@oh-my-pi/pi-coding-agent/modes/controllers/streaming-reveal";
+} from "@pk-nerdsaver-ai/pi-coding-agent/modes/controllers/streaming-reveal";
 
 function makeUsage(): AssistantMessage["usage"] {
 	return {

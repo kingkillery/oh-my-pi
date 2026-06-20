@@ -2,12 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { resetSettingsForTest, Settings, type ShellMinimizerSettings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { buildMinimizerOptions, executeBash } from "@oh-my-pi/pi-coding-agent/exec/bash-executor";
-import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-coding-agent/session/streaming-output";
-import * as shellSnapshot from "@oh-my-pi/pi-coding-agent/utils/shell-snapshot";
-import type { Shell } from "@oh-my-pi/pi-natives";
-import * as piNatives from "@oh-my-pi/pi-natives";
+import { resetSettingsForTest, Settings, type ShellMinimizerSettings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { buildMinimizerOptions, executeBash } from "@pk-nerdsaver-ai/pi-coding-agent/exec/bash-executor";
+import { DEFAULT_MAX_BYTES } from "@pk-nerdsaver-ai/pi-coding-agent/session/streaming-output";
+import * as shellSnapshot from "@pk-nerdsaver-ai/pi-coding-agent/utils/shell-snapshot";
+import type { Shell } from "@pk-nerdsaver-ai/pi-natives";
+import * as piNatives from "@pk-nerdsaver-ai/pi-natives";
 
 // Matches the schema default for `tools.artifactHeadBytes` (20 KB) used by
 // OutputSink when bash-executor pulls settings via resolveOutputSinkHeadBytes.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import type { SessionStatus } from "@oh-my-pi/pi-coding-agent/session/session-listing";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { MemorySessionStorage } from "@oh-my-pi/pi-coding-agent/session/session-storage";
+import type { SessionStatus } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-listing";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { MemorySessionStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-storage";
 
 const SESSION_DIR = "/sessions/status-proj";
 

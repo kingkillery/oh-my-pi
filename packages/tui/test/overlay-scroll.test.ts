@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { type Component, CURSOR_MARKER, TUI } from "@oh-my-pi/pi-tui";
+import { type Component, CURSOR_MARKER, TUI } from "@pk-nerdsaver-ai/pi-tui";
 import { VirtualTerminal } from "./virtual-terminal";
 
 class LineComponent implements Component {

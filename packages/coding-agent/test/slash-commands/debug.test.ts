@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as os from "node:os";
 import * as path from "node:path";
-import { clearNextRequestDebugPath, getNextRequestDebugPath } from "@oh-my-pi/pi-ai/utils/request-debug";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { executeBuiltinSlashCommand } from "@oh-my-pi/pi-coding-agent/slash-commands/builtin-registry";
+import { clearNextRequestDebugPath, getNextRequestDebugPath } from "@pk-nerdsaver-ai/pi-ai/utils/request-debug";
+import type { InteractiveModeContext } from "@pk-nerdsaver-ai/pi-coding-agent/modes/types";
+import { executeBuiltinSlashCommand } from "@pk-nerdsaver-ai/pi-coding-agent/slash-commands/builtin-registry";
 
 function createRuntimeHarness(cwd: string) {
 	const setText = vi.fn();

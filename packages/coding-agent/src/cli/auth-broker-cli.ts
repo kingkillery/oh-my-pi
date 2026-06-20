@@ -30,10 +30,10 @@ import {
 	type OAuthProviderInfo,
 	PROVIDER_REGISTRY,
 	SqliteAuthCredentialStore,
-} from "@oh-my-pi/pi-ai";
-import { AuthBrokerClient, DEFAULT_AUTH_BROKER_BIND, startAuthBroker } from "@oh-my-pi/pi-ai/auth-broker";
-import { $which, APP_NAME, getAgentDbPath, getConfigRootDir, isEnoent, logger, VERSION } from "@oh-my-pi/pi-utils";
-import { setTransports as setLoggerTransports } from "@oh-my-pi/pi-utils/logger";
+} from "@pk-nerdsaver-ai/pi-ai";
+import { AuthBrokerClient, DEFAULT_AUTH_BROKER_BIND, startAuthBroker } from "@pk-nerdsaver-ai/pi-ai/auth-broker";
+import { $which, APP_NAME, getAgentDbPath, getConfigRootDir, isEnoent, logger, VERSION } from "@pk-nerdsaver-ai/pi-utils";
+import { setTransports as setLoggerTransports } from "@pk-nerdsaver-ai/pi-utils/logger";
 import { $ } from "bun";
 import chalk from "chalk";
 import { resolveAuthBrokerConfig } from "../session/auth-broker-config";

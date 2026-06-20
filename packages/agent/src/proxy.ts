@@ -12,10 +12,10 @@ import {
 	type SimpleStreamOptions,
 	type StopReason,
 	type ToolCall,
-} from "@oh-my-pi/pi-ai";
-import { parseStreamingJson } from "@oh-my-pi/pi-ai/utils/json-parse";
-import { calculateCost } from "@oh-my-pi/pi-catalog/models";
-import { readSseJson } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-ai";
+import { parseStreamingJson } from "@pk-nerdsaver-ai/pi-ai/utils/json-parse";
+import { calculateCost } from "@pk-nerdsaver-ai/pi-catalog/models";
+import { readSseJson } from "@pk-nerdsaver-ai/pi-utils";
 
 // Event stream adapter for proxy SSE events
 export class ProxyMessageEventStream extends EventStream<AssistantMessageEvent, AssistantMessage> {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import type { Tool } from "@oh-my-pi/pi-ai/types";
-import { isArkSchema, toolWireSchema } from "@oh-my-pi/pi-ai/utils/schema";
-import { validateToolArguments } from "@oh-my-pi/pi-ai/utils/validation";
+import type { Tool } from "@pk-nerdsaver-ai/pi-ai/types";
+import { isArkSchema, toolWireSchema } from "@pk-nerdsaver-ai/pi-ai/utils/schema";
+import { validateToolArguments } from "@pk-nerdsaver-ai/pi-ai/utils/validation";
 import { type } from "arktype";
 import { z } from "zod/v4";
 

@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Effort, type FetchImpl, type Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import { kNoAuth, ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { Snowflake } from "@oh-my-pi/pi-utils";
+import { Effort, type FetchImpl, type Model } from "@pk-nerdsaver-ai/pi-ai";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { writeModelCache } from "@pk-nerdsaver-ai/pi-catalog/model-cache";
+import { kNoAuth, ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
+import { resetSettingsForTest } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { AuthStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/auth-storage";
+import { Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 
 describe("ModelRegistry runtime discovery", () => {
 	let tempDir: string;

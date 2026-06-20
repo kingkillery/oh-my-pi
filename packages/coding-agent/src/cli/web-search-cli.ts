@@ -4,7 +4,7 @@
  * Handles `omp q`/`omp web-search` subcommands for testing web search providers.
  */
 
-import { APP_NAME } from "@oh-my-pi/pi-utils";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import chalk from "chalk";
 import { initTheme, theme } from "../modes/theme/theme";
 import { runSearchQuery, type SearchQueryParams } from "../web/search/index";

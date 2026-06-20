@@ -1,4 +1,4 @@
-import { type SelectItem, SelectList, type SgrMouseEvent, truncateToWidth } from "@oh-my-pi/pi-tui";
+import { type SelectItem, SelectList, type SgrMouseEvent, truncateToWidth } from "@pk-nerdsaver-ai/pi-tui";
 import { SETTINGS_SCHEMA } from "../../../config/settings-schema";
 import { getSearchProvider, setPreferredSearchProvider } from "../../../web/search/provider";
 import { isSearchProviderPreference, type SearchProviderId } from "../../../web/search/types";

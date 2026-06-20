@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { parseSgrMouse } from "@oh-my-pi/pi-tui/mouse";
+import { parseSgrMouse } from "@pk-nerdsaver-ai/pi-tui/mouse";
 
 describe("parseSgrMouse", () => {
 	it("returns null for non-mouse input", () => {

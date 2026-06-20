@@ -9,8 +9,8 @@ import {
 	getGitNoIndexNullPath,
 	mergeTaskBranches,
 	parseIsolationMode,
-} from "@oh-my-pi/pi-coding-agent/task/worktree";
-import * as natives from "@oh-my-pi/pi-natives";
+} from "@pk-nerdsaver-ai/pi-coding-agent/task/worktree";
+import * as natives from "@pk-nerdsaver-ai/pi-natives";
 
 async function runGit(repo: string, args: string[]): Promise<string> {
 	const proc = Bun.spawn(["git", ...args], {

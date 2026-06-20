@@ -1,14 +1,14 @@
-import type { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { isVertexExpressOpenAIUrl, isVertexRawPredictUrl } from "@oh-my-pi/pi-catalog/hosts";
+import type { Effort } from "@pk-nerdsaver-ai/pi-catalog/effort";
+import { isVertexExpressOpenAIUrl, isVertexRawPredictUrl } from "@pk-nerdsaver-ai/pi-catalog/hosts";
 import {
 	mapEffortToAnthropicAdaptiveEffort,
 	mapEffortToGoogleThinkingLevel,
 	minimumSupportedEffort,
 	requireSupportedEffort,
 	resolveWireModelId,
-} from "@oh-my-pi/pi-catalog/model-thinking";
-import { CATALOG_PROVIDERS, type ProviderCatalogEntry } from "@oh-my-pi/pi-catalog/provider-models";
-import { $env, $pickenv, extractHttpStatusFromError } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-catalog/model-thinking";
+import { CATALOG_PROVIDERS, type ProviderCatalogEntry } from "@pk-nerdsaver-ai/pi-catalog/provider-models";
+import { $env, $pickenv, extractHttpStatusFromError } from "@pk-nerdsaver-ai/pi-utils";
 import { getCustomApi } from "./api-registry";
 import { AUTH_RETRY_STEPS, isApiKeyResolver, resolveRetryKey } from "./auth-retry";
 import { ProviderHttpError } from "./errors";

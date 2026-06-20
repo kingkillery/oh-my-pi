@@ -1,4 +1,4 @@
-import { type FetchImpl, getEnvApiKey } from "@oh-my-pi/pi-ai";
+import { type FetchImpl, getEnvApiKey } from "@pk-nerdsaver-ai/pi-ai";
 import type { AgentStorage } from "../session/agent-storage";
 import { findCredential, withHardTimeout } from "./search/providers/utils";
 

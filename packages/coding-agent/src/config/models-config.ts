@@ -2,7 +2,7 @@
  * models.json config file handle and provider configuration validation.
  */
 
-import type { Api, ModelSpec } from "@oh-my-pi/pi-ai/types";
+import type { Api, ModelSpec } from "@pk-nerdsaver-ai/pi-ai/types";
 import { ConfigFile } from "./config-file";
 import {
 	type ModelsConfig,

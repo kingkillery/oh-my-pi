@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { complete } from "@oh-my-pi/pi-ai/stream";
-import type { Api, Context, Model, OptionsForApi, ToolResultMessage } from "@oh-my-pi/pi-ai/types";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import { complete } from "@pk-nerdsaver-ai/pi-ai/stream";
+import type { Api, Context, Model, OptionsForApi, ToolResultMessage } from "@pk-nerdsaver-ai/pi-ai/types";
+import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
 import { type } from "arktype";
 import { e2eApiKey, resolveApiKey } from "./oauth";
 

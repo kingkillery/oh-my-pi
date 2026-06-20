@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { isReadOnlyAgent, TaskTool } from "@oh-my-pi/pi-coding-agent/task";
-import { loadBundledAgents } from "@oh-my-pi/pi-coding-agent/task/agents";
-import * as discoveryModule from "@oh-my-pi/pi-coding-agent/task/discovery";
-import type { AgentDefinition } from "@oh-my-pi/pi-coding-agent/task/types";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { isReadOnlyAgent, TaskTool } from "@pk-nerdsaver-ai/pi-coding-agent/task";
+import { loadBundledAgents } from "@pk-nerdsaver-ai/pi-coding-agent/task/agents";
+import * as discoveryModule from "@pk-nerdsaver-ai/pi-coding-agent/task/discovery";
+import type { AgentDefinition } from "@pk-nerdsaver-ai/pi-coding-agent/task/types";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
 
 function createSession(overrides: Partial<Record<string, unknown>> = {}): ToolSession {
 	return {

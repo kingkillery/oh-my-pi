@@ -5,9 +5,9 @@ import {
 	processInteractionUpdate,
 	type ToolCallState,
 	type UsageState,
-} from "@oh-my-pi/pi-ai/providers/cursor";
-import type { AssistantMessage, AssistantMessageEvent, TextContent, ThinkingContent } from "@oh-my-pi/pi-ai/types";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
+} from "@pk-nerdsaver-ai/pi-ai/providers/cursor";
+import type { AssistantMessage, AssistantMessageEvent, TextContent, ThinkingContent } from "@pk-nerdsaver-ai/pi-ai/types";
+import { AssistantMessageEventStream } from "@pk-nerdsaver-ai/pi-ai/utils/event-stream";
 
 interface Harness {
 	output: AssistantMessage;

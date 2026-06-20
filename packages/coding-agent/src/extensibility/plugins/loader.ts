@@ -6,7 +6,7 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { getPluginsLockfile, getPluginsNodeModules, getPluginsPackageJson, isEnoent } from "@oh-my-pi/pi-utils";
+import { getPluginsLockfile, getPluginsNodeModules, getPluginsPackageJson, isEnoent } from "@pk-nerdsaver-ai/pi-utils";
 import { getConfigDirPaths } from "../../config";
 import { installLegacyPiSpecifierShim } from "./legacy-pi-compat";
 import { normalizePluginRuntimeConfig } from "./runtime-config";

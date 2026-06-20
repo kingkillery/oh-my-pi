@@ -11,13 +11,13 @@ import { afterEach, beforeEach, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getCapability } from "@oh-my-pi/pi-coding-agent/capability";
-import { clearCache } from "@oh-my-pi/pi-coding-agent/capability/fs";
-import { type Rule, ruleCapability } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import type { LoadContext } from "@oh-my-pi/pi-coding-agent/capability/types";
+import { getCapability } from "@pk-nerdsaver-ai/pi-coding-agent/capability";
+import { clearCache } from "@pk-nerdsaver-ai/pi-coding-agent/capability/fs";
+import { type Rule, ruleCapability } from "@pk-nerdsaver-ai/pi-coding-agent/capability/rule";
+import type { LoadContext } from "@pk-nerdsaver-ai/pi-coding-agent/capability/types";
 // Register all discovery providers as a side effect.
-import "@oh-my-pi/pi-coding-agent/discovery";
-import { getConfigRootDir, setAgentDir } from "@oh-my-pi/pi-utils";
+import "@pk-nerdsaver-ai/pi-coding-agent/discovery";
+import { getConfigRootDir, setAgentDir } from "@pk-nerdsaver-ai/pi-utils";
 
 let tempDir: string;
 let home: string;

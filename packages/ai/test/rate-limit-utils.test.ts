@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { calculateRateLimitBackoffMs, isUsageLimitError, parseRateLimitReason } from "@oh-my-pi/pi-ai/rate-limit-utils";
+import { calculateRateLimitBackoffMs, isUsageLimitError, parseRateLimitReason } from "@pk-nerdsaver-ai/pi-ai/rate-limit-utils";
 
 describe("parseRateLimitReason", () => {
 	it("classifies Google Quota exceeded as QUOTA_EXHAUSTED", () => {

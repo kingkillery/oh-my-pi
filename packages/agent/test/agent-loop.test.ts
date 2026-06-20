@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { agentLoop, agentLoopContinue, agentLoopDetailed } from "@oh-my-pi/pi-agent-core/agent-loop";
+import { agentLoop, agentLoopContinue, agentLoopDetailed } from "@pk-nerdsaver-ai/pi-agent-core/agent-loop";
 import type {
 	AgentContext,
 	AgentEvent,
@@ -8,11 +8,11 @@ import type {
 	AgentTool,
 	AgentToolContext,
 	ToolCallContext,
-} from "@oh-my-pi/pi-agent-core/types";
-import type { AssistantMessage, AssistantMessageEvent, Message, ToolResultMessage } from "@oh-my-pi/pi-ai";
-import { createMockModel, type MockResponse } from "@oh-my-pi/pi-ai/providers/mock";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+} from "@pk-nerdsaver-ai/pi-agent-core/types";
+import type { AssistantMessage, AssistantMessageEvent, Message, ToolResultMessage } from "@pk-nerdsaver-ai/pi-ai";
+import { createMockModel, type MockResponse } from "@pk-nerdsaver-ai/pi-ai/providers/mock";
+import { AssistantMessageEventStream } from "@pk-nerdsaver-ai/pi-ai/utils/event-stream";
+import { INTENT_FIELD } from "@pk-nerdsaver-ai/pi-wire";
 import { type } from "arktype";
 import { createAssistantMessage, createUserMessage } from "./helpers";
 

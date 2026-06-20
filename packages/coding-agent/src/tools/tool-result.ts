@@ -1,5 +1,5 @@
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
+import type { AgentToolResult } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { ImageContent, TextContent } from "@pk-nerdsaver-ai/pi-ai";
 import type { OutputSummary, TruncationResult } from "../session/streaming-output";
 import type { OutputMeta, TruncationOptions, TruncationSummaryOptions, TruncationTextOptions } from "./output-meta";
 import { outputMeta } from "./output-meta";

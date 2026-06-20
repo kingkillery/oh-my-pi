@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import type { Model } from "@pk-nerdsaver-ai/pi-ai";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import {
 	resolveCliModel,
 	resolveModelFromSettings,
 	resolveModelRoleValue,
-} from "@oh-my-pi/pi-coding-agent/config/model-resolver";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+} from "@pk-nerdsaver-ai/pi-coding-agent/config/model-resolver";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
 
 function model(provider: string, id: string): Model<"anthropic-messages"> {
 	return buildModel({

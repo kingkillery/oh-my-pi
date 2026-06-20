@@ -1,16 +1,16 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { CompactionCancelledError, type CompactionOutcome } from "@oh-my-pi/pi-agent-core/compaction";
+import { CompactionCancelledError, type CompactionOutcome } from "@pk-nerdsaver-ai/pi-agent-core/compaction";
 import {
 	getEnvApiKey,
 	getProviderDetails,
 	type ProviderDetails,
 	type UsageLimit,
 	type UsageReport,
-} from "@oh-my-pi/pi-ai";
-import { Loader, Markdown, padding, Spacer, Text, visibleWidth } from "@oh-my-pi/pi-tui";
-import { formatDuration, Snowflake } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-ai";
+import { Loader, Markdown, padding, Spacer, Text, visibleWidth } from "@pk-nerdsaver-ai/pi-tui";
+import { formatDuration, Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 import { shouldEnableAppendOnlyContext } from "../../config/append-only-context-mode";
 import { type LoadedCustomShare, loadCustomShare } from "../../export/custom-share";
 import { shareSession } from "../../export/share";

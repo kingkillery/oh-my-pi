@@ -1,12 +1,12 @@
 import { beforeAll, describe, expect, it, vi } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
-import type { AgentToolContext } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ExtensionUISelectItem } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { getThemeByName, initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { AskTool, askToolRenderer } from "@oh-my-pi/pi-coding-agent/tools/ask";
-import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
+import type { AgentToolContext } from "@pk-nerdsaver-ai/pi-agent-core";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import type { ExtensionUISelectItem } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions";
+import { getThemeByName, initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { AskTool, askToolRenderer } from "@pk-nerdsaver-ai/pi-coding-agent/tools/ask";
+import { ToolAbortError } from "@pk-nerdsaver-ai/pi-coding-agent/tools/tool-errors";
 
 function createSession(overrides: Partial<ToolSession> = {}): ToolSession {
 	return {

@@ -1,4 +1,4 @@
-import { logger, untilAborted } from "@oh-my-pi/pi-utils";
+import { logger, untilAborted } from "@pk-nerdsaver-ai/pi-utils";
 import type { Markit, StreamInfo } from "../markit";
 import { ToolAbortError } from "../tools/tool-errors";
 import { loadEmbeddedMupdfWasm } from "./mupdf-wasm-embed";

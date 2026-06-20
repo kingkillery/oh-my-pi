@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { finalizeSubprocessOutput } from "@oh-my-pi/pi-coding-agent/task/executor";
-import { subprocessToolRegistry } from "@oh-my-pi/pi-coding-agent/task/subprocess-tool-registry";
-import { parseReportFindingDetails, toReviewFinding } from "@oh-my-pi/pi-coding-agent/tools/review";
+import { finalizeSubprocessOutput } from "@pk-nerdsaver-ai/pi-coding-agent/task/executor";
+import { subprocessToolRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/task/subprocess-tool-registry";
+import { parseReportFindingDetails, toReviewFinding } from "@pk-nerdsaver-ai/pi-coding-agent/tools/review";
 
 describe("report_finding subprocess extraction", () => {
 	it("returns undefined for malformed finding details", () => {

@@ -1,8 +1,8 @@
 /**
  * CLI argument parsing and help display
  */
-import { type Effort, THINKING_EFFORTS } from "@oh-my-pi/pi-catalog/effort";
-import { APP_NAME, CONFIG_DIR_NAME, logger } from "@oh-my-pi/pi-utils";
+import { type Effort, THINKING_EFFORTS } from "@pk-nerdsaver-ai/pi-catalog/effort";
+import { APP_NAME, CONFIG_DIR_NAME, logger } from "@pk-nerdsaver-ai/pi-utils";
 import chalk from "chalk";
 import { parseEffort } from "../thinking";
 import { BUILTIN_TOOL_NAMES } from "../tools/builtin-names";
@@ -84,7 +84,7 @@ export interface Args {
 /**
  * Runtime dependencies the data-driven setters need. Constructed once at
  * module load and passed to every {@link STRING_SETTERS} call so the
- * setter table itself can stay free of `@oh-my-pi/pi-utils` runtime imports
+ * setter table itself can stay free of `@pk-nerdsaver-ai/pi-utils` runtime imports
  * (which would otherwise trip the profile bootstrap's env-init ordering).
  */
 const PARSE_DEPS: ParseDeps = {

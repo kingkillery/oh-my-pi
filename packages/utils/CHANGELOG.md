@@ -20,7 +20,7 @@
 
 ### Removed
 
-- Removed the public `createAbortableStream` API from `@oh-my-pi/pi-utils`. Consumers should use the lighter, direct-reader `abortableSource` async generator inside `@oh-my-pi/pi-utils/stream` to avoid the extra ReadableStream wrapper layer and per-chunk enqueue overhead.
+- Removed the public `createAbortableStream` API from `@pk-nerdsaver-ai/pi-utils`. Consumers should use the lighter, direct-reader `abortableSource` async generator inside `@pk-nerdsaver-ai/pi-utils/stream` to avoid the extra ReadableStream wrapper layer and per-chunk enqueue overhead.
 
 ## [16.0.11] - 2026-06-19
 
@@ -49,7 +49,7 @@
 
 ### Added
 
-- Added `installWorkerInbox(port)` / `consumeWorkerInbox()` to `@oh-my-pi/pi-utils/worker-host`. A self-dispatching CLI host that imports a Bun worker module dynamically attaches the worker's real `message` listener after Bun flushes the messages the parent posted before spawn, dropping a synchronously-posted `init`. The host installs this buffering inbox synchronously in the entry's sync prefix so a listener exists at flush time; the worker module consumes it and binds the real handler, replaying anything buffered.
+- Added `installWorkerInbox(port)` / `consumeWorkerInbox()` to `@pk-nerdsaver-ai/pi-utils/worker-host`. A self-dispatching CLI host that imports a Bun worker module dynamically attaches the worker's real `message` listener after Bun flushes the messages the parent posted before spawn, dropping a synchronously-posted `init`. The host installs this buffering inbox synchronously in the entry's sync prefix so a listener exists at flush time; the worker module consumes it and binds the real handler, replaying anything buffered.
 
 ## [15.13.1] - 2026-06-15
 
@@ -57,7 +57,7 @@
 
 - Added profile-aware directory helpers and isolated profile state roots, while keeping the install ID shared across profiles.
 - Added a named-profile API to the `dirs` module — `setProfile()`, `getActiveProfile()`, `getProfileRootDir()`, and `normalizeProfileName()` — plus `resolveProfileEnv()`, which selects the active profile from `OMP_PROFILE` (canonical; takes precedence) then `PI_PROFILE` (legacy fallback, consulted only when `OMP_PROFILE` is unset).
-- Added the side-effect-free `@oh-my-pi/pi-utils/worker-host` module (`declareWorkerHostEntry()` / `workerHostEntry()`), extracted from `env` (still re-exported there) so worker spawn sites can resolve the self-dispatching CLI host entry without importing `env`'s side-effecting module graph.
+- Added the side-effect-free `@pk-nerdsaver-ai/pi-utils/worker-host` module (`declareWorkerHostEntry()` / `workerHostEntry()`), extracted from `env` (still re-exported there) so worker spawn sites can resolve the self-dispatching CLI host entry without importing `env`'s side-effecting module graph.
 
 ### Fixed
 

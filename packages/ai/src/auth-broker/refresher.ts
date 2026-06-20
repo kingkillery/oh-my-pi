@@ -9,7 +9,7 @@
  * are disabled via {@link AuthStorage.disableCredentialById} so the next
  * snapshot pull surfaces a clean delete on the client.
  */
-import { logger } from "@oh-my-pi/pi-utils";
+import { logger } from "@pk-nerdsaver-ai/pi-utils";
 import { type AuthStorage, isDefinitiveOAuthFailure } from "../auth-storage";
 import { DEFAULT_REFRESH_INTERVAL_MS, DEFAULT_REFRESH_SKEW_MS } from "./types";
 

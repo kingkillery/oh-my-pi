@@ -1,17 +1,17 @@
 import { afterEach, describe, expect, it, spyOn } from "bun:test";
-import { Agent, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { reset as resetCapabilities } from "@oh-my-pi/pi-coding-agent/capability";
-import { type SSHHost, sshCapability } from "@oh-my-pi/pi-coding-agent/capability/ssh";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { loadCapability } from "@oh-my-pi/pi-coding-agent/discovery";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { addSSHHost, removeSSHHost, updateSSHHost } from "@oh-my-pi/pi-coding-agent/ssh/config-writer";
-import * as connectionManager from "@oh-my-pi/pi-coding-agent/ssh/connection-manager";
-import { loadSshTool, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { getSSHConfigPath, TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, type AgentTool } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { Model } from "@pk-nerdsaver-ai/pi-ai";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { reset as resetCapabilities } from "@pk-nerdsaver-ai/pi-coding-agent/capability";
+import { type SSHHost, sshCapability } from "@pk-nerdsaver-ai/pi-coding-agent/capability/ssh";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { loadCapability } from "@pk-nerdsaver-ai/pi-coding-agent/discovery";
+import { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { addSSHHost, removeSSHHost, updateSSHHost } from "@pk-nerdsaver-ai/pi-coding-agent/ssh/config-writer";
+import * as connectionManager from "@pk-nerdsaver-ai/pi-coding-agent/ssh/connection-manager";
+import { loadSshTool, type ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { getSSHConfigPath, TempDir } from "@pk-nerdsaver-ai/pi-utils";
 
 function createModel(): Model<"openai-responses"> {
 	return buildModel({

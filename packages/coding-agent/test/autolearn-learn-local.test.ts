@@ -2,15 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
 import {
 	buildMemoryToolDeveloperInstructions,
 	getMemoryRoot,
 	saveLearnedLesson,
-} from "@oh-my-pi/pi-coding-agent/memories";
-import { localBackend } from "@oh-my-pi/pi-coding-agent/memory-backend/local-backend";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { LearnTool } from "@oh-my-pi/pi-coding-agent/tools/learn";
+} from "@pk-nerdsaver-ai/pi-coding-agent/memories";
+import { localBackend } from "@pk-nerdsaver-ai/pi-coding-agent/memory-backend/local-backend";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { LearnTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/learn";
 
 Bun.env.PI_PYTHON_SKIP_CHECK = "1";
 

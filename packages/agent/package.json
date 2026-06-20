@@ -1,6 +1,6 @@
 {
 	"type": "module",
-	"name": "@oh-my-pi/pi-agent-core",
+	"name": "@pk-nerdsaver-ai/pi-agent-core",
 	"version": "16.1.7",
 	"description": "General-purpose agent with transport abstraction, state management, and attachment support",
 	"homepage": "https://omp.sh",
@@ -35,12 +35,12 @@
 		"fmt": "biome format --write ."
 	},
 	"dependencies": {
-		"@oh-my-pi/pi-ai": "catalog:",
-		"@oh-my-pi/pi-catalog": "catalog:",
-		"@oh-my-pi/pi-natives": "catalog:",
-		"@oh-my-pi/pi-utils": "catalog:",
-		"@oh-my-pi/pi-wire": "catalog:",
-		"@oh-my-pi/snapcompact": "catalog:",
+		"@pk-nerdsaver-ai/pi-ai": "catalog:",
+		"@pk-nerdsaver-ai/pi-catalog": "catalog:",
+		"@pk-nerdsaver-ai/pi-natives": "catalog:",
+		"@pk-nerdsaver-ai/pi-utils": "catalog:",
+		"@pk-nerdsaver-ai/pi-wire": "catalog:",
+		"@pk-nerdsaver-ai/snapcompact": "catalog:",
 		"@opentelemetry/api": "catalog:"
 	},
 	"devDependencies": {

@@ -15,11 +15,11 @@ import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
+import type { AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
 import {
 	ADVISOR_TRANSCRIPT_FILENAME,
 	AdvisorTranscriptRecorder,
-} from "@oh-my-pi/pi-coding-agent/advisor/transcript-recorder";
+} from "@pk-nerdsaver-ai/pi-coding-agent/advisor/transcript-recorder";
 
 interface AdvisorEntry {
 	type?: string;

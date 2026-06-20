@@ -13,7 +13,7 @@ import {
 	isCompiledBinary,
 	prompt,
 	resolveRuntimeModule,
-} from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-utils";
 import packageJson from "../../package.json" with { type: "json" };
 import tinyTitleSystemPrompt from "../prompts/system/tiny-title-system.md" with { type: "text" };
 import { resolveTinyModelDevicePreference, type TinyModelDevice, tinyModelDeviceLoadOrder } from "./device";

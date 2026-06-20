@@ -1,4 +1,4 @@
-import { $env } from "@oh-my-pi/pi-utils";
+import { $env } from "@pk-nerdsaver-ai/pi-utils";
 import { getKimiCommonHeaders } from "../registry/oauth/kimi";
 import type {
 	UsageAmount,

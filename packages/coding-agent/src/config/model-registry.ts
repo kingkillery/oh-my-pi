@@ -1,28 +1,28 @@
 import { execSync } from "node:child_process";
 import * as path from "node:path";
-import { registerCustomApi, unregisterCustomApis } from "@oh-my-pi/pi-ai/api-registry";
-import type { Api, Context, Model, ModelSpec, SimpleStreamOptions, ThinkingConfig } from "@oh-my-pi/pi-ai/types";
-import type { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { isVertexExpressOpenAIUrl } from "@oh-my-pi/pi-catalog/hosts";
-import { readModelCache } from "@oh-my-pi/pi-catalog/model-cache";
+import { registerCustomApi, unregisterCustomApis } from "@pk-nerdsaver-ai/pi-ai/api-registry";
+import type { Api, Context, Model, ModelSpec, SimpleStreamOptions, ThinkingConfig } from "@pk-nerdsaver-ai/pi-ai/types";
+import type { AssistantMessageEventStream } from "@pk-nerdsaver-ai/pi-ai/utils/event-stream";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { isVertexExpressOpenAIUrl } from "@pk-nerdsaver-ai/pi-catalog/hosts";
+import { readModelCache } from "@pk-nerdsaver-ai/pi-catalog/model-cache";
 import {
 	createModelManager,
 	type ModelManagerOptions,
 	type ModelRefreshStrategy,
-} from "@oh-my-pi/pi-catalog/model-manager";
-import { getBundledModels, getBundledProviders } from "@oh-my-pi/pi-catalog/models";
+} from "@pk-nerdsaver-ai/pi-catalog/model-manager";
+import { getBundledModels, getBundledProviders } from "@pk-nerdsaver-ai/pi-catalog/models";
 import {
 	googleAntigravityModelManagerOptions,
 	googleGeminiCliModelManagerOptions,
 	openaiCodexModelManagerOptions,
 	PROVIDER_DESCRIPTORS,
-} from "@oh-my-pi/pi-catalog/provider-models";
+} from "@pk-nerdsaver-ai/pi-catalog/provider-models";
 import {
 	collapseBuiltModelVariants,
 	getVariantAliasSources,
 	resolveVariantAlias,
-} from "@oh-my-pi/pi-catalog/variant-collapse";
+} from "@pk-nerdsaver-ai/pi-catalog/variant-collapse";
 
 // Sentinels for local-only OAuth tokens — declared inline to avoid loading
 // provider modules at startup. Must match packages/ai/src/registry/lm-studio.ts
@@ -41,9 +41,9 @@ const STARTUP_MODEL_CACHE_PROVIDER_IDS: readonly string[] = [
 	...SPECIAL_MODEL_MANAGER_PROVIDER_IDS,
 ];
 
-import type { ApiKeyResolver, FetchImpl } from "@oh-my-pi/pi-ai";
-import { registerOAuthProvider, unregisterOAuthProviders } from "@oh-my-pi/pi-ai/oauth";
-import type { OAuthCredentials, OAuthLoginCallbacks } from "@oh-my-pi/pi-ai/oauth/types";
+import type { ApiKeyResolver, FetchImpl } from "@pk-nerdsaver-ai/pi-ai";
+import { registerOAuthProvider, unregisterOAuthProviders } from "@pk-nerdsaver-ai/pi-ai/oauth";
+import type { OAuthCredentials, OAuthLoginCallbacks } from "@pk-nerdsaver-ai/pi-ai/oauth/types";
 import {
 	buildCanonicalModelIndex,
 	buildCanonicalModelOrder,
@@ -58,8 +58,8 @@ import {
 	type ModelEquivalenceConfig,
 	resolveCanonicalVariant,
 	resolveModelReference,
-} from "@oh-my-pi/pi-catalog/identity";
-import { isBunTestRuntime, isRecord, logger } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-catalog/identity";
+import { isBunTestRuntime, isRecord, logger } from "@pk-nerdsaver-ai/pi-utils";
 import { parseModelString, resolveProviderModelReference } from "../config/model-resolver";
 import type { AuthStorage, OAuthCredential } from "../session/auth-storage";
 import { type ApiKeyResolverModel, type ApiKeyResolverOptions, createApiKeyResolver } from "./api-key-resolver";

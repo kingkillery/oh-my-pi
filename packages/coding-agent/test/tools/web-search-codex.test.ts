@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import type { AuthStorage, FetchImpl } from "@oh-my-pi/pi-ai";
-import type { SearchParams } from "@oh-my-pi/pi-coding-agent/web/search/providers/base";
-import { searchCodex } from "@oh-my-pi/pi-coding-agent/web/search/providers/codex";
+import type { AuthStorage, FetchImpl } from "@pk-nerdsaver-ai/pi-ai";
+import type { SearchParams } from "@pk-nerdsaver-ai/pi-coding-agent/web/search/providers/base";
+import { searchCodex } from "@pk-nerdsaver-ai/pi-coding-agent/web/search/providers/codex";
 
 type CapturedRequest = {
 	url: string;

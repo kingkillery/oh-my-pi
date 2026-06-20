@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { KeybindingsManager } from "@oh-my-pi/pi-coding-agent/config/keybindings";
-import { setKeybindings } from "@oh-my-pi/pi-tui";
+import { KeybindingsManager } from "@pk-nerdsaver-ai/pi-coding-agent/config/keybindings";
+import { setKeybindings } from "@pk-nerdsaver-ai/pi-tui";
 import { YAML } from "bun";
 
 describe("KeybindingsManager.create", () => {

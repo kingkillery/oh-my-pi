@@ -5,8 +5,8 @@ import * as path from "node:path";
 import {
 	resolvePluginExtensionPaths,
 	resolvePluginToolPaths,
-} from "@oh-my-pi/pi-coding-agent/extensibility/plugins/loader";
-import type { InstalledPlugin, PluginManifest } from "@oh-my-pi/pi-coding-agent/extensibility/plugins/types";
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/plugins/loader";
+import type { InstalledPlugin, PluginManifest } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/plugins/types";
 
 function makePlugin(pluginPath: string, manifest: PluginManifest): InstalledPlugin {
 	return {

@@ -18,7 +18,7 @@ import { beforeEach, describe, expect, it } from "bun:test";
 import {
 	RedisSessionStorage,
 	type RedisSessionStorageClient,
-} from "@oh-my-pi/pi-coding-agent/session/redis-session-storage";
+} from "@pk-nerdsaver-ai/pi-coding-agent/session/redis-session-storage";
 
 interface FakeRedisCall {
 	method: string;

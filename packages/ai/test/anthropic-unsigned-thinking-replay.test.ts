@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { convertAnthropicMessages, streamAnthropic } from "@oh-my-pi/pi-ai/providers/anthropic";
+import { convertAnthropicMessages, streamAnthropic } from "@pk-nerdsaver-ai/pi-ai/providers/anthropic";
 import type {
 	AssistantMessage,
 	Message,
@@ -7,8 +7,8 @@ import type {
 	ModelSpec,
 	ToolResultMessage,
 	UserMessage,
-} from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+} from "@pk-nerdsaver-ai/pi-ai/types";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 
 /**
  * Regression: Anthropic-compatible reasoning endpoints often emit `thinking`

@@ -1,7 +1,7 @@
 /**
  * Run onboarding setup or install dependencies for optional features.
  */
-import { Args, Command, Flags, renderCommandHelp } from "@oh-my-pi/pi-utils/cli";
+import { Args, Command, Flags, renderCommandHelp } from "@pk-nerdsaver-ai/pi-utils/cli";
 import { parseArgs } from "../cli/args";
 import { runSetupCommand, type SetupCommandArgs, type SetupComponent } from "../cli/setup-cli";
 import { runRootCommand } from "../main";

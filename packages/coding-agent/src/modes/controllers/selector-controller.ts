@@ -1,10 +1,10 @@
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { PASTE_CODE_LOGIN_PROVIDERS } from "@oh-my-pi/pi-ai";
-import { getOAuthProviders } from "@oh-my-pi/pi-ai/oauth";
-import type { OAuthProvider } from "@oh-my-pi/pi-ai/oauth/types";
-import type { Component, OverlayHandle } from "@oh-my-pi/pi-tui";
-import { Input, Loader, Spacer, setTuiTight, Text } from "@oh-my-pi/pi-tui";
-import { getAgentDbPath, getProjectDir, normalizePathForComparison } from "@oh-my-pi/pi-utils";
+import { ThinkingLevel } from "@pk-nerdsaver-ai/pi-agent-core";
+import { PASTE_CODE_LOGIN_PROVIDERS } from "@pk-nerdsaver-ai/pi-ai";
+import { getOAuthProviders } from "@pk-nerdsaver-ai/pi-ai/oauth";
+import type { OAuthProvider } from "@pk-nerdsaver-ai/pi-ai/oauth/types";
+import type { Component, OverlayHandle } from "@pk-nerdsaver-ai/pi-tui";
+import { Input, Loader, Spacer, setTuiTight, Text } from "@pk-nerdsaver-ai/pi-tui";
+import { getAgentDbPath, getProjectDir, normalizePathForComparison } from "@pk-nerdsaver-ai/pi-utils";
 import { formatModelSelectorValue } from "../../config/model-resolver";
 import { getRoleInfo } from "../../config/model-roles";
 import { settings } from "../../config/settings";

@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import * as connectionManager from "@oh-my-pi/pi-coding-agent/ssh/connection-manager";
+import * as connectionManager from "@pk-nerdsaver-ai/pi-coding-agent/ssh/connection-manager";
 
 async function withLooseKey<T>(run: (keyPath: string) => Promise<T>): Promise<T> {
 	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-ssh-key-"));

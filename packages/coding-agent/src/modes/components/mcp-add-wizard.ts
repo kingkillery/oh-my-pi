@@ -12,8 +12,8 @@ import {
 	Text,
 	TruncatedText,
 	truncateToWidth,
-} from "@oh-my-pi/pi-tui";
-import { getMCPConfigPath, getProjectDir } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-tui";
+import { getMCPConfigPath, getProjectDir } from "@pk-nerdsaver-ai/pi-utils";
 import { validateServerName } from "../../mcp/config-writer";
 import { analyzeAuthError, discoverOAuthEndpoints } from "../../mcp/oauth-discovery";
 import type { MCPHttpServerConfig, MCPServerConfig, MCPSseServerConfig, MCPStdioServerConfig } from "../../mcp/types";

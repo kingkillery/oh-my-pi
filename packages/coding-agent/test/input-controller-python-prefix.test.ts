@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "bun:test";
-import { InputController } from "@oh-my-pi/pi-coding-agent/modes/controllers/input-controller";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
+import { InputController } from "@pk-nerdsaver-ai/pi-coding-agent/modes/controllers/input-controller";
+import type { InteractiveModeContext } from "@pk-nerdsaver-ai/pi-coding-agent/modes/types";
 
 type FakeEditor = {
 	onSubmit?: (text: string) => Promise<void>;

@@ -3,13 +3,13 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import type { Context, Message } from "@oh-my-pi/pi-ai";
+import type { Context, Message } from "@pk-nerdsaver-ai/pi-ai";
 import {
 	obfuscateMessages,
 	obfuscateProviderContext,
 	SecretObfuscator,
-} from "@oh-my-pi/pi-coding-agent/secrets/obfuscator";
-import { compileSecretRegex } from "@oh-my-pi/pi-coding-agent/secrets/regex";
+} from "@pk-nerdsaver-ai/pi-coding-agent/secrets/obfuscator";
+import { compileSecretRegex } from "@pk-nerdsaver-ai/pi-coding-agent/secrets/regex";
 import { type } from "arktype";
 
 describe("compileSecretRegex", () => {

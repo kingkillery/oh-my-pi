@@ -15,8 +15,8 @@ import { describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { commands, isSubcommand, resolveCliArgv } from "@oh-my-pi/pi-coding-agent/cli-commands";
-import { looksLikeLocalPath } from "@oh-my-pi/pi-coding-agent/commands/install";
+import { commands, isSubcommand, resolveCliArgv } from "@pk-nerdsaver-ai/pi-coding-agent/cli-commands";
+import { looksLikeLocalPath } from "@pk-nerdsaver-ai/pi-coding-agent/commands/install";
 
 describe("install command is registered as a top-level subcommand", () => {
 	test("CLI runner sees `install` as a known command", () => {
@@ -53,7 +53,7 @@ describe("looksLikeLocalPath", () => {
 	});
 
 	test("npm specs and marketplace refs are remote", () => {
-		expect(looksLikeLocalPath("@oh-my-pi/exa")).toBe(false);
+		expect(looksLikeLocalPath("@pk-nerdsaver-ai/exa")).toBe(false);
 		expect(looksLikeLocalPath("my-pkg")).toBe(false);
 		expect(looksLikeLocalPath("my-pkg@1.2.3")).toBe(false);
 		expect(looksLikeLocalPath("name@marketplace")).toBe(false);

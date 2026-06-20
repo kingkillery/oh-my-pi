@@ -3,17 +3,17 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import "@oh-my-pi/pi-coding-agent/tools/renderers";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
+import "@pk-nerdsaver-ai/pi-coding-agent/tools/renderers";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { ReadTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/read";
 import {
 	listTables,
 	parseSqlitePathCandidates,
 	parseSqliteSelector,
 	renderTable,
 	renderTableList,
-} from "@oh-my-pi/pi-coding-agent/tools/sqlite-reader";
-import { WriteTool } from "@oh-my-pi/pi-coding-agent/tools/write";
+} from "@pk-nerdsaver-ai/pi-coding-agent/tools/sqlite-reader";
+import { WriteTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/write";
 
 type ToolTextResult = {
 	content: Array<{ type: string; text?: string }>;

@@ -3,7 +3,7 @@ import {
 	analyzeAuthError,
 	discoverOAuthEndpoints,
 	extractMcpAuthServerUrl,
-} from "@oh-my-pi/pi-coding-agent/mcp/oauth-discovery";
+} from "@pk-nerdsaver-ai/pi-coding-agent/mcp/oauth-discovery";
 import { type FetchInput, mockFetch } from "./helpers/fetch-mock";
 
 describe("mcp oauth discovery", () => {

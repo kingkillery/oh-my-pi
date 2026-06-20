@@ -1,17 +1,17 @@
 import { describe, expect, test } from "bun:test";
-import { clearCustomApis } from "@oh-my-pi/pi-ai/api-registry";
-import { createMockModel, type MockContent, registerMockApi } from "@oh-my-pi/pi-ai/providers/mock";
-import { stream, streamSimple } from "@oh-my-pi/pi-ai/stream";
-import type { Api, AssistantMessage, AssistantMessageEvent, Context, Model } from "@oh-my-pi/pi-ai/types";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
+import { clearCustomApis } from "@pk-nerdsaver-ai/pi-ai/api-registry";
+import { createMockModel, type MockContent, registerMockApi } from "@pk-nerdsaver-ai/pi-ai/providers/mock";
+import { stream, streamSimple } from "@pk-nerdsaver-ai/pi-ai/stream";
+import type { Api, AssistantMessage, AssistantMessageEvent, Context, Model } from "@pk-nerdsaver-ai/pi-ai/types";
+import { AssistantMessageEventStream } from "@pk-nerdsaver-ai/pi-ai/utils/event-stream";
 import {
 	isGeminiThinkingLoopModel,
 	isLoopGuardedModel,
 	THINKING_LOOP_ERROR_MARKER,
 	ThinkingLoopDetector,
 	withGeminiThinkingLoopGuard,
-} from "@oh-my-pi/pi-ai/utils/thinking-loop";
-import { isRetryableError } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-ai/utils/thinking-loop";
+import { isRetryableError } from "@pk-nerdsaver-ai/pi-utils";
 
 function context(): Context {
 	return { systemPrompt: [], messages: [{ role: "user", content: "go", timestamp: 0 }] };

@@ -26,7 +26,7 @@ import {
 	TERMINAL,
 	Text,
 	type TextSizingScale,
-} from "@oh-my-pi/pi-tui";
+} from "@pk-nerdsaver-ai/pi-tui";
 import { DynamicBorder } from "../modes/components/dynamic-border";
 import { theme } from "../modes/theme/theme";
 

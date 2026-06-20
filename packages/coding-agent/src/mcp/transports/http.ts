@@ -4,7 +4,7 @@
  * Implements JSON-RPC 2.0 over HTTP POST with optional SSE streaming.
  * Based on MCP spec 2025-03-26.
  */
-import { logger, readSseJson, Snowflake } from "@oh-my-pi/pi-utils";
+import { logger, readSseJson, Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 import type {
 	JsonRpcError,
 	JsonRpcMessage,

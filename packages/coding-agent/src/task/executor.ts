@@ -5,10 +5,10 @@
  */
 
 import path from "node:path";
-import type { AgentEvent, AgentIdentity, AgentTelemetryConfig, ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { recordHandoff, resolveTelemetry } from "@oh-my-pi/pi-agent-core";
-import type { Api, Model, Usage } from "@oh-my-pi/pi-ai";
-import { logger, popLoopPhase, prompt, pushLoopPhase, untilAborted } from "@oh-my-pi/pi-utils";
+import type { AgentEvent, AgentIdentity, AgentTelemetryConfig, ThinkingLevel } from "@pk-nerdsaver-ai/pi-agent-core";
+import { recordHandoff, resolveTelemetry } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { Api, Model, Usage } from "@pk-nerdsaver-ai/pi-ai";
+import { logger, popLoopPhase, prompt, pushLoopPhase, untilAborted } from "@pk-nerdsaver-ai/pi-utils";
 import type { Rule } from "../capability/rule";
 import { ModelRegistry } from "../config/model-registry";
 import {

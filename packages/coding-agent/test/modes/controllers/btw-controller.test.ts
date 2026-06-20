@@ -1,10 +1,10 @@
 import { beforeAll, describe, expect, it, vi } from "bun:test";
-import type { AssistantMessage, Usage } from "@oh-my-pi/pi-ai";
-import { BtwPanelComponent } from "@oh-my-pi/pi-coding-agent/modes/components/btw-panel";
-import { BtwController } from "@oh-my-pi/pi-coding-agent/modes/controllers/btw-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { Container, type TUI } from "@oh-my-pi/pi-tui";
+import type { AssistantMessage, Usage } from "@pk-nerdsaver-ai/pi-ai";
+import { BtwPanelComponent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/btw-panel";
+import { BtwController } from "@pk-nerdsaver-ai/pi-coding-agent/modes/controllers/btw-controller";
+import { initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@pk-nerdsaver-ai/pi-coding-agent/modes/types";
+import { Container, type TUI } from "@pk-nerdsaver-ai/pi-tui";
 
 const usage: Usage = {
 	input: 0,

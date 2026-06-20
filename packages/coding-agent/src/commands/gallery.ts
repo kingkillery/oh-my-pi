@@ -1,7 +1,7 @@
 /**
  * Render every built-in tool's renderer across its lifecycle states.
  */
-import { Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { Command, Flags } from "@pk-nerdsaver-ai/pi-utils/cli";
 import { GALLERY_STATES, type GalleryState, runGalleryCommand } from "../cli/gallery-cli";
 
 export default class Gallery extends Command {

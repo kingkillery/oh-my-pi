@@ -1,5 +1,5 @@
-import { hostMatchesUrl } from "@oh-my-pi/pi-catalog/hosts";
-import { $flag, extractHttpStatusFromError, logger, structuredCloneJSON } from "@oh-my-pi/pi-utils";
+import { hostMatchesUrl } from "@pk-nerdsaver-ai/pi-catalog/hosts";
+import { $flag, extractHttpStatusFromError, logger, structuredCloneJSON } from "@pk-nerdsaver-ai/pi-utils";
 import { getEnvApiKey } from "../stream";
 import type {
 	AssistantMessage,

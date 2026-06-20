@@ -8,14 +8,14 @@ import {
 	type AgentToolContext,
 	type AgentToolResult,
 	ThinkingLevel,
-} from "@oh-my-pi/pi-agent-core";
-import { Effort, type Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { CustomTool } from "@oh-my-pi/pi-coding-agent/extensibility/custom-tools/types";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import type { OutputMeta } from "@oh-my-pi/pi-coding-agent/tools/output-meta";
+} from "@pk-nerdsaver-ai/pi-agent-core";
+import { Effort, type Model } from "@pk-nerdsaver-ai/pi-ai";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import type { CustomTool } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/custom-tools/types";
+import { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import type { OutputMeta } from "@pk-nerdsaver-ai/pi-coding-agent/tools/output-meta";
 import { type } from "arktype";
 
 function createModel(): Model<"openai-responses"> {

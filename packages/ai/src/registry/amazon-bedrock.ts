@@ -1,4 +1,4 @@
-import { $env } from "@oh-my-pi/pi-utils";
+import { $env } from "@pk-nerdsaver-ai/pi-utils";
 import type { ProviderDefinition } from "./types";
 
 export const amazonBedrockProvider = {

@@ -1,0 +1,10 @@
+name = "oh-my-pi-install-redirect"
+main = "worker.js"
+compatibility_date = "2026-06-19"
+
+routes = [
+	{ pattern = "oh-my-pi.pkking.computer/install.sh", custom_domain = true },
+	{ pattern = "oh-my-pi.pkking.computer/install.ps1", custom_domain = true },
+	{ pattern = "oh-my-pi.pkking.computer/install", custom_domain = true },
+	{ pattern = "oh-my-pi.pkking.computer", custom_domain = true },
+]

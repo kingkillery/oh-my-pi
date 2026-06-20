@@ -1,4 +1,4 @@
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import { ANTHROPIC_THINKING, mapAnthropicToolChoice } from "../stream";
 import type { Api, Context, FetchImpl, Model, ModelSpec, SimpleStreamOptions } from "../types";
 import { AssistantMessageEventStream } from "../utils/event-stream";

@@ -1,5 +1,5 @@
-import type { AgentTool, AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { logger, untilAborted } from "@oh-my-pi/pi-utils";
+import type { AgentTool, AgentToolResult } from "@pk-nerdsaver-ai/pi-agent-core";
+import { logger, untilAborted } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
 import { ensureBankExists } from "../hindsight/bank";
 import reflectDescription from "../prompts/tools/reflect.md" with { type: "text" };

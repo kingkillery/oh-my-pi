@@ -1,7 +1,7 @@
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { THINKING_LOOP_ERROR_MARKER } from "@oh-my-pi/pi-ai/utils/thinking-loop";
-import { type Component, Loader, TERMINAL } from "@oh-my-pi/pi-tui";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import type { ImageContent } from "@pk-nerdsaver-ai/pi-ai";
+import { THINKING_LOOP_ERROR_MARKER } from "@pk-nerdsaver-ai/pi-ai/utils/thinking-loop";
+import { type Component, Loader, TERMINAL } from "@pk-nerdsaver-ai/pi-tui";
+import { INTENT_FIELD } from "@pk-nerdsaver-ai/pi-wire";
 import { extractTextContent } from "../../commit/utils";
 import { settings } from "../../config/settings";
 import { getFileSnapshotStore } from "../../edit/file-snapshot-store";

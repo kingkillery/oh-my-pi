@@ -3,7 +3,7 @@ import {
 	buildStealthInjectionScriptForTest,
 	configureUserAgentTargetsForTest,
 	targetSupportsUserAgentOverrideForTest,
-} from "@oh-my-pi/pi-coding-agent/tools/browser/launch";
+} from "@pk-nerdsaver-ai/pi-coding-agent/tools/browser/launch";
 import type { Browser, CDPSession, Target } from "puppeteer-core";
 
 type SentCommand = {

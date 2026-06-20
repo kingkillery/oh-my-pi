@@ -7,19 +7,19 @@
 
 import * as os from "node:os";
 import * as path from "node:path";
-import type { ToolCallContext } from "@oh-my-pi/pi-agent-core";
-import type { Ellipsis } from "@oh-my-pi/pi-natives";
-import type { Component } from "@oh-my-pi/pi-tui";
-import { getKeybindings, replaceTabs, truncateToWidth } from "@oh-my-pi/pi-tui";
-import { pluralize } from "@oh-my-pi/pi-utils";
+import type { ToolCallContext } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { Ellipsis } from "@pk-nerdsaver-ai/pi-natives";
+import type { Component } from "@pk-nerdsaver-ai/pi-tui";
+import { getKeybindings, replaceTabs, truncateToWidth } from "@pk-nerdsaver-ai/pi-tui";
+import { pluralize } from "@pk-nerdsaver-ai/pi-utils";
 import { formatKeyHints, type KeyId } from "../config/keybindings";
 import { settings } from "../config/settings";
 import type { Theme } from "../modes/theme/theme";
 import { Hasher } from "../tui/utils";
 import { formatDimensionNote, type ResizedImage } from "../utils/image-resize";
 
-export { Ellipsis } from "@oh-my-pi/pi-natives";
-export { replaceTabs, truncateToWidth, wrapTextWithAnsi } from "@oh-my-pi/pi-tui";
+export { Ellipsis } from "@pk-nerdsaver-ai/pi-natives";
+export { replaceTabs, truncateToWidth, wrapTextWithAnsi } from "@pk-nerdsaver-ai/pi-tui";
 
 // =============================================================================
 // Standardized Display Constants
@@ -119,7 +119,7 @@ export function getDomain(url: string): string {
 // Formatting Utilities
 // =============================================================================
 
-export { formatAge, formatBytes, formatCount, formatDuration, pluralize } from "@oh-my-pi/pi-utils";
+export { formatAge, formatBytes, formatCount, formatDuration, pluralize } from "@pk-nerdsaver-ai/pi-utils";
 
 // =============================================================================
 // Theme Helper Utilities

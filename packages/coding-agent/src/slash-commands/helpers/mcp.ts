@@ -1,4 +1,4 @@
-import { getMCPConfigPath, logger } from "@oh-my-pi/pi-utils";
+import { getMCPConfigPath, logger } from "@pk-nerdsaver-ai/pi-utils";
 import { connectToServer, disconnectServer, listPrompts, listResources, listTools } from "../../mcp/client";
 import {
 	addMCPServer,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { renderHtmlToText } from "@oh-my-pi/pi-coding-agent/tools/fetch";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { renderHtmlToText } from "@pk-nerdsaver-ai/pi-coding-agent/tools/fetch";
 import { asGlobalFetch } from "../helpers/fetch-mock";
 
 /**

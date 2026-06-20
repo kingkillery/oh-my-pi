@@ -1,6 +1,6 @@
-import type { Usage } from "@oh-my-pi/pi-ai";
-import type { Component } from "@oh-my-pi/pi-tui";
-import { formatNumber } from "@oh-my-pi/pi-utils";
+import type { Usage } from "@pk-nerdsaver-ai/pi-ai";
+import type { Component } from "@pk-nerdsaver-ai/pi-tui";
+import { formatNumber } from "@pk-nerdsaver-ai/pi-utils";
 import { theme } from "../../modes/theme/theme";
 
 /**

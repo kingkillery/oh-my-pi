@@ -12,17 +12,17 @@
  * helper itself is exercised directly.
  */
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import type { AuthStorage, FetchImpl } from "@oh-my-pi/pi-ai";
-import type { AgentStorage } from "@oh-my-pi/pi-coding-agent/session/agent-storage";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
-import { WebSearchTool } from "@oh-my-pi/pi-coding-agent/web/search";
-import * as provider from "@oh-my-pi/pi-coding-agent/web/search/provider";
-import { searchAnthropic } from "@oh-my-pi/pi-coding-agent/web/search/providers/anthropic";
-import type { SearchParams } from "@oh-my-pi/pi-coding-agent/web/search/providers/base";
-import { searchBrave } from "@oh-my-pi/pi-coding-agent/web/search/providers/brave";
-import { withHardTimeout } from "@oh-my-pi/pi-coding-agent/web/search/providers/utils";
-import type { SearchProviderId, SearchResponse } from "@oh-my-pi/pi-coding-agent/web/search/types";
+import type { AuthStorage, FetchImpl } from "@pk-nerdsaver-ai/pi-ai";
+import type { AgentStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-storage";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { ToolAbortError } from "@pk-nerdsaver-ai/pi-coding-agent/tools/tool-errors";
+import { WebSearchTool } from "@pk-nerdsaver-ai/pi-coding-agent/web/search";
+import * as provider from "@pk-nerdsaver-ai/pi-coding-agent/web/search/provider";
+import { searchAnthropic } from "@pk-nerdsaver-ai/pi-coding-agent/web/search/providers/anthropic";
+import type { SearchParams } from "@pk-nerdsaver-ai/pi-coding-agent/web/search/providers/base";
+import { searchBrave } from "@pk-nerdsaver-ai/pi-coding-agent/web/search/providers/brave";
+import { withHardTimeout } from "@pk-nerdsaver-ai/pi-coding-agent/web/search/providers/utils";
+import type { SearchProviderId, SearchResponse } from "@pk-nerdsaver-ai/pi-coding-agent/web/search/types";
 
 const FAKE_SESSION = {} as ToolSession;
 const fakeStorage = {

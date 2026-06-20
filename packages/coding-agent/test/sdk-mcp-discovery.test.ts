@@ -2,17 +2,17 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { AuthStorage, Effort, type Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { CustomTool } from "@oh-my-pi/pi-coding-agent/extensibility/custom-tools/types";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TOOL_DISCOVERY_AUTO_THRESHOLD } from "@oh-my-pi/pi-coding-agent/tool-discovery/mode";
-import { Snowflake } from "@oh-my-pi/pi-utils";
+import { ThinkingLevel } from "@pk-nerdsaver-ai/pi-agent-core";
+import { AuthStorage, Effort, type Model } from "@pk-nerdsaver-ai/pi-ai";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
+import { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import type { CustomTool } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/custom-tools/types";
+import { createAgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { TOOL_DISCOVERY_AUTO_THRESHOLD } from "@pk-nerdsaver-ai/pi-coding-agent/tool-discovery/mode";
+import { Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
 
 function createMcpCustomTool(name: string, serverName: string, mcpToolName: string): CustomTool {

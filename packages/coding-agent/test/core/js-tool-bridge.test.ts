@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "bun:test";
-import type { AgentTool, AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { callSessionTool } from "@oh-my-pi/pi-coding-agent/eval/js/tool-bridge";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import type { AgentTool, AgentToolResult } from "@pk-nerdsaver-ai/pi-agent-core";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { callSessionTool } from "@pk-nerdsaver-ai/pi-coding-agent/eval/js/tool-bridge";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { INTENT_FIELD } from "@pk-nerdsaver-ai/pi-wire";
 import { type } from "arktype";
 
 function createTool(

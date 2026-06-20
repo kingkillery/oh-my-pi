@@ -1,4 +1,4 @@
-import { Args, Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { Args, Command, Flags } from "@pk-nerdsaver-ai/pi-utils/cli";
 import { runBenchCommand } from "../cli/bench-cli";
 
 export default class Bench extends Command {
