@@ -7,6 +7,7 @@ import * as executorModule from "@pk-nerdsaver-ai/pi-coding-agent/task/executor"
 import type { AgentDefinition, SingleResult, TaskParams } from "@pk-nerdsaver-ai/pi-coding-agent/task/types";
 import { taskItemSchema, taskSchema } from "@pk-nerdsaver-ai/pi-coding-agent/task/types";
 import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { type } from "arktype";
 
 // Contract: `cwd` lets each task spawn run in its own working directory.
 // Flat calls carry it top-level; batch calls carry it per item. Missing `cwd`
@@ -60,8 +61,8 @@ describe("task cwd parameter", () => {
 				assignment: "Map the module.",
 				cwd: "/custom/path",
 			});
-			expect(parsed).not.toBeInstanceOf(Error);
-			if (!(parsed instanceof Error)) {
+			expect(parsed).not.toBeInstanceOf(type.errors);
+			if (!(parsed instanceof type.errors)) {
 				expect(parsed.cwd).toBe("/custom/path");
 			}
 		});
@@ -72,8 +73,8 @@ describe("task cwd parameter", () => {
 				assignment: "Work in subdir",
 				cwd: "./packages/web",
 			});
-			expect(itemParsed).not.toBeInstanceOf(Error);
-			if (!(itemParsed instanceof Error)) {
+			expect(itemParsed).not.toBeInstanceOf(type.errors);
+			if (!(itemParsed instanceof type.errors)) {
 				expect(itemParsed.cwd).toBe("./packages/web");
 			}
 		});
@@ -83,8 +84,8 @@ describe("task cwd parameter", () => {
 				agent: "explore",
 				assignment: "Map the module.",
 			});
-			expect(parsed).not.toBeInstanceOf(Error);
-			if (!(parsed instanceof Error)) {
+			expect(parsed).not.toBeInstanceOf(type.errors);
+			if (!(parsed instanceof type.errors)) {
 				expect(parsed.cwd).toBeUndefined();
 			}
 		});
@@ -94,8 +95,8 @@ describe("task cwd parameter", () => {
 				id: "A",
 				assignment: "Work here",
 			});
-			expect(itemParsed).not.toBeInstanceOf(Error);
-			if (!(itemParsed instanceof Error)) {
+			expect(itemParsed).not.toBeInstanceOf(type.errors);
+			if (!(itemParsed instanceof type.errors)) {
 				expect(itemParsed.cwd).toBeUndefined();
 			}
 		});

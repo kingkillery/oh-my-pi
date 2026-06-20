@@ -1254,7 +1254,7 @@ export const SETTINGS_SCHEMA = {
 
 	"loop.mode": {
 		type: "enum",
-		values: ["prompt", "compact", "reset"] as const,
+		values: ["prompt", "compact", "reset", "spiral"] as const,
 		default: "prompt",
 		ui: {
 			tab: "interaction",
@@ -1273,6 +1273,12 @@ export const SETTINGS_SCHEMA = {
 					description: "Compact the session context, then re-submit the prompt",
 				},
 				{ value: "reset", label: "Reset", description: "Start a new session, then re-submit the prompt" },
+				{
+					value: "spiral",
+					label: "Spiral",
+					description:
+						"Run a verifier/synthesis step between iterations and feed the reflection into the next prompt; stop when the objective is complete",
+				},
 			],
 		},
 	},

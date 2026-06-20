@@ -148,6 +148,7 @@ import {
 	type LoopLimitRuntime,
 	parseLoopLimitArgs,
 } from "./loop-limit";
+import * as loopSynthesis from "./loop-synthesis";
 import { OAuthManualInputManager } from "./oauth-manual-input";
 import type { ObservableSession } from "./session-observer-registry";
 import { SessionObserverRegistry } from "./session-observer-registry";
@@ -397,6 +398,10 @@ export class InteractiveMode implements InteractiveModeContext {
 	loopPrompt: string | undefined = undefined;
 	loopLimit: LoopLimitRuntime | undefined = undefined;
 	#loopAutoSubmitTimer: NodeJS.Timeout | undefined;
+	/** Spiral-loop synthesis state: the previous reflection and how many consecutive
+	 *  iterations it has repeated unchanged. Two stalls in a row stops the loop. */
+	#loopSpiralLastReflection: string | undefined;
+	#loopSpiralStallCount = 0;
 	#todoAutoClearTimer: NodeJS.Timeout | undefined;
 	#modelCycleClearTimer: NodeJS.Timeout | undefined;
 	todoPhases: TodoPhase[] = [];
@@ -1069,20 +1074,20 @@ export class InteractiveMode implements InteractiveModeContext {
 		return this.session.isStreaming || this.session.isCompacting || this.session.hasPostPromptWork;
 	}
 
-	#submitLoopPromptWhenReady(prompt: string): void {
+	#submitLoopPromptWhenReady(prompt: string, submitText: string = prompt): void {
 		if (!this.loopModeEnabled || this.loopPrompt !== prompt || !this.onInputCallback) return;
 		if (isLoopDurationExpired(this.loopLimit)) {
 			this.disableLoopMode("Loop time limit reached. Loop mode disabled.");
 			return;
 		}
 		if (this.#isAutoSubmitBlocked()) {
-			this.#deferLoopAutoSubmit(() => this.#submitLoopPromptWhenReady(prompt));
+			this.#deferLoopAutoSubmit(() => this.#submitLoopPromptWhenReady(prompt, submitText));
 			return;
 		}
-		this.onInputCallback(this.startPendingSubmission({ text: prompt }));
+		this.onInputCallback(this.startPendingSubmission({ text: submitText }));
 	}
 
-	async #runLoopIteration(action: "prompt" | "compact" | "reset", prompt: string): Promise<void> {
+	async #runLoopIteration(action: "prompt" | "compact" | "reset" | "spiral", prompt: string): Promise<void> {
 		if (!this.loopModeEnabled || this.loopPrompt !== prompt || !this.onInputCallback) return;
 		if (this.#isAutoSubmitBlocked()) {
 			this.#deferLoopAutoSubmit(() => {
@@ -1100,8 +1105,54 @@ export class InteractiveMode implements InteractiveModeContext {
 			await this.handleCompactCommand();
 		} else if (action === "reset") {
 			await this.handleClearCommand();
+		} else if (action === "spiral") {
+			await this.#runLoopSpiralIteration(prompt);
+			return;
 		}
 		this.#submitLoopPromptWhenReady(prompt);
+	}
+
+	/**
+	 * Spiral iteration: grade the latest turn against the immutable objective, then
+	 * re-submit the objective with the synthesized reflection appended. Stops the
+	 * loop when the objective is complete or when progress stalls. A synthesis
+	 * failure degrades to a plain re-submit so the loop never silently dies.
+	 */
+	async #runLoopSpiralIteration(prompt: string): Promise<void> {
+		let result: loopSynthesis.LoopSynthesisResult;
+		try {
+			result = await loopSynthesis.runLoopSynthesis(this.session, { objective: prompt });
+		} catch (err) {
+			logger.warn("Loop synthesis failed; re-submitting objective without reflection", {
+				error: err instanceof Error ? err.message : String(err),
+			});
+			this.#submitLoopPromptWhenReady(prompt);
+			return;
+		}
+		// The async synthesis call may have outlived the loop: the user could have
+		// typed a new prompt, paused, or disabled the loop. Re-check before acting.
+		if (!this.loopModeEnabled || this.loopPrompt !== prompt || !this.onInputCallback) return;
+
+		if (result.complete) {
+			this.disableLoopMode("Loop objective complete. Loop mode disabled.");
+			return;
+		}
+
+		// No-progress detection: when the reflection repeats unchanged across
+		// consecutive iterations the loop is stuck — stop instead of burning turns.
+		const normalized = result.reflection.trim();
+		if (normalized && normalized === this.#loopSpiralLastReflection) {
+			this.#loopSpiralStallCount += 1;
+		} else {
+			this.#loopSpiralStallCount = 0;
+		}
+		this.#loopSpiralLastReflection = normalized || undefined;
+		if (this.#loopSpiralStallCount >= 2) {
+			this.disableLoopMode("Loop made no progress across iterations. Loop mode disabled.");
+			return;
+		}
+
+		this.#submitLoopPromptWhenReady(prompt, loopSynthesis.composeSpiralPrompt(prompt, result.reflection));
 	}
 
 	disableLoopMode(message = "Loop mode disabled."): void {
@@ -1109,6 +1160,7 @@ export class InteractiveMode implements InteractiveModeContext {
 		this.loopModeEnabled = false;
 		this.loopPrompt = undefined;
 		this.loopLimit = undefined;
+		this.#resetLoopSpiralState();
 		this.#cancelLoopAutoSubmit();
 		this.statusLine.setLoopModeStatus(undefined);
 		this.updateEditorTopBorder();
@@ -1125,7 +1177,13 @@ export class InteractiveMode implements InteractiveModeContext {
 	 */
 	pauseLoop(): void {
 		this.loopPrompt = undefined;
+		this.#resetLoopSpiralState();
 		this.#cancelLoopAutoSubmit();
+	}
+
+	#resetLoopSpiralState(): void {
+		this.#loopSpiralLastReflection = undefined;
+		this.#loopSpiralStallCount = 0;
 	}
 
 	async handleLoopCommand(args = ""): Promise<string | undefined> {
