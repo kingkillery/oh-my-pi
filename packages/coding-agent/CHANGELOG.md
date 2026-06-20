@@ -6,6 +6,7 @@
 
 - Added persistent background agent sessions with /background promotion and a switcher.
 - Added `omp bg` command to launch the background agent switcher directly from the terminal.
+- Added per-spawn `cwd` support for background task agents so parallel agents can run from distinct working directories.
 
 ### Fixed
 

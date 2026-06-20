@@ -85,6 +85,7 @@ export const taskItemSchema = type({
 	"description?": "string",
 	"role?": ROLE_INPUT_SCHEMA,
 	assignment: "string",
+	"cwd?": "string",
 	"+": "delete",
 });
 const taskItemSchemaIsolated = type({
@@ -93,6 +94,7 @@ const taskItemSchemaIsolated = type({
 	"role?": ROLE_INPUT_SCHEMA,
 	assignment: "string",
 	"isolated?": "boolean",
+	"cwd?": "string",
 	"+": "delete",
 });
 
@@ -108,6 +110,8 @@ export interface TaskItem {
 	assignment?: string;
 	/** Run this spawn in an isolated worktree (batch form; flat form carries it top-level). */
 	isolated?: boolean;
+	/** Working directory for this spawn; defaults to parent session cwd. */
+	cwd?: string;
 }
 
 export const taskSchema = type({
@@ -117,6 +121,7 @@ export const taskSchema = type({
 	"role?": ROLE_INPUT_SCHEMA,
 	assignment: "string",
 	"isolated?": "boolean",
+	"cwd?": "string",
 	"+": "delete",
 });
 const taskSchemaNoIsolation = type({
@@ -125,6 +130,7 @@ const taskSchemaNoIsolation = type({
 	"description?": "string",
 	"role?": ROLE_INPUT_SCHEMA,
 	assignment: "string",
+	"cwd?": "string",
 	"+": "delete",
 });
 const taskSchemaBatch = type({
@@ -176,6 +182,8 @@ export interface TaskParams {
 	context?: string;
 	/** Run in an isolated worktree (flat form; per-item in batch form). */
 	isolated?: boolean;
+	/** Working directory override for this spawn (flat form); defaults to parent session cwd. */
+	cwd?: string;
 }
 
 /**
