@@ -61,10 +61,10 @@ describe("SessionSelectorComponent background instances", () => {
 	it("shows the background-specific empty state", () => {
 		const rendered = renderPlain([createSession("normal")]);
 
-		expect(rendered).toContain("No background agents yet. Run /background from a session to add one.");
+		expect(rendered).toContain("No background agents yet. Type a query and press Enter to launch one.");
 	});
 
-	it("does not wire delete for background instances", () => {
+	it("wires delete for background instances", () => {
 		const onDelete = vi.fn(async () => true);
 		const selector = new SessionSelectorComponent(
 			[createSession("background", true)],
@@ -76,7 +76,6 @@ describe("SessionSelectorComponent background instances", () => {
 
 		selector.handleInput("\x1b[3~");
 
-		expect(onDelete).not.toHaveBeenCalled();
-		expect(selector.render(140).join("\n")).not.toContain("Delete session?");
+		expect(selector.render(140).join("\n")).toContain("Delete session?");
 	});
 });
