@@ -11,6 +11,7 @@ set -e
 #   -r <ref>       Shorthand for --ref
 
 REPO="kingkillery/oh-my-pi"
+DIST_BASE="${OMP_DIST_BASE:-https://oh-my-pi.pkking.computer}"
 PACKAGE="@pk-nerdsaver-ai/pi-coding-agent"
 INSTALL_DIR="${PI_INSTALL_DIR:-$HOME/.local/bin}"
 MIN_BUN_VERSION="1.3.14"
@@ -202,31 +203,25 @@ install_binary() {
     esac
 
     BINARY="omp-${PLATFORM}-${ARCH}"
-    # Get release tag
+    # Resolve version: an explicit --ref pins the tag; otherwise ask the
+    # distribution endpoint (Cloudflare Worker -> private Hugging Face repo) for
+    # the latest tag. No GitHub dependency.
     if [ -n "$REF" ]; then
-        echo "Fetching release $REF..."
-        if RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/tags/${REF}"); then
-            LATEST=$(echo "$RELEASE_JSON" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
-        else
-            echo "Release tag not found: $REF"
-            echo "For branch/commit installs, use --source with --ref."
-            exit 1
-        fi
+        LATEST="$REF"
     else
-        echo "Fetching latest release..."
-        RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest")
-        LATEST=$(echo "$RELEASE_JSON" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+        echo "Fetching latest version..."
+        LATEST=$(curl -fsSL "${DIST_BASE}/version" | tr -d '[:space:]')
     fi
 
     if [ -z "$LATEST" ]; then
-        echo "Failed to fetch release tag"
+        echo "Failed to resolve version"
         exit 1
     fi
     echo "Using version: $LATEST"
 
     mkdir -p "$INSTALL_DIR"
-    # Download binary
-    BINARY_URL="https://github.com/${REPO}/releases/download/${LATEST}/${BINARY}"
+    # Download binary from the distribution endpoint.
+    BINARY_URL="${DIST_BASE}/bin/${LATEST}/${BINARY}"
     echo "Downloading ${BINARY}..."
     curl -fsSL "$BINARY_URL" -o "${INSTALL_DIR}/omp"
     chmod +x "${INSTALL_DIR}/omp"

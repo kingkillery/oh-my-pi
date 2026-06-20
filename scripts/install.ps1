@@ -17,6 +17,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $Repo = "kingkillery/oh-my-pi"
+$DistBase = if ($env:OMP_DIST_BASE) { $env:OMP_DIST_BASE } else { "https://oh-my-pi.pkking.computer" }
 $Package = "@pk-nerdsaver-ai/pi-coding-agent"
 $InstallDir = if ($env:PI_INSTALL_DIR) { $env:PI_INSTALL_DIR } else { "$env:LOCALAPPDATA\omp" }
 $BinaryName = "omp-windows-x64.exe"
@@ -236,28 +237,24 @@ function Install-ViaBun {
 }
 
 function Install-Binary {
+    # Resolve version: an explicit -Ref pins the tag; otherwise ask the
+    # distribution endpoint (Cloudflare Worker -> private Hugging Face repo).
     if ($Ref) {
-        Write-Host "Fetching release $Ref..."
-        try {
-            $Release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/tags/$Ref"
-        } catch {
-            throw "Release tag not found: $Ref`nFor branch/commit installs, use -Source with -Ref."
-        }
+        $Latest = $Ref
     } else {
-        Write-Host "Fetching latest release..."
-        $Release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest"
+        Write-Host "Fetching latest version..."
+        $Latest = (Invoke-RestMethod -Uri "$DistBase/version").ToString().Trim()
     }
 
-    $Latest = $Release.tag_name
     if (-not $Latest) {
-        throw "Failed to fetch release tag"
+        throw "Failed to resolve version"
     }
     Write-Host "Using version: $Latest"
 
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 
-    # Download binary
-    $BinaryUrl = "https://github.com/$Repo/releases/download/$Latest/$BinaryName"
+    # Download binary from the distribution endpoint (no GitHub dependency).
+    $BinaryUrl = "$DistBase/bin/$Latest/$BinaryName"
     Write-Host "Downloading $BinaryName..."
     $OutPath = Join-Path $InstallDir "omp.exe"
     Invoke-WebRequest -Uri $BinaryUrl -OutFile $OutPath

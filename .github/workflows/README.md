@@ -27,10 +27,11 @@ Publishing to npm and creating GitHub Releases do **not** require Actions or bil
   its own platform cleanly; full multi-platform output needs a cross toolchain
   (`zig` + `cargo-zigbuild` for linux, `cargo-xwin` for win32-msvc) and a macOS host
   (or `osxcross`) for the darwin targets.
-- **Publish**: `bun scripts/ci-release-publish.ts` packs and `npm publish`es each
-  package locally (npm auth via `npm login`).
-- **GitHub Release + binaries**: build with `bun scripts/ci-release-build-binaries.ts`
-  for the targets you can produce, then upload with `gh release create <tag> <files>`
-  (the `gh` CLI is already authed; no Actions involved).
+- **Distribution (binaries)**: built locally and published to a **private Hugging
+  Face repo**, served by the Cloudflare Worker in `infra/install-redirect/` — no
+  GitHub Releases, no Actions, no billing. Run `bun scripts/publish-binaries-hf.ts`.
+- **(Optional) npm**: `bun scripts/ci-release-publish.ts` packs + `npm publish`es
+  locally (needs all-platform native addons).
 
+**Full runbook:** [`infra/install-redirect/README.md`](../../infra/install-redirect/README.md).
 See the repo root `AGENTS.md` for package/release conventions.

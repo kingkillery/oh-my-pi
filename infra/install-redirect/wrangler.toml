@@ -2,9 +2,18 @@ name = "oh-my-pi-install-redirect"
 main = "worker.js"
 compatibility_date = "2026-06-19"
 
+# Custom-domain route attaches the Worker to the whole hostname, so it serves every
+# path: /install.sh, /install.ps1, /version, and /bin/<tag>/<binary>.
 routes = [
-	{ pattern = "oh-my-pi.pkking.computer/install.sh", custom_domain = true },
-	{ pattern = "oh-my-pi.pkking.computer/install.ps1", custom_domain = true },
-	{ pattern = "oh-my-pi.pkking.computer/install", custom_domain = true },
 	{ pattern = "oh-my-pi.pkking.computer", custom_domain = true },
 ]
+
+[vars]
+# Private Hugging Face repo that stores the release binaries (free storage + egress).
+HF_REPO = "kingkillery/oh-my-pi-binaries"
+# "models" (default) or "datasets".
+HF_REPO_TYPE = "models"
+
+# HF_TOKEN is a SECRET — never commit it. Set it once with:
+#   wrangler secret put HF_TOKEN
+# Use a fine-grained, read-only token scoped to the binaries repo.
