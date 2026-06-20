@@ -67,7 +67,7 @@
     },
     "packages/coding-agent": {
       "name": "@pk-nerdsaver-ai/pi-coding-agent",
-      "version": "16.0.7",
+      "version": "16.0.8",
       "bin": {
         "omp": "dist/cli.js",
       },
@@ -281,7 +281,7 @@
     },
     "packages/utils": {
       "name": "@pk-nerdsaver-ai/pi-utils",
-      "version": "16.0.6",
+      "version": "16.0.8",
       "dependencies": {
         "@pk-nerdsaver-ai/pi-natives": "catalog:",
         "beautiful-mermaid": "catalog:",
@@ -343,11 +343,11 @@
     "@pk-nerdsaver-ai/pi-agent-core": "16.0.6",
     "@pk-nerdsaver-ai/pi-ai": "16.0.6",
     "@pk-nerdsaver-ai/pi-catalog": "16.0.6",
-    "@pk-nerdsaver-ai/pi-coding-agent": "16.0.7",
+    "@pk-nerdsaver-ai/pi-coding-agent": "16.0.8",
     "@pk-nerdsaver-ai/pi-mnemopi": "16.0.6",
     "@pk-nerdsaver-ai/pi-natives": "16.0.6",
     "@pk-nerdsaver-ai/pi-tui": "16.0.6",
-    "@pk-nerdsaver-ai/pi-utils": "16.0.6",
+    "@pk-nerdsaver-ai/pi-utils": "16.0.8",
     "@pk-nerdsaver-ai/pi-wire": "16.0.6",
     "@pk-nerdsaver-ai/snapcompact": "16.0.6",
     "@puppeteer/browsers": "^3.0.4",
