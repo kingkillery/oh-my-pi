@@ -1,16 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
 import { scheduler } from "node:timers/promises";
-import { Agent, type AgentMessage, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import { z } from "@oh-my-pi/pi-ai";
-import { createMockModel, type MockModel, type MockResponse } from "@oh-my-pi/pi-ai/providers/mock";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { type SettingPath, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, type AgentMessage, type AgentTool } from "@pk-nerdsaver-ai/pi-agent-core";
+import { z } from "@pk-nerdsaver-ai/pi-ai";
+import { createMockModel, type MockModel, type MockResponse } from "@pk-nerdsaver-ai/pi-ai/providers/mock";
+import { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
+import { type SettingPath, Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { AgentSession, type AgentSessionEvent } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { AuthStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/auth-storage";
+import { convertToLlm } from "@pk-nerdsaver-ai/pi-coding-agent/session/messages";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { TempDir } from "@pk-nerdsaver-ai/pi-utils";
 
 const recordToolSchema = z.object({ value: z.string() });
 

@@ -3,9 +3,9 @@ import {
 	type InputItem,
 	type RequestBody,
 	transformRequestBody,
-} from "@oh-my-pi/pi-ai/providers/openai-codex/request-transformer";
-import { streamOpenAICodexResponses } from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
-import type { Context, FetchImpl } from "@oh-my-pi/pi-ai/types";
+} from "@pk-nerdsaver-ai/pi-ai/providers/openai-codex/request-transformer";
+import { streamOpenAICodexResponses } from "@pk-nerdsaver-ai/pi-ai/providers/openai-codex-responses";
+import type { Context, FetchImpl } from "@pk-nerdsaver-ai/pi-ai/types";
 import { createCodexModel } from "./helpers";
 
 function createCodexTestToken(accountId = "acc_test"): string {

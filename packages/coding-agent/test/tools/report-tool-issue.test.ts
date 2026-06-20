@@ -1,12 +1,12 @@
 import { Database } from "bun:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
 import {
 	__resetAutoQaFlushStateForTests,
 	flushGrievances,
 	isAutoQaEnabled,
-} from "@oh-my-pi/pi-coding-agent/tools/report-tool-issue";
-import * as piUtils from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-coding-agent/tools/report-tool-issue";
+import * as piUtils from "@pk-nerdsaver-ai/pi-utils";
 import { mockFetch } from "../helpers/fetch-mock";
 
 function openTempDb(): Database {

@@ -16,8 +16,8 @@
  * (batch request, diagnostics) lives on the instance and isn't safe to
  * share across concurrent edit tools.
  */
-import { Filesystem, NotFoundError, type WriteResult } from "@oh-my-pi/hashline";
-import { isEnoent } from "@oh-my-pi/pi-utils";
+import { Filesystem, NotFoundError, type WriteResult } from "@pk-nerdsaver-ai/hashline";
+import { isEnoent } from "@pk-nerdsaver-ai/pi-utils";
 import type { FileDiagnosticsResult, WritethroughCallback, WritethroughDeferredHandle } from "../../lsp";
 import type { ToolSession } from "../../tools";
 import { assertEditableFileContent } from "../../tools/auto-generated-guard";

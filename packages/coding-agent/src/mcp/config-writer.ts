@@ -5,7 +5,7 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { isEnoent } from "@oh-my-pi/pi-utils";
+import { isEnoent } from "@pk-nerdsaver-ai/pi-utils";
 import { invalidate as invalidateFsCache } from "../capability/fs";
 
 import { validateServerConfig } from "./config";

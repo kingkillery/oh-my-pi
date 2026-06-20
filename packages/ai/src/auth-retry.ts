@@ -1,4 +1,4 @@
-import { extractHttpStatusFromError } from "@oh-my-pi/pi-utils";
+import { extractHttpStatusFromError } from "@pk-nerdsaver-ai/pi-utils";
 import type { OAuthAccess } from "./auth-storage";
 import { isUsageLimitError } from "./rate-limit-utils";
 

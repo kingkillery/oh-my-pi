@@ -2,15 +2,15 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { completeSimple, Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getThemeByName } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { InspectImageTool } from "@oh-my-pi/pi-coding-agent/tools/inspect-image";
-import { inspectImageToolRenderer } from "@oh-my-pi/pi-coding-agent/tools/inspect-image-renderer";
-import { toolRenderers } from "@oh-my-pi/pi-coding-agent/tools/renderers";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+import type { completeSimple, Model } from "@pk-nerdsaver-ai/pi-ai";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { getThemeByName } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { InspectImageTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/inspect-image";
+import { inspectImageToolRenderer } from "@pk-nerdsaver-ai/pi-coding-agent/tools/inspect-image-renderer";
+import { toolRenderers } from "@pk-nerdsaver-ai/pi-coding-agent/tools/renderers";
+import { sanitizeText } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
 
 const TINY_PNG_BASE64 =

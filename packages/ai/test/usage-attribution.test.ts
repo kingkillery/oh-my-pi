@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { applyAnthropicUsageExtras } from "@oh-my-pi/pi-ai/providers/anthropic";
-import { parseChunkUsage } from "@oh-my-pi/pi-ai/providers/openai-completions";
-import { calculateOpenAIUsageAccounting } from "@oh-my-pi/pi-ai/providers/openai-shared";
-import type { Model, Usage } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import { applyAnthropicUsageExtras } from "@pk-nerdsaver-ai/pi-ai/providers/anthropic";
+import { parseChunkUsage } from "@pk-nerdsaver-ai/pi-ai/providers/openai-completions";
+import { calculateOpenAIUsageAccounting } from "@pk-nerdsaver-ai/pi-ai/providers/openai-shared";
+import type { Model, Usage } from "@pk-nerdsaver-ai/pi-ai/types";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 
 const OPENAI_MODEL: Model<"openai-completions"> = buildModel({
 	id: "gpt-5",

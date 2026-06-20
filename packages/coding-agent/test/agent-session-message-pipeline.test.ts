@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { Agent, type AgentMessage } from "@oh-my-pi/pi-agent-core";
+import { Agent, type AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
 import {
 	type Api,
 	type Context,
@@ -10,14 +10,14 @@ import {
 	registerCustomApi,
 	type SimpleStreamOptions,
 	type TextContent,
-} from "@oh-my-pi/pi-ai";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { SecretObfuscator } from "@oh-my-pi/pi-coding-agent/secrets";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { convertToLlm, wrapSteeringForModel } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+} from "@pk-nerdsaver-ai/pi-ai";
+import { AssistantMessageEventStream } from "@pk-nerdsaver-ai/pi-ai/utils/event-stream";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { SecretObfuscator } from "@pk-nerdsaver-ai/pi-coding-agent/secrets";
+import { AgentSession, type AgentSessionEvent } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { convertToLlm, wrapSteeringForModel } from "@pk-nerdsaver-ai/pi-coding-agent/session/messages";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
 import { createAssistantMessage } from "./helpers/agent-session-setup";
 
 function createAgent(): Agent {

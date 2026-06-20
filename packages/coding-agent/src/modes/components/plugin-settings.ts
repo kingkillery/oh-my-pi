@@ -17,8 +17,8 @@ import {
 	SettingsList,
 	Spacer,
 	Text,
-} from "@oh-my-pi/pi-tui";
-import { logger } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-tui";
+import { logger } from "@pk-nerdsaver-ai/pi-utils";
 import { clearPluginRootsAndCaches, resolveOrDefaultProjectRegistryPath } from "../../discovery/helpers";
 import { PluginManager } from "../../extensibility/plugins/manager";
 import type { InstalledPluginSummary } from "../../extensibility/plugins/marketplace";

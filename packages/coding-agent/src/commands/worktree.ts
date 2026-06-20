@@ -1,7 +1,7 @@
 /**
  * List and clean up agent-managed git worktrees under `~/.omp/wt`.
  */
-import { Args, Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { Args, Command, Flags } from "@pk-nerdsaver-ai/pi-utils/cli";
 import { clearWorktrees, listWorktrees } from "../cli/worktree-cli";
 
 export default class Worktree extends Command {

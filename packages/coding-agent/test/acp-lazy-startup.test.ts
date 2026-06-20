@@ -10,14 +10,14 @@ import {
 	type RequestPermissionResponse,
 	type SessionNotification,
 } from "@agentclientprotocol/sdk";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAcpConnection } from "@oh-my-pi/pi-coding-agent/modes/acp/acp-mode";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import type { Model } from "@pk-nerdsaver-ai/pi-ai";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { createAcpConnection } from "@pk-nerdsaver-ai/pi-coding-agent/modes/acp/acp-mode";
+import type { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { AuthStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/auth-storage";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { TempDir } from "@pk-nerdsaver-ai/pi-utils";
 
 const TEST_MODEL: Model = buildModel({
 	id: "claude-sonnet-4-20250514",
@@ -157,7 +157,7 @@ async function closeTransport(writable: WritableStream<unknown>): Promise<void> 
 
 describe("ACP lazy startup", () => {
 	it("applies schema defaults for ACP background jobs and preserves explicit overrides", async () => {
-		const { runRootCommand } = await import("@oh-my-pi/pi-coding-agent/main");
+		const { runRootCommand } = await import("@pk-nerdsaver-ai/pi-coding-agent/main");
 
 		type ObservedBackgroundSettings = {
 			asyncEnabled: boolean;
@@ -243,7 +243,7 @@ describe("ACP lazy startup", () => {
 	});
 
 	it("default-disables advisor for protocol hosts", async () => {
-		const { runRootCommand } = await import("@oh-my-pi/pi-coding-agent/main");
+		const { runRootCommand } = await import("@pk-nerdsaver-ai/pi-coding-agent/main");
 
 		type ObservedAdvisorSettings = {
 			enabled: boolean;
@@ -319,7 +319,7 @@ describe("ACP lazy startup", () => {
 	});
 
 	it("honors explicit todo settings for protocol hosts", async () => {
-		const { runRootCommand } = await import("@oh-my-pi/pi-coding-agent/main");
+		const { runRootCommand } = await import("@pk-nerdsaver-ai/pi-coding-agent/main");
 
 		type ObservedTodoSettings = {
 			enabled: boolean;
@@ -471,8 +471,8 @@ describe("ACP lazy startup", () => {
 		const authStorage = await AuthStorage.create(path.join(cwd, "auth.db"));
 		try {
 			const settings = Settings.isolated({ "marketplace.autoUpdate": "off" });
-			const { runRootCommand } = await import("@oh-my-pi/pi-coding-agent/main");
-			const { createAgentSession } = await import("@oh-my-pi/pi-coding-agent/sdk");
+			const { runRootCommand } = await import("@pk-nerdsaver-ai/pi-coding-agent/main");
+			const { createAgentSession } = await import("@pk-nerdsaver-ai/pi-coding-agent/sdk");
 			let session: AgentSession | undefined;
 
 			const stopped = runRootCommand(

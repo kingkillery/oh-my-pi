@@ -19,7 +19,7 @@ import * as path from "node:path";
 import { scheduler } from "node:timers/promises";
 import { isPromise } from "node:util/types";
 
-import type { InMemorySnapshotStore } from "@oh-my-pi/hashline";
+import type { InMemorySnapshotStore } from "@pk-nerdsaver-ai/hashline";
 import {
 	type AfterToolCallContext,
 	type AfterToolCallResult,
@@ -36,7 +36,7 @@ import {
 	resolveTelemetry,
 	STREAM_INTERRUPTED_AFTER_CONTENT_STOP_DETAIL,
 	ThinkingLevel,
-} from "@oh-my-pi/pi-agent-core";
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import {
 	AGGRESSIVE_SHAKE_CONFIG,
 	AUTO_HANDOFF_THRESHOLD_FOCUS,
@@ -63,14 +63,14 @@ import {
 	type ShakeRegion,
 	type SummaryOptions,
 	shouldCompact,
-} from "@oh-my-pi/pi-agent-core/compaction";
+} from "@pk-nerdsaver-ai/pi-agent-core/compaction";
 import {
 	DEFAULT_PRUNE_CONFIG,
 	pruneSupersededToolResults,
 	pruneToolOutputs,
 	readToolSupersedeKey,
-} from "@oh-my-pi/pi-agent-core/compaction/pruning";
-import type { ProtectedToolMatcher } from "@oh-my-pi/pi-agent-core/compaction/tool-protection";
+} from "@pk-nerdsaver-ai/pi-agent-core/compaction/pruning";
+import type { ProtectedToolMatcher } from "@pk-nerdsaver-ai/pi-agent-core/compaction/tool-protection";
 import type {
 	AssistantMessage,
 	Context,
@@ -90,7 +90,7 @@ import type {
 	ToolChoice,
 	Usage,
 	UsageReport,
-} from "@oh-my-pi/pi-ai";
+} from "@pk-nerdsaver-ai/pi-ai";
 import {
 	calculateRateLimitBackoffMs,
 	clearAnthropicFastModeFallback,
@@ -101,10 +101,10 @@ import {
 	parseRateLimitReason,
 	resolveServiceTier,
 	streamSimple,
-} from "@oh-my-pi/pi-ai";
-import { getSupportedEfforts } from "@oh-my-pi/pi-catalog/model-thinking";
-import { modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
-import { MacOSPowerAssertion } from "@oh-my-pi/pi-natives";
+} from "@pk-nerdsaver-ai/pi-ai";
+import { getSupportedEfforts } from "@pk-nerdsaver-ai/pi-catalog/model-thinking";
+import { modelsAreEqual } from "@pk-nerdsaver-ai/pi-catalog/models";
+import { MacOSPowerAssertion } from "@pk-nerdsaver-ai/pi-natives";
 import {
 	extractRetryHint,
 	formatDuration,
@@ -117,8 +117,8 @@ import {
 	prompt,
 	relativePathWithinRoot,
 	Snowflake,
-} from "@oh-my-pi/pi-utils";
-import * as snapcompact from "@oh-my-pi/snapcompact";
+} from "@pk-nerdsaver-ai/pi-utils";
+import * as snapcompact from "@pk-nerdsaver-ai/snapcompact";
 import {
 	AdviseTool,
 	type AdvisorAgent,

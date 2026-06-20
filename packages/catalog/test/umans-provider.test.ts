@@ -3,8 +3,8 @@ import {
 	MODELS_DEV_PROVIDER_DESCRIPTORS,
 	mapModelsDevToModels,
 	umansModelManagerOptions,
-} from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { FetchImpl } from "@oh-my-pi/pi-catalog/types";
+} from "@pk-nerdsaver-ai/pi-catalog/provider-models/openai-compat";
+import type { FetchImpl } from "@pk-nerdsaver-ai/pi-catalog/types";
 import modelsJson from "../src/models.json";
 
 interface BundledModel {

@@ -23,7 +23,7 @@ import {
 	logger,
 	procmgr,
 	setDefaultTabWidth,
-} from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-utils";
 import { YAML } from "bun";
 import { type Settings as SettingsCapabilityItem, settingsCapability } from "../capability/settings";
 import type { ModelRole } from "../config/model-roles";

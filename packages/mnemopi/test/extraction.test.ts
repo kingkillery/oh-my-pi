@@ -5,17 +5,17 @@ import {
 	extractFactsSafe,
 	heuristicExtractFacts,
 	parseFacts,
-} from "@oh-my-pi/pi-mnemopi/core/extraction";
-import { getExtractionStats, resetExtractionStats } from "@oh-my-pi/pi-mnemopi/core/extraction/diagnostics";
+} from "@pk-nerdsaver-ai/pi-mnemopi/core/extraction";
+import { getExtractionStats, resetExtractionStats } from "@pk-nerdsaver-ai/pi-mnemopi/core/extraction/diagnostics";
 import {
 	CallableLlmBackend,
 	resetHostLlmBackendForTests,
 	setHostLlmBackend,
-} from "@oh-my-pi/pi-mnemopi/core/llm-backends";
+} from "@pk-nerdsaver-ai/pi-mnemopi/core/llm-backends";
 import {
 	type ResolvedMnemopiRuntimeOptions,
 	withMnemopiRuntimeOptions,
-} from "@oh-my-pi/pi-mnemopi/core/runtime-options";
+} from "@pk-nerdsaver-ai/pi-mnemopi/core/runtime-options";
 
 const OLD_ENV = { ...process.env };
 function restoreEnv(): void {

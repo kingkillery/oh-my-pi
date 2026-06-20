@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { isRecord } from "@oh-my-pi/pi-utils";
+import { isRecord } from "@pk-nerdsaver-ai/pi-utils";
 import { hasRootMarkers, resolveCommand } from "../lsp/config";
 import DEFAULTS from "./defaults.json" with { type: "json" };
 import type { DapAdapterConfig, DapResolvedAdapter } from "./types";

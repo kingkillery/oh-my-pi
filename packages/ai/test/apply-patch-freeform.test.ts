@@ -2,20 +2,20 @@ import { describe, expect, test } from "bun:test";
 import {
 	convertOpenAICodexResponsesTools as convertCodexTools,
 	normalizeCodexToolChoice,
-} from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
+} from "@pk-nerdsaver-ai/pi-ai/providers/openai-codex-responses";
 import {
 	convertTools,
 	mapOpenAIResponsesToolChoiceForTools,
 	supportsFreeformApplyPatch,
-} from "@oh-my-pi/pi-ai/providers/openai-responses";
-import type { ResponseStreamEvent } from "@oh-my-pi/pi-ai/providers/openai-responses-wire";
+} from "@pk-nerdsaver-ai/pi-ai/providers/openai-responses";
+import type { ResponseStreamEvent } from "@pk-nerdsaver-ai/pi-ai/providers/openai-responses-wire";
 import {
 	appendResponsesToolResultMessages,
 	convertResponsesAssistantMessage,
 	processResponsesStream,
-} from "@oh-my-pi/pi-ai/providers/openai-shared";
-import type { AssistantMessage, Model, ModelSpec, Tool, ToolResultMessage } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+} from "@pk-nerdsaver-ai/pi-ai/providers/openai-shared";
+import type { AssistantMessage, Model, ModelSpec, Tool, ToolResultMessage } from "@pk-nerdsaver-ai/pi-ai/types";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import { type } from "arktype";
 
 const GRAMMAR = [

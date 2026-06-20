@@ -1,7 +1,7 @@
 /**
  * Open background agent switcher directly from CLI.
  */
-import { Command } from "@oh-my-pi/pi-utils/cli";
+import { Command } from "@pk-nerdsaver-ai/pi-utils/cli";
 import { parseArgs } from "../cli/args";
 import { runRootCommand } from "../main";
 

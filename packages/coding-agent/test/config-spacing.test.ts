@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getDefaultTabWidth, getIndentation, Snowflake, setDefaultTabWidth } from "@oh-my-pi/pi-utils";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { getDefaultTabWidth, getIndentation, Snowflake, setDefaultTabWidth } from "@pk-nerdsaver-ai/pi-utils";
 import { beginSettingsTest, restoreSettingsTestState, type SettingsTestState } from "./helpers/settings-test-state";
 
 describe("indentation resolver", () => {

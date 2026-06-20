@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { CURSOR_MARKER } from "@oh-my-pi/pi-tui";
-import { Input } from "@oh-my-pi/pi-tui/components/input";
-import { setKittyProtocolActive } from "@oh-my-pi/pi-tui/keys";
-import { visibleWidth } from "@oh-my-pi/pi-tui/utils";
-import { getIndentation } from "@oh-my-pi/pi-utils";
+import { CURSOR_MARKER } from "@pk-nerdsaver-ai/pi-tui";
+import { Input } from "@pk-nerdsaver-ai/pi-tui/components/input";
+import { setKittyProtocolActive } from "@pk-nerdsaver-ai/pi-tui/keys";
+import { visibleWidth } from "@pk-nerdsaver-ai/pi-tui/utils";
+import { getIndentation } from "@pk-nerdsaver-ai/pi-utils";
 
 function renderedWidth(input: Input, width: number): number {
 	const [line] = input.render(width);

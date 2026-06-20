@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { createAutoresearchExtension } from "@oh-my-pi/pi-coding-agent/autoresearch";
+import { createAutoresearchExtension } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch";
 import {
 	buildExperimentState,
 	computeConfidence,
@@ -10,16 +10,16 @@ import {
 	findBaselineRunNumber,
 	findBestKeptMetric,
 	reconstructControlState,
-} from "@oh-my-pi/pi-coding-agent/autoresearch/state";
-import { AutoresearchStorage } from "@oh-my-pi/pi-coding-agent/autoresearch/storage";
-import type { ExperimentResult } from "@oh-my-pi/pi-coding-agent/autoresearch/types";
+} from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/state";
+import { AutoresearchStorage } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/storage";
+import type { ExperimentResult } from "@pk-nerdsaver-ai/pi-coding-agent/autoresearch/types";
 import type {
 	ExtensionAPI,
 	ExtensionCommandContext,
 	RegisteredCommand,
-} from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import * as git from "@oh-my-pi/pi-coding-agent/utils/git";
-import { Snowflake } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions";
+import * as git from "@pk-nerdsaver-ai/pi-coding-agent/utils/git";
+import { Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 
 afterEach(() => {
 	vi.restoreAllMocks();

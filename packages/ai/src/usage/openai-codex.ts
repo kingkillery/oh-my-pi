@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { CODEX_BASE_URL } from "@oh-my-pi/pi-catalog/wire/codex";
+import { CODEX_BASE_URL } from "@pk-nerdsaver-ai/pi-catalog/wire/codex";
 import type {
 	CredentialRankingStrategy,
 	UsageAmount,

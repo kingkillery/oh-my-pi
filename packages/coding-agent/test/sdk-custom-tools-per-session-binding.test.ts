@@ -20,7 +20,7 @@ import {
 	type CustomToolAPI,
 	loadCustomTools,
 	type ToolPathWithSource,
-} from "@oh-my-pi/pi-coding-agent/extensibility/custom-tools";
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/custom-tools";
 
 describe("loadCustomTools per-session binding (#2190 review fix)", () => {
 	let tmp: string;

@@ -1,4 +1,4 @@
-import type { UsageLimit, UsageReport } from "@oh-my-pi/pi-ai";
+import type { UsageLimit, UsageReport } from "@pk-nerdsaver-ai/pi-ai";
 import type { OAuthAccountIdentity } from "../../session/auth-storage";
 import type { SlashCommandRuntime } from "../types";
 import { reportMatchesActiveAccount } from "./active-oauth-account";

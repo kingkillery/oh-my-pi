@@ -1,9 +1,9 @@
 import { dirname } from "node:path";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type * as MnemopiNs from "@oh-my-pi/pi-mnemopi";
-import type { Mnemopi, RecallResult } from "@oh-my-pi/pi-mnemopi";
-import type * as MnemopiCoreNs from "@oh-my-pi/pi-mnemopi/core";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
+import type * as MnemopiNs from "@pk-nerdsaver-ai/pi-mnemopi";
+import type { Mnemopi, RecallResult } from "@pk-nerdsaver-ai/pi-mnemopi";
+import type * as MnemopiCoreNs from "@pk-nerdsaver-ai/pi-mnemopi/core";
+import { logger } from "@pk-nerdsaver-ai/pi-utils";
 import {
 	composeRecallQuery,
 	formatCurrentTime,
@@ -19,18 +19,18 @@ import type { MnemopiBackendConfig, MnemopiScoping } from "./config";
 let mnemopiMod: typeof MnemopiNs | undefined;
 let mnemopiCoreMod: typeof MnemopiCoreNs | undefined;
 
-/** Lazily load `@oh-my-pi/pi-mnemopi` (memoized). */
+/** Lazily load `@pk-nerdsaver-ai/pi-mnemopi` (memoized). */
 export async function loadMnemopi(): Promise<typeof MnemopiNs> {
 	if (!mnemopiMod) {
-		mnemopiMod = await import("@oh-my-pi/pi-mnemopi");
+		mnemopiMod = await import("@pk-nerdsaver-ai/pi-mnemopi");
 	}
 	return mnemopiMod;
 }
 
-/** Lazily load `@oh-my-pi/pi-mnemopi/core` (memoized). */
+/** Lazily load `@pk-nerdsaver-ai/pi-mnemopi/core` (memoized). */
 export async function loadMnemopiCore(): Promise<typeof MnemopiCoreNs> {
 	if (!mnemopiCoreMod) {
-		mnemopiCoreMod = await import("@oh-my-pi/pi-mnemopi/core");
+		mnemopiCoreMod = await import("@pk-nerdsaver-ai/pi-mnemopi/core");
 	}
 	return mnemopiCoreMod;
 }

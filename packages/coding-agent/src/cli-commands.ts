@@ -8,7 +8,7 @@
  * `launch` — see #1496 for the original "args silently leak to the LLM"
  * regression that motivated the split.
  */
-import type { CommandEntry } from "@oh-my-pi/pi-utils/cli";
+import type { CommandEntry } from "@pk-nerdsaver-ai/pi-utils/cli";
 
 export const commands: CommandEntry[] = [
 	{ name: "launch", load: () => import("./commands/launch").then(m => m.default) },

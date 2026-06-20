@@ -11,7 +11,7 @@ import {
 	type SnapshotResponse,
 	SqliteAuthCredentialStore,
 	startAuthBroker,
-} from "@oh-my-pi/pi-ai";
+} from "@pk-nerdsaver-ai/pi-ai";
 
 const ANTHROPIC_ENV = ["ANTHROPIC_API_KEY", "ANTHROPIC_OAUTH_TOKEN"] as const;
 const savedEnv: Partial<Record<(typeof ANTHROPIC_ENV)[number], string | undefined>> = {};

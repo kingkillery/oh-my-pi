@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { getThemeByName } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
+import { getThemeByName } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
 import {
 	recallToolRenderer,
 	reflectToolRenderer,
 	retainToolRenderer,
-} from "@oh-my-pi/pi-coding-agent/tools/memory-render";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-coding-agent/tools/memory-render";
+import { sanitizeText } from "@pk-nerdsaver-ai/pi-utils";
 
 async function theme() {
 	const t = await getThemeByName("dark");

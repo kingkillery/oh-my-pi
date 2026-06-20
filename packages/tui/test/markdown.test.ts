@@ -1,9 +1,9 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
-import { clearRenderCache, Markdown, renderInlineMarkdown } from "@oh-my-pi/pi-tui/components/markdown";
-import { setTerminalTextSizing, TERMINAL } from "@oh-my-pi/pi-tui/terminal-capabilities";
-import { type Component, TUI } from "@oh-my-pi/pi-tui/tui";
-import { visibleWidth } from "@oh-my-pi/pi-tui/utils";
+import { clearRenderCache, Markdown, renderInlineMarkdown } from "@pk-nerdsaver-ai/pi-tui/components/markdown";
+import { setTerminalTextSizing, TERMINAL } from "@pk-nerdsaver-ai/pi-tui/terminal-capabilities";
+import { type Component, TUI } from "@pk-nerdsaver-ai/pi-tui/tui";
+import { visibleWidth } from "@pk-nerdsaver-ai/pi-tui/utils";
 import { Chalk } from "chalk";
 import { defaultMarkdownTheme } from "./test-themes.js";
 import { VirtualTerminal } from "./virtual-terminal.js";

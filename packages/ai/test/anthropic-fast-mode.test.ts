@@ -3,9 +3,9 @@ import {
 	clearAnthropicFastModeFallback,
 	isAnthropicFastModeUnsupportedError,
 	streamAnthropic,
-} from "@oh-my-pi/pi-ai/providers/anthropic";
-import type { Context, Model, ProviderSessionState, ServiceTier } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+} from "@pk-nerdsaver-ai/pi-ai/providers/anthropic";
+import type { Context, Model, ProviderSessionState, ServiceTier } from "@pk-nerdsaver-ai/pi-ai/types";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 
 function makeAnthropicModel(id: string): Model<"anthropic-messages"> {
 	return buildModel({

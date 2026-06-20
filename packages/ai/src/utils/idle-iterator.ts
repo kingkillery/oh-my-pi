@@ -1,4 +1,4 @@
-import { $env } from "@oh-my-pi/pi-utils";
+import { $env } from "@pk-nerdsaver-ai/pi-utils";
 
 const DEFAULT_STREAM_IDLE_TIMEOUT_MS = 120_000;
 const DEFAULT_STREAM_FIRST_EVENT_TIMEOUT_MS = 100_000;

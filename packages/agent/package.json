@@ -1,6 +1,6 @@
 {
 	"type": "module",
-	"name": "@oh-my-pi/pi-agent-core",
+	"name": "@pk-nerdsaver-ai/pi-agent-core",
 	"version": "16.0.6",
 	"description": "General-purpose agent with transport abstraction, state management, and attachment support",
 	"homepage": "https://omp.sh",
@@ -25,7 +25,7 @@
 		"state-management"
 	],
 	"main": "./src/index.ts",
-	"types": "./src/index.ts",
+	"types": "./dist/types/index.d.ts",
 	"scripts": {
 		"check": "biome check . && bun run check:types",
 		"check:types": "tsgo -p tsconfig.json --noEmit",
@@ -35,11 +35,11 @@
 		"fmt": "biome format --write ."
 	},
 	"dependencies": {
-		"@oh-my-pi/pi-ai": "catalog:",
-		"@oh-my-pi/pi-catalog": "catalog:",
-		"@oh-my-pi/pi-natives": "catalog:",
-		"@oh-my-pi/pi-utils": "catalog:",
-		"@oh-my-pi/snapcompact": "catalog:",
+		"@pk-nerdsaver-ai/pi-ai": "catalog:",
+		"@pk-nerdsaver-ai/pi-catalog": "catalog:",
+		"@pk-nerdsaver-ai/pi-natives": "catalog:",
+		"@pk-nerdsaver-ai/pi-utils": "catalog:",
+		"@pk-nerdsaver-ai/snapcompact": "catalog:",
 		"@opentelemetry/api": "catalog:"
 	},
 	"devDependencies": {
@@ -53,23 +53,24 @@
 	"files": [
 		"src",
 		"README.md",
-		"CHANGELOG.md"
+		"CHANGELOG.md",
+		"dist/types"
 	],
 	"exports": {
 		".": {
-			"types": "./src/index.ts",
+			"types": "./dist/types/index.d.ts",
 			"import": "./src/index.ts"
 		},
 		"./compaction": {
-			"types": "./src/compaction.ts",
+			"types": "./dist/types/compaction.d.ts",
 			"import": "./src/compaction.ts"
 		},
 		"./compaction/*": {
-			"types": "./src/compaction/*.ts",
+			"types": "./dist/types/compaction/*.d.ts",
 			"import": "./src/compaction/*.ts"
 		},
 		"./*": {
-			"types": "./src/*.ts",
+			"types": "./dist/types/*.d.ts",
 			"import": "./src/*.ts"
 		}
 	}

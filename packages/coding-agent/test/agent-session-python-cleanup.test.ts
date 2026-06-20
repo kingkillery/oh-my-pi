@@ -2,15 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "bun:
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import * as pythonExecutor from "@oh-my-pi/pi-coding-agent/eval/py/executor";
-import type { PythonKernel as PythonKernelInstance } from "@oh-my-pi/pi-coding-agent/eval/py/kernel";
-import * as pythonKernel from "@oh-my-pi/pi-coding-agent/eval/py/kernel";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { createAgentSession, type ExtensionFactory, type WorkspaceTree } from "@oh-my-pi/pi-coding-agent/sdk";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { Snowflake } from "@oh-my-pi/pi-utils";
+import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import * as pythonExecutor from "@pk-nerdsaver-ai/pi-coding-agent/eval/py/executor";
+import type { PythonKernel as PythonKernelInstance } from "@pk-nerdsaver-ai/pi-coding-agent/eval/py/kernel";
+import * as pythonKernel from "@pk-nerdsaver-ai/pi-coding-agent/eval/py/kernel";
+import { AgentRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/registry/agent-registry";
+import { createAgentSession, type ExtensionFactory, type WorkspaceTree } from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 
 const OK_EXECUTION = { status: "ok", cancelled: false, timedOut: false, stdinRequested: false } as const;
 

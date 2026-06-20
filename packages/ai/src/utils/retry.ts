@@ -1,5 +1,5 @@
 import { scheduler } from "node:timers/promises";
-import { extractHttpStatusFromError, isRetryableError } from "@oh-my-pi/pi-utils";
+import { extractHttpStatusFromError, isRetryableError } from "@pk-nerdsaver-ai/pi-utils";
 import { getHeadersFromError, getRetryAfterMsFromHeaders } from "./retry-after";
 
 /**

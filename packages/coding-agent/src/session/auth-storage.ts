@@ -1,5 +1,5 @@
 /**
- * Re-exports from @oh-my-pi/pi-ai.
+ * Re-exports from @pk-nerdsaver-ai/pi-ai.
  * All credential storage types and the AuthStorage class now live in the ai package.
  */
 
@@ -20,7 +20,7 @@ export type {
 	SerializedAuthStorage,
 	SnapshotResponse,
 	StoredAuthCredential,
-} from "@oh-my-pi/pi-ai";
+} from "@pk-nerdsaver-ai/pi-ai";
 export {
 	AuthBrokerClient,
 	AuthStorage,
@@ -30,4 +30,4 @@ export {
 	readAuthBrokerSnapshotCache,
 	SqliteAuthCredentialStore,
 	writeAuthBrokerSnapshotCache,
-} from "@oh-my-pi/pi-ai";
+} from "@pk-nerdsaver-ai/pi-ai";

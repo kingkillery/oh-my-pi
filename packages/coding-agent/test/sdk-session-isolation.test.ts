@@ -2,16 +2,16 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import type { Rule } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import { SecretObfuscator } from "@oh-my-pi/pi-coding-agent/secrets";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { getSessionsDir, Snowflake } from "@oh-my-pi/pi-utils";
+import type { AssistantMessage } from "@pk-nerdsaver-ai/pi-ai";
+import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
+import type { Rule } from "@pk-nerdsaver-ai/pi-coding-agent/capability/rule";
+import { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { createAgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/sdk";
+import { SecretObfuscator } from "@pk-nerdsaver-ai/pi-coding-agent/secrets";
+import { AuthStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/auth-storage";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { getSessionsDir, Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 
 function createTtsrRule(name: string): Rule {
 	return {

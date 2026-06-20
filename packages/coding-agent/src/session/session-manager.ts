@@ -1,7 +1,14 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { ImageContent, Message, MessageAttribution, ServiceTier, TextContent, Usage } from "@oh-my-pi/pi-ai";
-import { getBlobsDir, getProjectDir, getSessionsDir, isEnoent, logger, toError } from "@oh-my-pi/pi-utils";
+import type {
+	ImageContent,
+	Message,
+	MessageAttribution,
+	ServiceTier,
+	TextContent,
+	Usage,
+} from "@pk-nerdsaver-ai/pi-ai";
+import { getBlobsDir, getProjectDir, getSessionsDir, isEnoent, logger, toError } from "@pk-nerdsaver-ai/pi-utils";
 import { ArtifactManager } from "./artifacts";
 import { type BlobPutOptions, type BlobPutResult, BlobStore } from "./blob-store";
 import {

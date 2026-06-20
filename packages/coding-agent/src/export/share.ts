@@ -19,9 +19,9 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentState } from "@oh-my-pi/pi-agent-core";
-import { $which, logger } from "@oh-my-pi/pi-utils";
-import { DEFAULT_SHARE_URL } from "@oh-my-pi/pi-wire";
+import type { AgentState } from "@pk-nerdsaver-ai/pi-agent-core";
+import { $which, logger } from "@pk-nerdsaver-ai/pi-utils";
+import { DEFAULT_SHARE_URL } from "@pk-nerdsaver-ai/pi-wire";
 import { $ } from "bun";
 import type { SecretObfuscator } from "../secrets/obfuscator";
 import type { SessionManager } from "../session/session-manager";

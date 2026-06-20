@@ -4,21 +4,25 @@ import * as os from "node:os";
 import * as path from "node:path";
 import * as url from "node:url";
 import * as zlib from "node:zlib";
-import type { AgentToolContext } from "@oh-my-pi/pi-agent-core";
-import { AsyncJobManager } from "@oh-my-pi/pi-coding-agent/async";
-import { DEFAULT_BASH_INTERCEPTOR_RULES, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { EditTool } from "@oh-my-pi/pi-coding-agent/edit";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { BashTool } from "@oh-my-pi/pi-coding-agent/tools/bash";
-import { FindTool } from "@oh-my-pi/pi-coding-agent/tools/find";
-import { JobTool } from "@oh-my-pi/pi-coding-agent/tools/job";
-import { wrapToolWithMetaNotice } from "@oh-my-pi/pi-coding-agent/tools/output-meta";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { DEFAULT_FILE_LIMIT, MULTI_FILE_PER_FILE_MATCHES, SearchTool } from "@oh-my-pi/pi-coding-agent/tools/search";
-import * as toolTimeouts from "@oh-my-pi/pi-coding-agent/tools/tool-timeouts";
-import { WriteTool } from "@oh-my-pi/pi-coding-agent/tools/write";
-import { $which, Snowflake } from "@oh-my-pi/pi-utils";
+import type { AgentToolContext } from "@pk-nerdsaver-ai/pi-agent-core";
+import { AsyncJobManager } from "@pk-nerdsaver-ai/pi-coding-agent/async";
+import { DEFAULT_BASH_INTERCEPTOR_RULES, Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { EditTool } from "@pk-nerdsaver-ai/pi-coding-agent/edit";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { BashTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/bash";
+import { FindTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/find";
+import { JobTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/job";
+import { wrapToolWithMetaNotice } from "@pk-nerdsaver-ai/pi-coding-agent/tools/output-meta";
+import { ReadTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/read";
+import {
+	DEFAULT_FILE_LIMIT,
+	MULTI_FILE_PER_FILE_MATCHES,
+	SearchTool,
+} from "@pk-nerdsaver-ai/pi-coding-agent/tools/search";
+import * as toolTimeouts from "@pk-nerdsaver-ai/pi-coding-agent/tools/tool-timeouts";
+import { WriteTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools/write";
+import { $which, Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 import { unzipSync } from "fflate";
 
 // Helper to extract text from content blocks

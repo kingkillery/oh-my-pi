@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { streamOpenAICompletions } from "@oh-my-pi/pi-ai/providers/openai-completions";
-import type { Context, Model, ModelSpec, Tool } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import { streamOpenAICompletions } from "@pk-nerdsaver-ai/pi-ai/providers/openai-completions";
+import type { Context, Model, ModelSpec, Tool } from "@pk-nerdsaver-ai/pi-ai/types";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
 import { type } from "arktype";
 
 const echoTool: Tool = {

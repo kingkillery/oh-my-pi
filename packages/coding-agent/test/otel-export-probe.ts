@@ -10,12 +10,12 @@
  * protobuf POST at /v1/traces.
  */
 
+import { trace } from "@opentelemetry/api";
 import {
 	flushTelemetryExport,
 	initTelemetryExport,
 	isTelemetryExportEnabled,
-} from "@oh-my-pi/pi-coding-agent/telemetry-export";
-import { trace } from "@opentelemetry/api";
+} from "@pk-nerdsaver-ai/pi-coding-agent/telemetry-export";
 
 let received = false;
 
@@ -47,7 +47,7 @@ if (!isTelemetryExportEnabled()) {
 	process.exit(2);
 }
 
-const span = trace.getTracer("@oh-my-pi/pi-agent-core").startSpan("agent.llm_call");
+const span = trace.getTracer("@pk-nerdsaver-ai/pi-agent-core").startSpan("agent.llm_call");
 span.setAttribute("gen_ai.system", "probe");
 span.setAttribute("gen_ai.request.model", "claude-haiku-4-5");
 span.end();

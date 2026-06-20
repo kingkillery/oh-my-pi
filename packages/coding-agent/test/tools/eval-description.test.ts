@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { EvalTool, getEvalToolDescription } from "@oh-my-pi/pi-coding-agent/tools/eval";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { EvalTool, getEvalToolDescription } from "@pk-nerdsaver-ai/pi-coding-agent/tools/eval";
 
 function makeSession(opts: { spawns: string | null }): ToolSession {
 	return {

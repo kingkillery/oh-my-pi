@@ -1,6 +1,6 @@
 {
 	"type": "module",
-	"name": "@oh-my-pi/pi-mnemopi",
+	"name": "@pk-nerdsaver-ai/pi-mnemopi",
 	"version": "16.0.6",
 	"description": "Local SQLite memory engine for Oh My Pi agents",
 	"homepage": "https://omp.sh",
@@ -26,7 +26,7 @@
 	],
 	"main": "./src/index.ts",
 	"module": "./src/index.ts",
-	"types": "./src/index.ts",
+	"types": "./dist/types/index.d.ts",
 	"bin": {
 		"mnemopi": "src/cli.ts"
 	},
@@ -39,9 +39,9 @@
 		"fmt": "biome format --write ."
 	},
 	"dependencies": {
-		"@oh-my-pi/pi-ai": "catalog:",
-		"@oh-my-pi/pi-catalog": "catalog:",
-		"@oh-my-pi/pi-utils": "catalog:",
+		"@pk-nerdsaver-ai/pi-ai": "catalog:",
+		"@pk-nerdsaver-ai/pi-catalog": "catalog:",
+		"@pk-nerdsaver-ai/pi-utils": "catalog:",
 		"lru-cache": "catalog:"
 	},
 	"peerDependencies": {
@@ -67,39 +67,40 @@
 	"files": [
 		"src",
 		"README.md",
-		"CHANGELOG.md"
+		"CHANGELOG.md",
+		"dist/types"
 	],
 	"exports": {
 		".": {
-			"types": "./src/index.ts",
+			"types": "./dist/types/index.d.ts",
 			"import": "./src/index.ts"
 		},
 		"./core": {
-			"types": "./src/core/index.ts",
+			"types": "./dist/types/core/index.d.ts",
 			"import": "./src/core/index.ts"
 		},
 		"./core/beam": {
-			"types": "./src/core/beam/index.ts",
+			"types": "./dist/types/core/beam/index.d.ts",
 			"import": "./src/core/beam/index.ts"
 		},
 		"./beam": {
-			"types": "./src/core/beam/index.ts",
+			"types": "./dist/types/core/beam/index.d.ts",
 			"import": "./src/core/beam/index.ts"
 		},
 		"./diagnose": {
-			"types": "./src/diagnose.ts",
+			"types": "./dist/types/diagnose.d.ts",
 			"import": "./src/diagnose.ts"
 		},
 		"./mcp": {
-			"types": "./src/mcp-tools.ts",
+			"types": "./dist/types/mcp-tools.d.ts",
 			"import": "./src/mcp-tools.ts"
 		},
 		"./cli": {
-			"types": "./src/cli.ts",
+			"types": "./dist/types/cli.d.ts",
 			"import": "./src/cli.ts"
 		},
 		"./*": {
-			"types": "./src/*.ts",
+			"types": "./dist/types/*.d.ts",
 			"import": "./src/*.ts"
 		},
 		"./*.js": "./src/*.ts"

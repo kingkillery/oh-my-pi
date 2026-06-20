@@ -4,7 +4,12 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, wri
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { gunzipSync, gzipSync } from "node:zlib";
-import { createBackup, emergencyRestore, restoreBackup, verifyIntegrity } from "@oh-my-pi/pi-mnemopi/dr/recovery";
+import {
+	createBackup,
+	emergencyRestore,
+	restoreBackup,
+	verifyIntegrity,
+} from "@pk-nerdsaver-ai/pi-mnemopi/dr/recovery";
 
 const tempDirs: string[] = [];
 const SQLITE_HEADER = Buffer.from("SQLite format 3\0", "binary");

@@ -1,8 +1,8 @@
 import * as os from "node:os";
 import * as path from "node:path";
-import type { Model } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { isEnoent } from "@oh-my-pi/pi-utils";
+import type { Model } from "@pk-nerdsaver-ai/pi-ai/types";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { isEnoent } from "@pk-nerdsaver-ai/pi-utils";
 
 export async function withEnv(
 	overrides: Record<string, string | undefined>,

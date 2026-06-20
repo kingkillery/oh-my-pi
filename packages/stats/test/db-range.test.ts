@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getDashboardStats } from "@oh-my-pi/omp-stats/aggregator";
-import { closeDb, initDb, insertMessageStats } from "@oh-my-pi/omp-stats/db";
-import type { MessageStats } from "@oh-my-pi/omp-stats/types";
-import { getAgentDir, setAgentDir, TempDir } from "@oh-my-pi/pi-utils";
+import { getDashboardStats } from "@pk-nerdsaver-ai/omp-stats/aggregator";
+import { closeDb, initDb, insertMessageStats } from "@pk-nerdsaver-ai/omp-stats/db";
+import type { MessageStats } from "@pk-nerdsaver-ai/omp-stats/types";
+import { getAgentDir, setAgentDir, TempDir } from "@pk-nerdsaver-ai/pi-utils";
 
 const originalConfigDir = process.env.PI_CONFIG_DIR;
 const originalAgentDir = getAgentDir();

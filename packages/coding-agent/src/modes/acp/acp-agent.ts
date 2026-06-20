@@ -40,9 +40,9 @@ import {
 	type SetSessionModeResponse,
 	type Usage,
 } from "@agentclientprotocol/sdk";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, Model } from "@oh-my-pi/pi-ai";
-import { isEnoent, logger, VERSION } from "@oh-my-pi/pi-utils";
+import type { AgentToolResult } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { AssistantMessage, Model } from "@pk-nerdsaver-ai/pi-ai";
+import { isEnoent, logger, VERSION } from "@pk-nerdsaver-ai/pi-utils";
 import { disableProvider, enableProvider, reset as resetCapabilities } from "../../capability";
 import { Settings } from "../../config/settings";
 import { clearPluginRootsAndCaches, resolveActiveProjectRegistryPath } from "../../discovery/helpers";

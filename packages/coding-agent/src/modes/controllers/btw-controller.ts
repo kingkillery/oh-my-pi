@@ -1,5 +1,5 @@
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { prompt } from "@oh-my-pi/pi-utils";
+import type { AssistantMessage } from "@pk-nerdsaver-ai/pi-ai";
+import { prompt } from "@pk-nerdsaver-ai/pi-utils";
 import btwUserPrompt from "../../prompts/system/btw-user.md" with { type: "text" };
 import { BtwPanelComponent } from "../components/btw-panel";
 import type { InteractiveModeContext } from "../types";

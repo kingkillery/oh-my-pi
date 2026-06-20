@@ -2,13 +2,13 @@ import { afterEach, beforeAll, describe, expect, it, type Mock, vi } from "bun:t
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, Usage } from "@oh-my-pi/pi-ai";
-import type { Rule } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import { OmfgController } from "@oh-my-pi/pi-coding-agent/modes/controllers/omfg-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { Container, type TUI } from "@oh-my-pi/pi-tui";
+import type { AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { AssistantMessage, Usage } from "@pk-nerdsaver-ai/pi-ai";
+import type { Rule } from "@pk-nerdsaver-ai/pi-coding-agent/capability/rule";
+import { OmfgController } from "@pk-nerdsaver-ai/pi-coding-agent/modes/controllers/omfg-controller";
+import { initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@pk-nerdsaver-ai/pi-coding-agent/modes/types";
+import { Container, type TUI } from "@pk-nerdsaver-ai/pi-tui";
 
 const PROJECT_OPTION = "This project (.omp/rules)";
 const GLOBAL_OPTION = "Global — all projects (~/.omp/agent/rules)";

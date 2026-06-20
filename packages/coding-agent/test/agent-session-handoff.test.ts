@@ -1,18 +1,18 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent, type AgentMessage } from "@oh-my-pi/pi-agent-core";
-import * as compactionModule from "@oh-my-pi/pi-agent-core/compaction";
-import type { AssistantMessage, Model, ToolCall } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ExtensionRunner, loadExtensions } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { SecretObfuscator } from "@oh-my-pi/pi-coding-agent/secrets";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, type AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
+import * as compactionModule from "@pk-nerdsaver-ai/pi-agent-core/compaction";
+import type { AssistantMessage, Model, ToolCall } from "@pk-nerdsaver-ai/pi-ai";
+import { createMockModel } from "@pk-nerdsaver-ai/pi-ai/providers/mock";
+import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
+import { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { ExtensionRunner, loadExtensions } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/extensions";
+import { SecretObfuscator } from "@pk-nerdsaver-ai/pi-coding-agent/secrets";
+import { AgentSession, type AgentSessionEvent } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { AuthStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/auth-storage";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { TempDir } from "@pk-nerdsaver-ai/pi-utils";
 
 const HANDOFF_SECRET = "HANDOFF_SECRET_TOKEN_12345";
 

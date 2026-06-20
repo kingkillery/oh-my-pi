@@ -8,8 +8,8 @@ import {
 	setKeybindings,
 	TUI_KEYBINDINGS,
 	KeybindingsManager as TuiKeybindingsManager,
-} from "@oh-my-pi/pi-tui";
-import { getAgentDir, isEnoent, logger } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-tui";
+import { getAgentDir, isEnoent, logger } from "@pk-nerdsaver-ai/pi-utils";
 import { YAML } from "bun";
 
 /**
@@ -58,7 +58,7 @@ interface AppKeybindings {
 
 export type AppKeybinding = keyof AppKeybindings;
 
-declare module "@oh-my-pi/pi-tui" {
+declare module "@pk-nerdsaver-ai/pi-tui" {
 	interface Keybindings extends AppKeybindings {}
 }
 

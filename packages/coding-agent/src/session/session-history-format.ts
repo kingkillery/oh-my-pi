@@ -6,9 +6,9 @@
  * result pairs collapsed to single lines, thinking elided, custom messages
  * as one-liners. No system prompt, no tool catalog, no config sections.
  */
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { INTENT_FIELD } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, ImageContent, TextContent, ToolResultMessage } from "@oh-my-pi/pi-ai";
+import type { AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
+import { INTENT_FIELD } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { AssistantMessage, ImageContent, TextContent, ToolResultMessage } from "@pk-nerdsaver-ai/pi-ai";
 import type {
 	BashExecutionMessage,
 	BranchSummaryMessage,

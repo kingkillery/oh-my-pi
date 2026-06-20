@@ -7,7 +7,7 @@ import {
 	classifySource,
 	fetchMarketplace,
 	parseMarketplaceCatalog,
-} from "@oh-my-pi/pi-coding-agent/extensibility/plugins/marketplace";
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/plugins/marketplace";
 
 // Fixture lives at test/marketplace/fixtures/valid-marketplace/
 const FIXTURE_DIR = path.join(import.meta.dir, "fixtures", "valid-marketplace");

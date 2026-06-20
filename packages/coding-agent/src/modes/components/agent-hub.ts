@@ -15,10 +15,10 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { AgentMessage, AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { Usage } from "@oh-my-pi/pi-ai";
-import { Container, Editor, Ellipsis, matchesKey, ScrollView, Text, type TUI } from "@oh-my-pi/pi-tui";
-import { formatAge, formatBytes, formatDuration, formatNumber, getProjectDir, logger } from "@oh-my-pi/pi-utils";
+import type { AgentMessage, AgentTool } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { Usage } from "@pk-nerdsaver-ai/pi-ai";
+import { Container, Editor, Ellipsis, matchesKey, ScrollView, Text, type TUI } from "@pk-nerdsaver-ai/pi-tui";
+import { formatAge, formatBytes, formatDuration, formatNumber, getProjectDir, logger } from "@pk-nerdsaver-ai/pi-utils";
 import type { AdvisorMessageDetails } from "../../advisor";
 import { COLLAB_PROMPT_MESSAGE_TYPE, type CollabPromptDetails } from "../../collab/protocol";
 import type { KeyId } from "../../config/keybindings";

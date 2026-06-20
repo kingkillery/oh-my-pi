@@ -1,5 +1,5 @@
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent, MessageAttribution, ServiceTier, TextContent } from "@oh-my-pi/pi-ai";
+import type { AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { ImageContent, MessageAttribution, ServiceTier, TextContent } from "@pk-nerdsaver-ai/pi-ai";
 
 export const CURRENT_SESSION_VERSION = 3;
 

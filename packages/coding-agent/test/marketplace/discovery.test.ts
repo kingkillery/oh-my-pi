@@ -2,7 +2,7 @@
  * Discovery integration tests for OMP plugin registry reading.
  *
  * NOTE: listClaudePluginRoots() lives in discovery/helpers.ts which imports
- * @oh-my-pi/pi-natives (native Rust addon via glob). We cannot call it here.
+ * @pk-nerdsaver-ai/pi-natives (native Rust addon via glob). We cannot call it here.
  *
  * Instead these tests validate the structural contract that listClaudePluginRoots
  * depends on:
@@ -19,18 +19,18 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { InstalledPluginEntry } from "@oh-my-pi/pi-coding-agent/extensibility/plugins/marketplace";
+import type { InstalledPluginEntry } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/plugins/marketplace";
 import {
 	addInstalledPlugin,
 	buildPluginId,
 	readInstalledPluginsRegistry,
 	writeInstalledPluginsRegistry,
-} from "@oh-my-pi/pi-coding-agent/extensibility/plugins/marketplace";
+} from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/plugins/marketplace";
 
 // ── Inline validator ───────────────────────────────────────────────────────────
 //
 // Mirrors parseClaudePluginsRegistry() in discovery/helpers.ts exactly.
-// Kept here to avoid importing helpers.ts (which pulls in @oh-my-pi/pi-natives).
+// Kept here to avoid importing helpers.ts (which pulls in @pk-nerdsaver-ai/pi-natives).
 function validateClaudeRegistryFormat(content: string): Record<string, unknown> | null {
 	let data: Record<string, unknown>;
 	try {
@@ -51,7 +51,7 @@ function validateClaudeRegistryFormat(content: string): Record<string, unknown> 
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-// Matches getConfigDirName() — single source of truth is in @oh-my-pi/pi-utils,
+// Matches getConfigDirName() — single source of truth is in @pk-nerdsaver-ai/pi-utils,
 // but we know the value is ".omp" and hardcoding it here keeps tests free of
 // native-addon transitive imports.
 const OMP_CONFIG_DIR = ".omp";

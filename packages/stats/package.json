@@ -1,6 +1,6 @@
 {
 	"type": "module",
-	"name": "@oh-my-pi/omp-stats",
+	"name": "@pk-nerdsaver-ai/omp-stats",
 	"version": "16.0.6",
 	"description": "Local observability dashboard for pi AI usage statistics",
 	"homepage": "https://omp.sh",
@@ -23,7 +23,7 @@
 		"statistics"
 	],
 	"main": "./src/index.ts",
-	"types": "./src/index.ts",
+	"types": "./dist/types/index.d.ts",
 	"bin": {
 		"omp-stats": "./src/index.ts"
 	},
@@ -37,9 +37,9 @@
 		"fmt": "biome format --write ."
 	},
 	"dependencies": {
-		"@oh-my-pi/pi-ai": "catalog:",
-		"@oh-my-pi/pi-catalog": "catalog:",
-		"@oh-my-pi/pi-utils": "catalog:",
+		"@pk-nerdsaver-ai/pi-ai": "catalog:",
+		"@pk-nerdsaver-ai/pi-catalog": "catalog:",
+		"@pk-nerdsaver-ai/pi-utils": "catalog:",
 		"@tailwindcss/node": "catalog:",
 		"chart.js": "catalog:",
 		"date-fns": "catalog:",
@@ -63,27 +63,29 @@
 		"build.ts",
 		"tailwind.config.js",
 		"README.md",
-		"CHANGELOG.md"
+		"CHANGELOG.md",
+		"dist/types",
+		"dist/client"
 	],
 	"exports": {
 		".": {
-			"types": "./src/index.ts",
+			"types": "./dist/types/index.d.ts",
 			"import": "./src/index.ts"
 		},
 		"./*": {
-			"types": "./src/*.ts",
+			"types": "./dist/types/*.d.ts",
 			"import": "./src/*.ts"
 		},
 		"./client": {
-			"types": "./src/client/index.tsx",
+			"types": "./dist/types/client/index.d.ts",
 			"import": "./src/client/index.tsx"
 		},
 		"./client/*": {
-			"types": "./src/client/*.ts",
+			"types": "./dist/types/client/*.d.ts",
 			"import": "./src/client/*.ts"
 		},
 		"./client/components/*": {
-			"types": "./src/client/components/*.ts",
+			"types": "./dist/types/client/components/*.d.ts",
 			"import": "./src/client/components/*.ts"
 		},
 		"./*.js": "./src/*.ts"

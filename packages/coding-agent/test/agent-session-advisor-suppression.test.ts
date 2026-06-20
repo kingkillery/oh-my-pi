@@ -21,17 +21,17 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Agent, type AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { createMockModel, type MockModel, type MockResponse } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { IrcMessage } from "@oh-my-pi/pi-coding-agent/irc/bus";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { USER_INTERRUPT_LABEL } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { Snowflake } from "@oh-my-pi/pi-utils";
+import { Agent, type AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
+import { createMockModel, type MockModel, type MockResponse } from "@pk-nerdsaver-ai/pi-ai/providers/mock";
+import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
+import { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import type { IrcMessage } from "@pk-nerdsaver-ai/pi-coding-agent/irc/bus";
+import { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { AuthStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/auth-storage";
+import { USER_INTERRUPT_LABEL } from "@pk-nerdsaver-ai/pi-coding-agent/session/messages";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 
 const ADVISOR_TYPE = "advisor";
 

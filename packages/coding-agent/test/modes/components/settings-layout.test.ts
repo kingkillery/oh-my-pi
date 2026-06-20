@@ -4,8 +4,8 @@ import {
 	SETTINGS_SCHEMA,
 	type SettingTab,
 	TAB_GROUPS,
-} from "@oh-my-pi/pi-coding-agent/config/settings-schema";
-import { getSettingsForTab } from "@oh-my-pi/pi-coding-agent/modes/components/settings-defs";
+} from "@pk-nerdsaver-ai/pi-coding-agent/config/settings-schema";
+import { getSettingsForTab } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/settings-defs";
 
 interface UiShape {
 	tab: SettingTab;

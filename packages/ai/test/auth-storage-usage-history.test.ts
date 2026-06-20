@@ -14,9 +14,9 @@
  */
 import { Database } from "bun:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { AuthStorage, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai/auth-storage";
-import type { UsageHistoryEntry, UsageReport } from "@oh-my-pi/pi-ai/usage";
-import * as claudeUsage from "@oh-my-pi/pi-ai/usage/claude";
+import { AuthStorage, SqliteAuthCredentialStore } from "@pk-nerdsaver-ai/pi-ai/auth-storage";
+import type { UsageHistoryEntry, UsageReport } from "@pk-nerdsaver-ai/pi-ai/usage";
+import * as claudeUsage from "@pk-nerdsaver-ai/pi-ai/usage/claude";
 
 const HOUR = 3_600_000;
 // Hour-aligned base so bucket boundaries in the tests are explicit.

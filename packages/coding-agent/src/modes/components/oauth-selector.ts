@@ -1,5 +1,5 @@
-import { getOAuthProviders } from "@oh-my-pi/pi-ai/oauth";
-import type { OAuthProviderInfo } from "@oh-my-pi/pi-ai/oauth/types";
+import { getOAuthProviders } from "@pk-nerdsaver-ai/pi-ai/oauth";
+import type { OAuthProviderInfo } from "@pk-nerdsaver-ai/pi-ai/oauth/types";
 import {
 	Container,
 	extractPrintableText,
@@ -9,7 +9,7 @@ import {
 	type SgrMouseEvent,
 	Spacer,
 	TruncatedText,
-} from "@oh-my-pi/pi-tui";
+} from "@pk-nerdsaver-ai/pi-tui";
 import { theme } from "../../modes/theme/theme";
 import { matchesSelectCancel, matchesSelectDown, matchesSelectUp } from "../../modes/utils/keybinding-matchers";
 import type { AuthStorage, CredentialOriginKind } from "../../session/auth-storage";

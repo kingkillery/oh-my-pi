@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { createAbortableStream } from "@oh-my-pi/pi-utils";
-import { sanitizeText } from "@oh-my-pi/pi-utils/sanitize-text";
+import { createAbortableStream } from "@pk-nerdsaver-ai/pi-utils";
+import { sanitizeText } from "@pk-nerdsaver-ai/pi-utils/sanitize-text";
 import {
 	parseJsonlLenient,
 	readJsonl,
@@ -8,7 +8,7 @@ import {
 	readSseEvents,
 	readSseJson,
 	type ServerSentEvent,
-} from "@oh-my-pi/pi-utils/stream";
+} from "@pk-nerdsaver-ai/pi-utils/stream";
 
 const encoder = new TextEncoder();
 

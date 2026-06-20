@@ -1,6 +1,6 @@
-import { INTENT_FIELD } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { type Component, Loader, TERMINAL } from "@oh-my-pi/pi-tui";
+import { INTENT_FIELD } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { ImageContent } from "@pk-nerdsaver-ai/pi-ai";
+import { type Component, Loader, TERMINAL } from "@pk-nerdsaver-ai/pi-tui";
 import { extractTextContent } from "../../commit/utils";
 import { settings } from "../../config/settings";
 import { getFileSnapshotStore } from "../../edit/file-snapshot-store";

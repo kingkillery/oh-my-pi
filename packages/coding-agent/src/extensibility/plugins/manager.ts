@@ -10,7 +10,7 @@ import {
 	getProjectPluginOverridesPath,
 	isEnoent,
 	logger,
-} from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-utils";
 import { type GitSource, parseGitUrl } from "./git-url";
 import { installLegacyPiSpecifierShim, loadLegacyPiModule } from "./legacy-pi-compat";
 import { resolvePluginManifestEntries } from "./loader";

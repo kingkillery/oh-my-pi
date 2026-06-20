@@ -1,7 +1,7 @@
-import type { InMemorySnapshotStore } from "@oh-my-pi/hashline";
-import type { AgentTelemetryConfig, AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { FetchImpl, Model, ToolChoice } from "@oh-my-pi/pi-ai";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { InMemorySnapshotStore } from "@pk-nerdsaver-ai/hashline";
+import type { AgentTelemetryConfig, AgentTool } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { FetchImpl, Model, ToolChoice } from "@pk-nerdsaver-ai/pi-ai";
+import { logger } from "@pk-nerdsaver-ai/pi-utils";
 import type { AsyncJobManager } from "../async/job-manager";
 import type { Rule } from "../capability/rule";
 import type { PromptTemplate } from "../config/prompt-templates";

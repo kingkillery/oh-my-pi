@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import type { Rule } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import { resetActiveRulesForTests, setActiveRules } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import type { Skill } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
-import { resetActiveSkillsForTests, setActiveSkills } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
-import { InternalUrlRouter } from "@oh-my-pi/pi-coding-agent/internal-urls/router";
+import type { Rule } from "@pk-nerdsaver-ai/pi-coding-agent/capability/rule";
+import { resetActiveRulesForTests, setActiveRules } from "@pk-nerdsaver-ai/pi-coding-agent/capability/rule";
+import type { Skill } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/skills";
+import { resetActiveSkillsForTests, setActiveSkills } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/skills";
+import { InternalUrlRouter } from "@pk-nerdsaver-ai/pi-coding-agent/internal-urls/router";
 import {
 	applyInternalUrlCompletion,
 	extractInternalUrlContext,
 	getInternalUrlSuggestions,
 	isInternalUrlPrefix,
-} from "@oh-my-pi/pi-coding-agent/modes/internal-url-autocomplete";
-import { PromptActionAutocompleteProvider } from "@oh-my-pi/pi-coding-agent/modes/prompt-action-autocomplete";
+} from "@pk-nerdsaver-ai/pi-coding-agent/modes/internal-url-autocomplete";
+import { PromptActionAutocompleteProvider } from "@pk-nerdsaver-ai/pi-coding-agent/modes/prompt-action-autocomplete";
 
 function skill(name: string, description = ""): Skill {
 	return { name, description, filePath: `/skills/${name}/SKILL.md`, baseDir: `/skills/${name}`, source: "test" };

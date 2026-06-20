@@ -1,7 +1,12 @@
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@oh-my-pi/pi-agent-core";
-import { instrumentedCompleteSimple, resolveTelemetry } from "@oh-my-pi/pi-agent-core";
-import { type Api, completeSimple, type Model, type ToolExample } from "@oh-my-pi/pi-ai";
-import { prompt } from "@oh-my-pi/pi-utils";
+import type {
+	AgentTool,
+	AgentToolContext,
+	AgentToolResult,
+	AgentToolUpdateCallback,
+} from "@pk-nerdsaver-ai/pi-agent-core";
+import { instrumentedCompleteSimple, resolveTelemetry } from "@pk-nerdsaver-ai/pi-agent-core";
+import { type Api, completeSimple, type Model, type ToolExample } from "@pk-nerdsaver-ai/pi-ai";
+import { prompt } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
 import { extractTextContent } from "../commit/utils";
 

@@ -3,7 +3,7 @@
  * plan-review overlay, …). Every helper paints with `theme.boxSharp` glyphs and
  * the `border`/`accent` theme colors so all outlined overlays read identically.
  */
-import { padding, truncateToWidth, visibleWidth } from "@oh-my-pi/pi-tui";
+import { padding, truncateToWidth, visibleWidth } from "@pk-nerdsaver-ai/pi-tui";
 import { theme } from "../theme/theme";
 
 /** Pad or truncate a (possibly ANSI-styled) string to exactly `width` columns. */

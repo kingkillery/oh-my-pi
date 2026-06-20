@@ -9,9 +9,9 @@ import {
 	sanitizeSkillName,
 	toSkillFrontmatter,
 	writeManagedSkill,
-} from "@oh-my-pi/pi-coding-agent/autolearn/managed-skills";
-import { parseFrontmatter } from "@oh-my-pi/pi-utils";
-import { getAgentDir, setAgentDir } from "@oh-my-pi/pi-utils/dirs";
+} from "@pk-nerdsaver-ai/pi-coding-agent/autolearn/managed-skills";
+import { parseFrontmatter } from "@pk-nerdsaver-ai/pi-utils";
+import { getAgentDir, setAgentDir } from "@pk-nerdsaver-ai/pi-utils/dirs";
 
 describe("managed-skills primitives", () => {
 	let tempHome: string;

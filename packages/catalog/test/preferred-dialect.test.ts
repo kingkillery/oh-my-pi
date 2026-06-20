@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { FALLBACK_DIALECT, preferredDialect } from "@oh-my-pi/pi-catalog/identity";
+import { FALLBACK_DIALECT, preferredDialect } from "@pk-nerdsaver-ai/pi-catalog/identity";
 
 describe("preferredDialect", () => {
 	it("maps model IDs to dialects correctly", () => {

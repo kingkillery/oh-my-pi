@@ -1,4 +1,4 @@
-import type { AgentTool, AgentToolResult } from "@oh-my-pi/pi-agent-core";
+import type { AgentTool, AgentToolResult } from "@pk-nerdsaver-ai/pi-agent-core";
 import type { ToolSession } from "../../tools";
 import { ToolError } from "../../tools/tool-errors";
 import { EVAL_AGENT_BRIDGE_NAME, runEvalAgent } from "../agent-bridge";

@@ -114,7 +114,7 @@ const codingAgentRuntimePathPatterns = [
 ];
 
 const codingAgentNativeContentMarkers = [
-	"@oh-my-pi/pi-natives",
+	"@pk-nerdsaver-ai/pi-natives",
 	"pi-natives",
 	"native",
 	"readImageMetadata",
@@ -151,7 +151,7 @@ const codingAgentSingletonContentPatterns = [
 ];
 
 const codingAgentUiContentMarkers = [
-	"@oh-my-pi/pi-tui",
+	"@pk-nerdsaver-ai/pi-tui",
 	"InteractiveMode",
 	"InputController",
 	"StatusLine",

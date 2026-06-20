@@ -16,7 +16,7 @@
  * boot without forcing a startup reorder.
  */
 import * as path from "node:path";
-import { getAgentDir, getConfigRootDir, isEnoent, logger } from "@oh-my-pi/pi-utils";
+import { getAgentDir, getConfigRootDir, isEnoent, logger } from "@pk-nerdsaver-ai/pi-utils";
 import { YAML } from "bun";
 import { resolveConfigValue } from "../config/resolve-config-value";
 

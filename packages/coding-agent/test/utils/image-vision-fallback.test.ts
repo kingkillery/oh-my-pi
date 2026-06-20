@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AssistantMessage, completeSimple, Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import type { AssistantMessage, completeSimple, Model } from "@pk-nerdsaver-ai/pi-ai";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
 import {
 	type DescribeAttachedImagesDeps,
 	describeAttachedImagesForTextModel,
-} from "@oh-my-pi/pi-coding-agent/utils/image-vision-fallback";
+} from "@pk-nerdsaver-ai/pi-coding-agent/utils/image-vision-fallback";
 
 // 1x1 transparent PNG.
 const TINY_PNG_BASE64 =

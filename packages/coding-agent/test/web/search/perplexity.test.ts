@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import type { AuthStorage, FetchImpl } from "@oh-my-pi/pi-ai";
-import { PerplexityProvider, searchPerplexity } from "@oh-my-pi/pi-coding-agent/web/search/providers/perplexity";
+import type { AuthStorage, FetchImpl } from "@pk-nerdsaver-ai/pi-ai";
+import { PerplexityProvider, searchPerplexity } from "@pk-nerdsaver-ai/pi-coding-agent/web/search/providers/perplexity";
 
 const API_URL = "https://api.perplexity.ai/chat/completions";
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";

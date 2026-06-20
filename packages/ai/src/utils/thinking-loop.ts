@@ -32,7 +32,7 @@
  * `google-generative-ai` / `google-gemini-cli`, Vertex). Disable with
  * `PI_NO_THINKING_LOOP_GUARD=1`.
  */
-import { logger } from "@oh-my-pi/pi-utils";
+import { logger } from "@pk-nerdsaver-ai/pi-utils";
 import type { Api, AssistantMessage, Model, StreamOptions } from "../types";
 import { AssistantMessageEventStream } from "./event-stream";
 

@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, setSystemTime } from "bun:test";
-import { Agent, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { CustomTool } from "@oh-my-pi/pi-coding-agent/extensibility/custom-tools/types";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+import { Agent, type AgentTool } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { Model } from "@pk-nerdsaver-ai/pi-ai";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import type { CustomTool } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/custom-tools/types";
+import { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
 import { type } from "arktype";
 
 // Cache-stability invariant: when MCP servers reconnect with byte-identical tool

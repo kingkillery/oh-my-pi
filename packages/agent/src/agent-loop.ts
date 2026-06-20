@@ -18,14 +18,14 @@ import {
 	type TSchema,
 	validateToolArguments,
 	zodToWireSchema,
-} from "@oh-my-pi/pi-ai";
+} from "@pk-nerdsaver-ai/pi-ai";
 import {
 	type Dialect,
 	encodeInbandToolHistory,
 	renderInbandToolPrompt,
 	renderToolExamples,
 	wrapInbandToolStream,
-} from "@oh-my-pi/pi-ai/dialect";
+} from "@pk-nerdsaver-ai/pi-ai/dialect";
 import {
 	createHarmonyAuditEvent,
 	detectHarmonyLeakInAssistantMessage,
@@ -35,9 +35,9 @@ import {
 	isHarmonyLeakMitigationTarget,
 	recoverHarmonyToolCall,
 	signalListLabel,
-} from "@oh-my-pi/pi-ai/utils/harmony-leak";
-import { preferredDialect } from "@oh-my-pi/pi-catalog/identity";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-ai/utils/harmony-leak";
+import { preferredDialect } from "@pk-nerdsaver-ai/pi-catalog/identity";
+import { sanitizeText } from "@pk-nerdsaver-ai/pi-utils";
 import { type AgentRunCoverage, type AgentRunSummary, ToolCallBlockedError } from "./run-collector";
 import {
 	type AgentTelemetry,

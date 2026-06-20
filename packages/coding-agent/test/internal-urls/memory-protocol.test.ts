@@ -2,11 +2,11 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { InternalUrlRouter } from "@oh-my-pi/pi-coding-agent/internal-urls";
-import { getMemoryRoot } from "@oh-my-pi/pi-coding-agent/memories";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { getAgentDir, setAgentDir } from "@oh-my-pi/pi-utils";
+import { InternalUrlRouter } from "@pk-nerdsaver-ai/pi-coding-agent/internal-urls";
+import { getMemoryRoot } from "@pk-nerdsaver-ai/pi-coding-agent/memories";
+import { AgentRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/registry/agent-registry";
+import type { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { getAgentDir, setAgentDir } from "@pk-nerdsaver-ai/pi-utils";
 
 interface MemoryFixture {
 	cwd: string;

@@ -1,10 +1,10 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getOAuthProviders } from "@oh-my-pi/pi-ai/oauth";
-import { setNextRequestDebugPath } from "@oh-my-pi/pi-ai/utils/request-debug";
-import type { AutocompleteItem } from "@oh-my-pi/pi-tui";
-import { APP_NAME, setProjectDir } from "@oh-my-pi/pi-utils";
+import { getOAuthProviders } from "@pk-nerdsaver-ai/pi-ai/oauth";
+import { setNextRequestDebugPath } from "@pk-nerdsaver-ai/pi-ai/utils/request-debug";
+import type { AutocompleteItem } from "@pk-nerdsaver-ai/pi-tui";
+import { APP_NAME, setProjectDir } from "@pk-nerdsaver-ai/pi-utils";
 import { COLLAB_GUEST_ALLOWED_COMMANDS, CollabGuestLink } from "../collab/guest";
 import { CollabHost } from "../collab/host";
 import type { SettingPath, SettingValue } from "../config/settings";

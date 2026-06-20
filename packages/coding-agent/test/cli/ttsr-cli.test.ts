@@ -7,9 +7,9 @@ import {
 	type TtsrCommandArgs,
 	type TtsrScanArgs,
 	type TtsrTestArgs,
-} from "@oh-my-pi/pi-coding-agent/cli/ttsr-cli";
-import { resetSettingsForTest } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getProjectAgentDir, getProjectDir, setProjectDir } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-coding-agent/cli/ttsr-cli";
+import { resetSettingsForTest } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { getProjectAgentDir, getProjectDir, setProjectDir } from "@pk-nerdsaver-ai/pi-utils";
 
 // Capture stdout writes so assertions don't leak to the test runner.
 let stdout = "";

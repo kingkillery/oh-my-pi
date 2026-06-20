@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { computeMnemopiBankScope, extendRecallWithLegacyBanks } from "@oh-my-pi/pi-coding-agent/mnemopi/config";
+import { computeMnemopiBankScope, extendRecallWithLegacyBanks } from "@pk-nerdsaver-ai/pi-coding-agent/mnemopi/config";
 
 // Set up a fixture filesystem we can reuse across the two regression
 // suites — same shape as `~/.omp/memories/mnemopi/` on a real install.

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { AppendOnlyContextManager, AppendOnlyLog, StablePrefix } from "@oh-my-pi/pi-agent-core/append-only-context";
-import type { AgentContext, AgentTool } from "@oh-my-pi/pi-agent-core/types";
-import type { Message, Tool, ToolExample } from "@oh-my-pi/pi-ai";
+import {
+	AppendOnlyContextManager,
+	AppendOnlyLog,
+	StablePrefix,
+} from "@pk-nerdsaver-ai/pi-agent-core/append-only-context";
+import type { AgentContext, AgentTool } from "@pk-nerdsaver-ai/pi-agent-core/types";
+import type { Message, Tool, ToolExample } from "@pk-nerdsaver-ai/pi-ai";
 import { type } from "arktype";
 
 // ---------------------------------------------------------------------------

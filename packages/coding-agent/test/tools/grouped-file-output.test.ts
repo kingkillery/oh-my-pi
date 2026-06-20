@@ -3,7 +3,7 @@ import {
 	classifyGroupedLines,
 	formatGroupedFiles,
 	groupLineIndicesByBlank,
-} from "@oh-my-pi/pi-coding-agent/tools/grouped-file-output";
+} from "@pk-nerdsaver-ai/pi-coding-agent/tools/grouped-file-output";
 
 describe("formatGroupedFiles", () => {
 	it("nests subdirectories with deeper headings and blank-separates top groups", () => {

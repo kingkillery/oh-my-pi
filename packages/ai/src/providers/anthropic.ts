@@ -2,11 +2,11 @@ import * as nodeCrypto from "node:crypto";
 import * as fs from "node:fs";
 import { scheduler } from "node:timers/promises";
 import * as tls from "node:tls";
-import { isOfficialAnthropicApiUrl } from "@oh-my-pi/pi-catalog/compat/anthropic";
-import { mapEffortToAnthropicAdaptiveEffort } from "@oh-my-pi/pi-catalog/model-thinking";
-import { calculateCost } from "@oh-my-pi/pi-catalog/models";
-import { isAnthropicOAuthToken } from "@oh-my-pi/pi-catalog/utils";
-import { parseGitHubCopilotApiKey } from "@oh-my-pi/pi-catalog/wire/github-copilot";
+import { isOfficialAnthropicApiUrl } from "@pk-nerdsaver-ai/pi-catalog/compat/anthropic";
+import { mapEffortToAnthropicAdaptiveEffort } from "@pk-nerdsaver-ai/pi-catalog/model-thinking";
+import { calculateCost } from "@pk-nerdsaver-ai/pi-catalog/models";
+import { isAnthropicOAuthToken } from "@pk-nerdsaver-ai/pi-catalog/utils";
+import { parseGitHubCopilotApiKey } from "@pk-nerdsaver-ai/pi-catalog/wire/github-copilot";
 import {
 	$env,
 	extractHttpStatusFromError,
@@ -16,7 +16,7 @@ import {
 	isUnexpectedSocketCloseMessage,
 	logger,
 	readSseEvents,
-} from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-utils";
 import { isUsageLimitError } from "../rate-limit-utils";
 import { getEnvApiKey, OUTPUT_FALLBACK_BUFFER } from "../stream";
 import type {

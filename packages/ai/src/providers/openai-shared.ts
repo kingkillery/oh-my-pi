@@ -1,8 +1,8 @@
-import type { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { toFirepassWireModelId, toFireworksWireModelId } from "@oh-my-pi/pi-catalog/fireworks-model-id";
-import { isGlm52ReasoningEffortModelId } from "@oh-my-pi/pi-catalog/identity";
-import { getSupportedEfforts } from "@oh-my-pi/pi-catalog/model-thinking";
-import { calculateCost } from "@oh-my-pi/pi-catalog/models";
+import type { Effort } from "@pk-nerdsaver-ai/pi-catalog/effort";
+import { toFirepassWireModelId, toFireworksWireModelId } from "@pk-nerdsaver-ai/pi-catalog/fireworks-model-id";
+import { isGlm52ReasoningEffortModelId } from "@pk-nerdsaver-ai/pi-catalog/identity";
+import { getSupportedEfforts } from "@pk-nerdsaver-ai/pi-catalog/model-thinking";
+import { calculateCost } from "@pk-nerdsaver-ai/pi-catalog/models";
 import type {
 	OpenAICompat,
 	OpenAIReasoningDisableMode,
@@ -12,9 +12,9 @@ import type {
 	ResolvedOpenAIResponsesCompat,
 	ResolvedOpenAISharedCompat,
 	VercelGatewayRouting,
-} from "@oh-my-pi/pi-catalog/types";
-import { parseGitHubCopilotApiKey } from "@oh-my-pi/pi-catalog/wire/github-copilot";
-import { $env, extractHttpStatusFromError, logger, structuredCloneJSON } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-catalog/types";
+import { parseGitHubCopilotApiKey } from "@pk-nerdsaver-ai/pi-catalog/wire/github-copilot";
+import { $env, extractHttpStatusFromError, logger, structuredCloneJSON } from "@pk-nerdsaver-ai/pi-utils";
 import {
 	type Api,
 	type AssistantMessage,

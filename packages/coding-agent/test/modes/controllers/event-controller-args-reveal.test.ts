@@ -6,14 +6,14 @@
  * how assistant text snaps at message_end.
  */
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { resetSettingsForTest, Settings, settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ToolExecutionComponent } from "@oh-my-pi/pi-coding-agent/modes/components/tool-execution";
-import { EventController } from "@oh-my-pi/pi-coding-agent/modes/controllers/event-controller";
-import { STREAMING_REVEAL_FRAME_MS } from "@oh-my-pi/pi-coding-agent/modes/controllers/streaming-reveal";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import type { AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
+import type { AssistantMessage } from "@pk-nerdsaver-ai/pi-ai";
+import { resetSettingsForTest, Settings, settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { ToolExecutionComponent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/tool-execution";
+import { EventController } from "@pk-nerdsaver-ai/pi-coding-agent/modes/controllers/event-controller";
+import { STREAMING_REVEAL_FRAME_MS } from "@pk-nerdsaver-ai/pi-coding-agent/modes/controllers/streaming-reveal";
+import { initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@pk-nerdsaver-ai/pi-coding-agent/modes/types";
+import type { AgentSessionEvent } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
 
 beforeAll(async () => {
 	await initTheme();

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { EnhancedPasteController } from "@oh-my-pi/pi-coding-agent/utils/enhanced-paste";
+import { EnhancedPasteController } from "@pk-nerdsaver-ai/pi-coding-agent/utils/enhanced-paste";
 
 /**
  * Regression for https://github.com/can1357/oh-my-pi/issues/2127

@@ -2,13 +2,13 @@ import { afterEach, beforeAll, beforeEach, describe, expect, test } from "bun:te
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentTool } from "@oh-my-pi/pi-agent-core";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { EDIT_MODE_STRATEGIES } from "@oh-my-pi/pi-coding-agent/edit";
-import { ToolExecutionComponent } from "@oh-my-pi/pi-coding-agent/modes/components/tool-execution";
-import { theme as activeTheme, initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { previewWindowRows } from "@oh-my-pi/pi-coding-agent/tools/render-utils";
-import { TUI, visibleWidth } from "@oh-my-pi/pi-tui";
+import type { AgentTool } from "@pk-nerdsaver-ai/pi-agent-core";
+import { resetSettingsForTest, Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { EDIT_MODE_STRATEGIES } from "@pk-nerdsaver-ai/pi-coding-agent/edit";
+import { ToolExecutionComponent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/tool-execution";
+import { theme as activeTheme, initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import { previewWindowRows } from "@pk-nerdsaver-ai/pi-coding-agent/tools/render-utils";
+import { TUI, visibleWidth } from "@pk-nerdsaver-ai/pi-tui";
 import { VirtualTerminal } from "../../tui/test/virtual-terminal";
 
 // The streaming edit preview is a fixed-height tail window ("cursor"): the last

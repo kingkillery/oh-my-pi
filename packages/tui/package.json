@@ -1,6 +1,6 @@
 {
 	"type": "module",
-	"name": "@oh-my-pi/pi-tui",
+	"name": "@pk-nerdsaver-ai/pi-tui",
 	"version": "16.0.6",
 	"description": "Terminal User Interface library with differential rendering for efficient text-based applications",
 	"homepage": "https://omp.sh",
@@ -27,7 +27,7 @@
 		"cli"
 	],
 	"main": "./src/index.ts",
-	"types": "./src/index.ts",
+	"types": "./dist/types/index.d.ts",
 	"scripts": {
 		"check": "biome check . && bun run check:types",
 		"check:types": "tsgo -p tsconfig.json --noEmit",
@@ -37,8 +37,8 @@
 		"fmt": "biome format --write ."
 	},
 	"dependencies": {
-		"@oh-my-pi/pi-natives": "catalog:",
-		"@oh-my-pi/pi-utils": "catalog:",
+		"@pk-nerdsaver-ai/pi-natives": "catalog:",
+		"@pk-nerdsaver-ai/pi-utils": "catalog:",
 		"lru-cache": "catalog:",
 		"marked": "catalog:"
 	},
@@ -52,19 +52,20 @@
 	"files": [
 		"src",
 		"README.md",
-		"CHANGELOG.md"
+		"CHANGELOG.md",
+		"dist/types"
 	],
 	"exports": {
 		".": {
-			"types": "./src/index.ts",
+			"types": "./dist/types/index.d.ts",
 			"import": "./src/index.ts"
 		},
 		"./*": {
-			"types": "./src/*.ts",
+			"types": "./dist/types/*.d.ts",
 			"import": "./src/*.ts"
 		},
 		"./components/*": {
-			"types": "./src/components/*.ts",
+			"types": "./dist/types/components/*.d.ts",
 			"import": "./src/components/*.ts"
 		},
 		"./*.js": "./src/*.ts"

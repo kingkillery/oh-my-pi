@@ -9,10 +9,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { InternalUrlRouter } from "@oh-my-pi/pi-coding-agent/internal-urls";
-import { resetForTests as resetCacheForTests } from "@oh-my-pi/pi-coding-agent/tools/github-cache";
-import * as git from "@oh-my-pi/pi-coding-agent/utils/git";
+import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { InternalUrlRouter } from "@pk-nerdsaver-ai/pi-coding-agent/internal-urls";
+import { resetForTests as resetCacheForTests } from "@pk-nerdsaver-ai/pi-coding-agent/tools/github-cache";
+import * as git from "@pk-nerdsaver-ai/pi-coding-agent/utils/git";
 
 let tempDir: string;
 let originalEnv: string | undefined;

@@ -1,4 +1,4 @@
-import type { Effort } from "@oh-my-pi/pi-catalog/effort";
+import type { Effort } from "@pk-nerdsaver-ai/pi-catalog/effort";
 import type {
 	AssistantMessage,
 	AssistantMessageEventStream,

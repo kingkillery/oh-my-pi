@@ -12,22 +12,22 @@
  *   with `{ summary, shortSummary? }`.
  */
 
-import { ProviderHttpError } from "@oh-my-pi/pi-ai/errors";
-import { parseTextSignature } from "@oh-my-pi/pi-ai/providers/openai-shared";
-import { transformMessages } from "@oh-my-pi/pi-ai/providers/transform-messages";
-import type { AssistantMessage, FetchImpl, Message, Model } from "@oh-my-pi/pi-ai/types";
+import { ProviderHttpError } from "@pk-nerdsaver-ai/pi-ai/errors";
+import { parseTextSignature } from "@pk-nerdsaver-ai/pi-ai/providers/openai-shared";
+import { transformMessages } from "@pk-nerdsaver-ai/pi-ai/providers/transform-messages";
+import type { AssistantMessage, FetchImpl, Message, Model } from "@pk-nerdsaver-ai/pi-ai/types";
 import {
 	getOpenAIResponsesHistoryItems,
 	getOpenAIResponsesHistoryPayload,
 	normalizeResponsesToolCallId,
-} from "@oh-my-pi/pi-ai/utils";
+} from "@pk-nerdsaver-ai/pi-ai/utils";
 import {
 	CODEX_BASE_URL,
 	getCodexAccountId,
 	OPENAI_HEADER_VALUES,
 	OPENAI_HEADERS,
-} from "@oh-my-pi/pi-catalog/wire/codex";
-import { logger } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-catalog/wire/codex";
+import { logger } from "@pk-nerdsaver-ai/pi-utils";
 
 // ============================================================================
 // Public types

@@ -5,7 +5,7 @@ import {
 	type SgrMouseEvent,
 	truncateToWidth,
 	visibleWidth,
-} from "@oh-my-pi/pi-tui";
+} from "@pk-nerdsaver-ai/pi-tui";
 import {
 	enableAutoTheme,
 	getAvailableThemes,

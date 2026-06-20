@@ -7,7 +7,7 @@ import {
 	AppendOnlyContextManager,
 	INTENT_FIELD,
 	type ThinkingLevel,
-} from "@oh-my-pi/pi-agent-core";
+} from "@pk-nerdsaver-ai/pi-agent-core";
 import {
 	type Context,
 	type CredentialDisabledEvent,
@@ -15,14 +15,14 @@ import {
 	type Model,
 	type SimpleStreamOptions,
 	streamSimple,
-} from "@oh-my-pi/pi-ai";
-import type { Dialect } from "@oh-my-pi/pi-ai/dialect";
+} from "@pk-nerdsaver-ai/pi-ai";
+import type { Dialect } from "@pk-nerdsaver-ai/pi-ai/dialect";
 import {
 	getOpenAICodexTransportDetails,
 	prewarmOpenAICodexResponses,
-} from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
-import { FALLBACK_DIALECT, preferredDialect } from "@oh-my-pi/pi-catalog/identity";
-import type { Component } from "@oh-my-pi/pi-tui";
+} from "@pk-nerdsaver-ai/pi-ai/providers/openai-codex-responses";
+import { FALLBACK_DIALECT, preferredDialect } from "@pk-nerdsaver-ai/pi-catalog/identity";
+import type { Component } from "@pk-nerdsaver-ai/pi-tui";
 import {
 	$env,
 	$flag,
@@ -34,7 +34,7 @@ import {
 	postmortem,
 	prompt,
 	Snowflake,
-} from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-utils";
 import { ADVISOR_READONLY_TOOL_NAMES, discoverWatchdogFiles } from "./advisor";
 import { type AsyncJob, AsyncJobManager } from "./async";
 import { AutoLearnController, buildAutoLearnInstructions } from "./autolearn/controller";
@@ -1091,7 +1091,7 @@ function buildMCPPromptCommands(manager: MCPManager): LoadedCustomCommand[] {
  * const { session } = await createAgentSession();
  *
  * // With explicit model
- * import { getModel } from '@oh-my-pi/pi-ai';
+ * import { getModel } from '@pk-nerdsaver-ai/pi-ai';
  * const { session } = await createAgentSession({
  *   model: getModel('anthropic', 'claude-opus-4-5'),
  *   thinkingLevel: 'high',

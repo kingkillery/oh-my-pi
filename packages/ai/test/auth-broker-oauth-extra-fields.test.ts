@@ -11,7 +11,7 @@ import {
 	RemoteAuthCredentialStore,
 	SqliteAuthCredentialStore,
 	startAuthBroker,
-} from "@oh-my-pi/pi-ai";
+} from "@pk-nerdsaver-ai/pi-ai";
 
 // MCP OAuth credentials extend the base OAuthCredential with refresh material
 // (tokenUrl/clientId/clientSecret/resource) embedded so token refresh works for

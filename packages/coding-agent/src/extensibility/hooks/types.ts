@@ -1,6 +1,6 @@
-import type { ImageContent, Message, Model, TextContent } from "@oh-my-pi/pi-ai";
-import type { Component, TUI } from "@oh-my-pi/pi-tui";
-import type { logger as PiLogger } from "@oh-my-pi/pi-utils";
+import type { ImageContent, Message, Model, TextContent } from "@pk-nerdsaver-ai/pi-ai";
+import type { Component, TUI } from "@pk-nerdsaver-ai/pi-tui";
+import type { logger as PiLogger } from "@pk-nerdsaver-ai/pi-utils";
 import type { Type } from "arktype";
 import type * as zod from "zod/v4";
 import type { ModelRegistry } from "../../config/model-registry";

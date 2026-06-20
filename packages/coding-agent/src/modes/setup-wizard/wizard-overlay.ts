@@ -6,8 +6,8 @@ import {
 	parseSgrMouse,
 	truncateToWidth,
 	visibleWidth,
-} from "@oh-my-pi/pi-tui";
-import { APP_NAME } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-tui";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import { gradientLogo, PI_LOGO } from "../components/welcome";
 import { theme } from "../theme/theme";
 import type { InteractiveModeContext } from "../types";

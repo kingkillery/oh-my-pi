@@ -6,9 +6,9 @@
  * (and exit with code 1). This test verifies the guard skips silent-abort.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SILENT_ABORT_MARKER } from "@oh-my-pi/pi-coding-agent/session/messages";
+import type { AssistantMessage } from "@pk-nerdsaver-ai/pi-ai";
+import type { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
+import { SILENT_ABORT_MARKER } from "@pk-nerdsaver-ai/pi-coding-agent/session/messages";
 
 function makeAssistantMessage(overrides: Partial<AssistantMessage> = {}): AssistantMessage {
 	return {
@@ -69,7 +69,7 @@ describe("Print-mode silent-abort regression", () => {
 	});
 
 	it("does not write silent-abort marker to stderr or exit non-zero", async () => {
-		const { runPrintMode } = await import("@oh-my-pi/pi-coding-agent/modes/print-mode");
+		const { runPrintMode } = await import("@pk-nerdsaver-ai/pi-coding-agent/modes/print-mode");
 
 		const silentAbortMsg = makeAssistantMessage({
 			stopReason: "aborted",
@@ -88,7 +88,7 @@ describe("Print-mode silent-abort regression", () => {
 	});
 
 	it("writes real error messages to stderr and exits non-zero", async () => {
-		const { runPrintMode } = await import("@oh-my-pi/pi-coding-agent/modes/print-mode");
+		const { runPrintMode } = await import("@pk-nerdsaver-ai/pi-coding-agent/modes/print-mode");
 
 		const errorMsg = makeAssistantMessage({
 			stopReason: "error",

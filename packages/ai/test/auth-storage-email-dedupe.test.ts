@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { AuthStorage, type OAuthCredential, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai/auth-storage";
+import { AuthStorage, type OAuthCredential, SqliteAuthCredentialStore } from "@pk-nerdsaver-ai/pi-ai/auth-storage";
 
 const LEGACY_TIMESTAMP = 1_700_000_000;
 

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import "./setup";
-import { BeamMemory } from "@oh-my-pi/pi-mnemopi/core/beam";
-import type { EpisodicGraph, RelatedMemory } from "@oh-my-pi/pi-mnemopi/core/episodic-graph";
+import { BeamMemory } from "@pk-nerdsaver-ai/pi-mnemopi/core/beam";
+import type { EpisodicGraph, RelatedMemory } from "@pk-nerdsaver-ai/pi-mnemopi/core/episodic-graph";
 
 const previousProactive = process.env.MNEMOPI_PROACTIVE_LINKING;
 

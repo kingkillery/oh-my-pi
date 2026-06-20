@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { getBundledModels } from "@oh-my-pi/pi-catalog/models";
+import { getBundledModels } from "@pk-nerdsaver-ai/pi-catalog/models";
 import {
 	modelLacksWebpSupport,
 	normalizeModelContextImages,
 	webpExclusionForModel,
-} from "@oh-my-pi/pi-coding-agent/utils/image-loading";
+} from "@pk-nerdsaver-ai/pi-coding-agent/utils/image-loading";
 
 // 1x1 red PNG seed, upscaled + re-encoded as WebP at test time so no binary
 // fixture is checked in. Bun.Image sniffs format from bytes.

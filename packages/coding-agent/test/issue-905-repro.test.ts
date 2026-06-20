@@ -16,9 +16,9 @@ import { afterAll, beforeAll, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { AuthStorage } from "@oh-my-pi/pi-ai";
-import { runModelsListing } from "@oh-my-pi/pi-coding-agent/cli/models-cli";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
+import { AuthStorage } from "@pk-nerdsaver-ai/pi-ai";
+import { runModelsListing } from "@pk-nerdsaver-ai/pi-coding-agent/cli/models-cli";
+import { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
 
 let tmp: string;
 let extPath: string;

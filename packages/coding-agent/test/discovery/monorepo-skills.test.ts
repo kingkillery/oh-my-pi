@@ -9,10 +9,10 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { clearCache } from "@oh-my-pi/pi-coding-agent/capability/fs";
-import type { Skill } from "@oh-my-pi/pi-coding-agent/capability/skill";
-import type { LoadContext, LoadResult } from "@oh-my-pi/pi-coding-agent/capability/types";
-import { scanSkillsFromDir } from "@oh-my-pi/pi-coding-agent/discovery/helpers";
+import { clearCache } from "@pk-nerdsaver-ai/pi-coding-agent/capability/fs";
+import type { Skill } from "@pk-nerdsaver-ai/pi-coding-agent/capability/skill";
+import type { LoadContext, LoadResult } from "@pk-nerdsaver-ai/pi-coding-agent/capability/types";
+import { scanSkillsFromDir } from "@pk-nerdsaver-ai/pi-coding-agent/discovery/helpers";
 
 function writeSkill(dir: string, name: string, description: string): void {
 	const skillDir = path.join(dir, name);

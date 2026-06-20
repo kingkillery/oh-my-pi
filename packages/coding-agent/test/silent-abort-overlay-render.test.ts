@@ -11,12 +11,12 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentHubOverlayComponent } from "@oh-my-pi/pi-coding-agent/modes/components/agent-hub";
-import type { ObservableSession } from "@oh-my-pi/pi-coding-agent/modes/session-observer-registry";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { SILENT_ABORT_MARKER } from "@oh-my-pi/pi-coding-agent/session/messages";
+import { resetSettingsForTest, Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { AgentHubOverlayComponent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/agent-hub";
+import type { ObservableSession } from "@pk-nerdsaver-ai/pi-coding-agent/modes/session-observer-registry";
+import { initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import { AgentRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/registry/agent-registry";
+import { SILENT_ABORT_MARKER } from "@pk-nerdsaver-ai/pi-coding-agent/session/messages";
 
 const SESSION_ID = "test-session-1";
 
@@ -33,7 +33,7 @@ function makeSubagentRegistry(sessions: ObservableSession[]) {
 		onChange: () => () => {},
 		setMainSession: () => {},
 		getActiveSubagentCount: () => sessions.filter(s => s.status === "active").length,
-	} as unknown as import("@oh-my-pi/pi-coding-agent/modes/session-observer-registry").SessionObserverRegistry;
+	} as unknown as import("@pk-nerdsaver-ai/pi-coding-agent/modes/session-observer-registry").SessionObserverRegistry;
 }
 
 function makeHub(sessionFile: string, observed: ObservableSession[]): AgentHubOverlayComponent {

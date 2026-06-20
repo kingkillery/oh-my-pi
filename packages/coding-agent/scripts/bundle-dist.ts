@@ -2,7 +2,7 @@
 
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { isEnoent } from "@oh-my-pi/pi-utils";
+import { isEnoent } from "@pk-nerdsaver-ai/pi-utils";
 
 const packageDir = path.join(import.meta.dir, "..");
 const outDir = path.join(packageDir, "dist");
@@ -69,7 +69,7 @@ async function main(): Promise<void> {
 			"--external",
 			"mupdf",
 			"--external",
-			"@oh-my-pi/pi-natives",
+			"@pk-nerdsaver-ai/pi-natives",
 			"--external",
 			"@huggingface/transformers",
 			"--external",

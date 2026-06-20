@@ -9,7 +9,7 @@ import {
 	buildMiseUpgradeArgs,
 	replaceBinaryForUpdate,
 	resolveUpdateMethodForTest,
-} from "@oh-my-pi/pi-coding-agent/cli/update-cli";
+} from "@pk-nerdsaver-ai/pi-coding-agent/cli/update-cli";
 
 const tempDirs: string[] = [];
 
@@ -106,21 +106,21 @@ describe("update-cli bun install command", () => {
 			"-g",
 			"--no-cache",
 			"--registry=https://registry.npmjs.org/",
-			"@oh-my-pi/pi-coding-agent@15.7.6",
+			"@pk-nerdsaver-ai/pi-coding-agent@15.7.6",
 		]);
 	});
 
 	it("pins the native addon core and the platform-specific leaf to the same version so the loader sentinel cannot drift on supported tags", () => {
 		// Regression: bun install -g <pkg>@<v> would update only the top-level
-		// package, leaving @oh-my-pi/pi-natives and @oh-my-pi/pi-natives-<tag>
+		// package, leaving @pk-nerdsaver-ai/pi-natives and @pk-nerdsaver-ai/pi-natives-<tag>
 		// at their previous version. The next launch then loaded a stale .node
 		// file and aborted at validateLoadedBindings with `The .node file on
 		// disk is from a different release than this loader`. See
 		// https://github.com/can1357/oh-my-pi/issues/1824.
 		for (const tag of ["linux-x64", "linux-arm64", "darwin-x64", "darwin-arm64", "win32-x64"]) {
 			const args = buildBunInstallArgs("15.9.0", tag);
-			expect(args).toContain("@oh-my-pi/pi-natives@15.9.0");
-			expect(args).toContain(`@oh-my-pi/pi-natives-${tag}@15.9.0`);
+			expect(args).toContain("@pk-nerdsaver-ai/pi-natives@15.9.0");
+			expect(args).toContain(`@pk-nerdsaver-ai/pi-natives-${tag}@15.9.0`);
 		}
 	});
 
@@ -131,8 +131,8 @@ describe("update-cli bun install command", () => {
 		// pipeline doesn't publish, otherwise bun aborts with EBADPLATFORM
 		// and hides the real diagnostic from `loadNative`'s aggregated error.
 		const args = buildBunInstallArgs("15.9.0", "linux-arm");
-		expect(args).toContain("@oh-my-pi/pi-natives@15.9.0");
-		expect(args.some(arg => arg.startsWith("@oh-my-pi/pi-natives-"))).toBe(false);
+		expect(args).toContain("@pk-nerdsaver-ai/pi-natives@15.9.0");
+		expect(args.some(arg => arg.startsWith("@pk-nerdsaver-ai/pi-natives-"))).toBe(false);
 	});
 });
 

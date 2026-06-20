@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { isEnoent, logger, ptree, untilAborted } from "@oh-my-pi/pi-utils";
+import { isEnoent, logger, ptree, untilAborted } from "@pk-nerdsaver-ai/pi-utils";
 import { ToolAbortError, throwIfAborted } from "../tools/tool-errors";
 import { applyWorkspaceEdit } from "./edits";
 import { getLspmuxCommand, isLspmuxSupported } from "./lspmux";

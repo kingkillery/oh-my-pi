@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import CommitCommand from "@oh-my-pi/pi-coding-agent/commands/commit";
-import * as commitModule from "@oh-my-pi/pi-coding-agent/commit";
-import * as themeModule from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { postmortem } from "@oh-my-pi/pi-utils";
+import CommitCommand from "@pk-nerdsaver-ai/pi-coding-agent/commands/commit";
+import * as commitModule from "@pk-nerdsaver-ai/pi-coding-agent/commit";
+import * as themeModule from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import { postmortem } from "@pk-nerdsaver-ai/pi-utils";
 
 describe("omp commit command lifecycle (issue #1041)", () => {
 	afterEach(() => {

@@ -1,8 +1,8 @@
-export { truncate } from "@oh-my-pi/pi-utils";
+export { truncate } from "@pk-nerdsaver-ai/pi-utils";
 
 import * as fs from "node:fs/promises";
 import path from "node:path";
-import { isEnoent } from "@oh-my-pi/pi-utils";
+import { isEnoent } from "@pk-nerdsaver-ai/pi-utils";
 import { type Theme, theme } from "../modes/theme/theme";
 import { formatGroupedFiles } from "../tools/grouped-file-output";
 import { formatPathRelativeToCwd, resolveToCwd } from "../tools/path-utils";

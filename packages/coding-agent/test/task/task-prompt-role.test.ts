@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { prompt } from "@oh-my-pi/pi-utils";
+import { prompt } from "@pk-nerdsaver-ai/pi-utils";
 import taskDescriptionTemplate from "../../src/prompts/tools/task.md" with { type: "text" };
 
 // Contract: the task tool description the model sees advertises the `role`

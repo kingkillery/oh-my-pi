@@ -1,5 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { type RequestBody, transformRequestBody } from "@oh-my-pi/pi-ai/providers/openai-codex/request-transformer";
+import {
+	type RequestBody,
+	transformRequestBody,
+} from "@pk-nerdsaver-ai/pi-ai/providers/openai-codex/request-transformer";
 import { createCodexModel } from "./helpers";
 
 describe("openai-codex include handling", () => {

@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import * as tls from "node:tls";
-import { Effort } from "@oh-my-pi/pi-ai";
+import { Effort } from "@pk-nerdsaver-ai/pi-ai";
 import {
 	applyClaudeToolPrefix,
 	buildAnthropicClientOptions,
@@ -20,8 +20,8 @@ import {
 	mapStainlessOs,
 	streamAnthropic,
 	stripClaudeToolPrefix,
-} from "@oh-my-pi/pi-ai/providers/anthropic";
-import { getEnvApiKey } from "@oh-my-pi/pi-ai/stream";
+} from "@pk-nerdsaver-ai/pi-ai/providers/anthropic";
+import { getEnvApiKey } from "@pk-nerdsaver-ai/pi-ai/stream";
 import type {
 	AssistantMessage,
 	Context,
@@ -30,8 +30,8 @@ import type {
 	TJsonSchema,
 	TokenTaskBudget,
 	Tool,
-} from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+} from "@pk-nerdsaver-ai/pi-ai/types";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import { type as arkType } from "arktype";
 import { withEnv } from "./helpers";
 

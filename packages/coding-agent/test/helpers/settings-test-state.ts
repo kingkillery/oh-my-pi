@@ -1,6 +1,6 @@
 import { vi } from "bun:test";
-import { resetSettingsForTest } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { isTuiTight, setTuiTight } from "@oh-my-pi/pi-tui";
+import { resetSettingsForTest } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { isTuiTight, setTuiTight } from "@pk-nerdsaver-ai/pi-tui";
 import {
 	getAgentDir,
 	getDefaultTabWidth,
@@ -8,7 +8,7 @@ import {
 	setAgentDir,
 	setDefaultTabWidth,
 	setProjectDir,
-} from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-utils";
 
 export interface SettingsTestState {
 	agentDir: string;

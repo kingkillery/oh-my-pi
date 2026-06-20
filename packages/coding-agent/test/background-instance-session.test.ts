@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { MemorySessionStorage } from "@oh-my-pi/pi-coding-agent/session/session-storage";
+import { SessionManager } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-manager";
+import { MemorySessionStorage } from "@pk-nerdsaver-ai/pi-coding-agent/session/session-storage";
 
 describe("background instance sessions", () => {
 	it("persists an active background instance and archives it", async () => {

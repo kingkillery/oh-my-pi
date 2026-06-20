@@ -6,12 +6,12 @@ import {
 	truncateToWidth as nativeTruncateToWidth,
 	wrapTextWithAnsi as nativeWrapTextWithAnsi,
 	type SliceResult,
-} from "@oh-my-pi/pi-natives";
-import { getDefaultTabWidth, getIndentation } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-natives";
+import { getDefaultTabWidth, getIndentation } from "@pk-nerdsaver-ai/pi-utils";
 
-export { Ellipsis } from "@oh-my-pi/pi-natives";
+export { Ellipsis } from "@pk-nerdsaver-ai/pi-natives";
 
-export { getDefaultTabWidth, getIndentation } from "@oh-my-pi/pi-utils";
+export { getDefaultTabWidth, getIndentation } from "@pk-nerdsaver-ai/pi-utils";
 
 export type TextSizingScale = 1 | 2 | 3;
 export type TextSizingVerticalAlign = "top" | "bottom" | "center";

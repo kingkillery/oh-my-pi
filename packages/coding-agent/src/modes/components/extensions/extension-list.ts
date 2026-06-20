@@ -13,7 +13,7 @@ import {
 	ScrollView,
 	truncateToWidth,
 	visibleWidth,
-} from "@oh-my-pi/pi-tui";
+} from "@pk-nerdsaver-ai/pi-tui";
 import { isProviderEnabled } from "../../../discovery";
 import { theme } from "../../../modes/theme/theme";
 import { matchesSelectDown, matchesSelectUp } from "../../utils/keybinding-matchers";

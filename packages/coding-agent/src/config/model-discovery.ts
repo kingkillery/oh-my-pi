@@ -5,16 +5,16 @@
  * `discoverModelsByProviderType` with a `DiscoveryContext`; built-in provider
  * discovery lives in pi-catalog's provider-models.
  */
-import { type ApiKey, type FetchImpl, withAuth } from "@oh-my-pi/pi-ai";
-import type { Api, Model } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import { type ApiKey, type FetchImpl, withAuth } from "@pk-nerdsaver-ai/pi-ai";
+import type { Api, Model } from "@pk-nerdsaver-ai/pi-ai/types";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import {
 	getBundledModelReferenceIndex,
 	resolveModelReference,
 	stripBracketedModelIdAffixes,
-} from "@oh-my-pi/pi-catalog/identity";
-import type { ModelSpec } from "@oh-my-pi/pi-catalog/types";
-import { isRecord } from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-catalog/identity";
+import type { ModelSpec } from "@pk-nerdsaver-ai/pi-catalog/types";
+import { isRecord } from "@pk-nerdsaver-ai/pi-utils";
 import type { ProviderDiscovery } from "./models-config-schema";
 
 // Default cap on `max_tokens` for auto-discovered models that do not advertise

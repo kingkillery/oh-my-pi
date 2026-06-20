@@ -4,7 +4,7 @@ import {
 	CombinedAutocompleteProvider,
 	getKeybindings,
 	type SlashCommand,
-} from "@oh-my-pi/pi-tui";
+} from "@pk-nerdsaver-ai/pi-tui";
 import { formatKeyHints, type KeybindingsManager } from "../config/keybindings";
 import { isSettingsInitialized, settings } from "../config/settings";
 import { applyEmojiCompletion, getEmojiSuggestions, isEmojiPrefix, tryEmojiInlineReplace } from "./emoji-autocomplete";

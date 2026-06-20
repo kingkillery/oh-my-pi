@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { normalizeAnthropicToolSchema } from "@oh-my-pi/pi-ai/providers/anthropic";
-import type { Tool } from "@oh-my-pi/pi-ai/types";
+import { normalizeAnthropicToolSchema } from "@pk-nerdsaver-ai/pi-ai/providers/anthropic";
+import type { Tool } from "@pk-nerdsaver-ai/pi-ai/types";
 import {
 	adaptSchemaForStrict,
 	decontaminateZodInstance,
@@ -10,7 +10,7 @@ import {
 	normalizeSchemaForGoogle,
 	toolWireSchema,
 	zodToWireSchema,
-} from "@oh-my-pi/pi-ai/utils/schema";
+} from "@pk-nerdsaver-ai/pi-ai/utils/schema";
 import { type } from "arktype";
 import { z } from "zod/v4";
 

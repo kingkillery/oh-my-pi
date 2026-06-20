@@ -8,7 +8,7 @@
  */
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { isEnoent, logger } from "@oh-my-pi/pi-utils";
+import { isEnoent, logger } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
 import type { SnapshotResponse } from "./types";
 import { snapshotResponseSchema } from "./wire-schemas";

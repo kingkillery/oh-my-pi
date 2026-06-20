@@ -1,7 +1,7 @@
 /**
  * Regression for the Windows `bun install -g` update path: when an `omp`
  * process is running, bun cannot overwrite a locked
- * `node_modules/@oh-my-pi/pi-natives/native/pi_natives.win32-x64.node` during
+ * `node_modules/@pk-nerdsaver-ai/pi-natives/native/pi_natives.win32-x64.node` during
  * package update and silently keeps the old binary next to the new ESM
  * wrapper. The next launch then throws `<sym> is not a function` deep inside
  * tool execution (see Discord report, 2026-05-14).
@@ -33,7 +33,7 @@ import packageJson from "../package.json" with { type: "json" };
 
 const winNodeModulesNativeDir = "C:\\Users\\Admin\\node_modules\\@oh-my-pi\\pi-natives\\native";
 const winWorkspaceNativeDir = "C:\\Users\\Admin\\dev\\oh-my-pi\\packages\\natives\\native";
-const posixNodeModulesNativeDir = "/home/u/proj/node_modules/@oh-my-pi/pi-natives/native";
+const posixNodeModulesNativeDir = "/home/u/proj/node_modules/@pk-nerdsaver-ai/pi-natives/native";
 
 describe("windows native addon staging", () => {
 	it("stages only on Windows node_modules installs", () => {

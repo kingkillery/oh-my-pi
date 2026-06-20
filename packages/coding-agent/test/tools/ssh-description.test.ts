@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import type { SSHHost } from "@oh-my-pi/pi-coding-agent/capability/ssh";
-import type { SourceMeta } from "@oh-my-pi/pi-coding-agent/capability/types";
-import * as discovery from "@oh-my-pi/pi-coding-agent/discovery";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { loadSshTool } from "@oh-my-pi/pi-coding-agent/tools";
+import type { SSHHost } from "@pk-nerdsaver-ai/pi-coding-agent/capability/ssh";
+import type { SourceMeta } from "@pk-nerdsaver-ai/pi-coding-agent/capability/types";
+import * as discovery from "@pk-nerdsaver-ai/pi-coding-agent/discovery";
+import type { ToolSession } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
+import { loadSshTool } from "@pk-nerdsaver-ai/pi-coding-agent/tools";
 
 const SOURCE: SourceMeta = {
 	provider: "test",

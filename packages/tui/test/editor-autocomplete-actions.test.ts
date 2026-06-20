@@ -3,8 +3,8 @@ import {
 	type AutocompleteItem,
 	type AutocompleteProvider,
 	CombinedAutocompleteProvider,
-} from "@oh-my-pi/pi-tui/autocomplete";
-import { Editor } from "@oh-my-pi/pi-tui/components/editor";
+} from "@pk-nerdsaver-ai/pi-tui/autocomplete";
+import { Editor } from "@pk-nerdsaver-ai/pi-tui/components/editor";
 import { defaultEditorTheme } from "./test-themes";
 
 class HashActionProvider implements AutocompleteProvider {

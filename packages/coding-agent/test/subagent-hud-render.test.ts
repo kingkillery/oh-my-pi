@@ -6,20 +6,20 @@
  * their progress is already rendered inline (tool block / eval cell).
  */
 import { beforeAll, describe, expect, it } from "bun:test";
-import { renderSubagentHudLines } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
+import { renderSubagentHudLines } from "@pk-nerdsaver-ai/pi-coding-agent/modes/interactive-mode";
 import {
 	type ObservableSession,
 	SessionObserverRegistry,
-} from "@oh-my-pi/pi-coding-agent/modes/session-observer-registry";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
+} from "@pk-nerdsaver-ai/pi-coding-agent/modes/session-observer-registry";
+import { initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
 import {
 	type AgentProgress,
 	type SubagentLifecyclePayload,
 	type SubagentProgressPayload,
 	TASK_SUBAGENT_LIFECYCLE_CHANNEL,
 	TASK_SUBAGENT_PROGRESS_CHANNEL,
-} from "@oh-my-pi/pi-coding-agent/task";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
+} from "@pk-nerdsaver-ai/pi-coding-agent/task";
+import { EventBus } from "@pk-nerdsaver-ai/pi-coding-agent/utils/event-bus";
 
 function makeSession(overrides: Partial<ObservableSession> & { id: string }): ObservableSession {
 	return {

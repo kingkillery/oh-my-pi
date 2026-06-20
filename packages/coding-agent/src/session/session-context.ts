@@ -1,6 +1,6 @@
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { ProviderPayload, ServiceTier } from "@oh-my-pi/pi-ai";
-import * as snapcompact from "@oh-my-pi/snapcompact";
+import type { AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
+import type { ProviderPayload, ServiceTier } from "@pk-nerdsaver-ai/pi-ai";
+import * as snapcompact from "@pk-nerdsaver-ai/snapcompact";
 import { createBranchSummaryMessage, createCompactionSummaryMessage, createCustomMessage } from "./messages";
 import { type CompactionEntry, EPHEMERAL_MODEL_CHANGE_ROLE, type SessionEntry } from "./session-entries";
 

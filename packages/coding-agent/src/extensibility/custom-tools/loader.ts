@@ -5,8 +5,8 @@
  * CustomToolAPI to avoid import resolution issues with custom tools loaded from user directories.
  */
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { AgentToolResult } from "@pk-nerdsaver-ai/pi-agent-core";
+import { logger } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
 import * as zodModule from "zod/v4";
 import { toolCapability } from "../../capability/tool";

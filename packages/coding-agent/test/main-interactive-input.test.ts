@@ -2,9 +2,9 @@ import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { submitInteractiveInput } from "@oh-my-pi/pi-coding-agent/main";
-import type { SubmittedUserInput } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { discoverTitleSystemPromptFile } from "@oh-my-pi/pi-coding-agent/system-prompt";
+import { submitInteractiveInput } from "@pk-nerdsaver-ai/pi-coding-agent/main";
+import type { SubmittedUserInput } from "@pk-nerdsaver-ai/pi-coding-agent/modes/types";
+import { discoverTitleSystemPromptFile } from "@pk-nerdsaver-ai/pi-coding-agent/system-prompt";
 
 const cleanupDirs: string[] = [];
 

@@ -4,10 +4,10 @@ import {
 	buildCursorSystemPromptJsons,
 	resolveExecHandler,
 	streamCursor,
-} from "@oh-my-pi/pi-ai/providers/cursor";
-import type { Context, Model } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import type { AgentRunRequest } from "@oh-my-pi/pi-catalog/discovery/cursor-gen/agent_pb";
+} from "@pk-nerdsaver-ai/pi-ai/providers/cursor";
+import type { Context, Model } from "@pk-nerdsaver-ai/pi-ai/types";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
+import type { AgentRunRequest } from "@pk-nerdsaver-ai/pi-catalog/discovery/cursor-gen/agent_pb";
 
 const cursorModel: Model<"cursor-agent"> = buildModel({
 	id: "cursor-composer-2.5",

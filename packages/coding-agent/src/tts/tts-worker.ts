@@ -6,7 +6,7 @@ import {
 	getTinyModelsCacheDir,
 	installRuntimeModuleResolver,
 	resolveRuntimeModule,
-} from "@oh-my-pi/pi-utils";
+} from "@pk-nerdsaver-ai/pi-utils";
 import { resolveTinyModelDevicePreference, type TinyModelDevice, tinyModelDeviceLoadOrder } from "../tiny/device";
 import { resolveTinyModelDtypeOverride, type TinyModelDtype } from "../tiny/dtype";
 import { getTtsLocalModelSpec, resolveTtsVoice, type TtsLocalModelKey, type TtsLocalModelSpec } from "./models";
