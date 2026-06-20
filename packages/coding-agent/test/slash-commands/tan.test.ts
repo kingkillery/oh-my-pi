@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "bun:test";
+import * as path from "node:path";
 import type { InteractiveModeContext } from "@pk-nerdsaver-ai/pi-coding-agent/modes/types";
 import { executeBuiltinSlashCommand } from "@pk-nerdsaver-ai/pi-coding-agent/slash-commands/builtin-registry";
 
@@ -12,6 +13,11 @@ function createRuntime() {
 			ctx: {
 				editor: { setText } as unknown as InteractiveModeContext["editor"],
 				handleTanCommand,
+				sessionManager: {
+					getCwd: vi.fn(() => process.cwd()),
+				} as unknown as InteractiveModeContext["sessionManager"],
+				showError: vi.fn(),
+				showStatus: vi.fn(),
 			} as unknown as InteractiveModeContext,
 		},
 	};
@@ -25,7 +31,7 @@ describe("/tan slash command", () => {
 
 		expect(handled).toBe(true);
 		expect(harness.setText).toHaveBeenCalledWith("");
-		expect(harness.handleTanCommand).toHaveBeenCalledWith("add a changelog note");
+		expect(harness.handleTanCommand).toHaveBeenCalledWith("add a changelog note", undefined);
 	});
 
 	it("preserves the raw multi-word suffix after /tan", async () => {
@@ -37,6 +43,18 @@ describe("/tan slash command", () => {
 		);
 
 		expect(handled).toBe(true);
-		expect(harness.handleTanCommand).toHaveBeenCalledWith("investigate why prompt cache reuse matters here");
+		expect(harness.handleTanCommand).toHaveBeenCalledWith(
+			"investigate why prompt cache reuse matters here",
+			undefined,
+		);
+	});
+
+	it("resolves --cwd before routing to the tan handler", async () => {
+		const harness = createRuntime();
+
+		const handled = await executeBuiltinSlashCommand("/tan --cwd . check nearby files", harness.runtime);
+
+		expect(handled).toBe(true);
+		expect(harness.handleTanCommand).toHaveBeenCalledWith("check nearby files", path.resolve(process.cwd(), "."));
 	});
 });

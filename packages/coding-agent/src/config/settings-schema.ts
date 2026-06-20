@@ -3849,6 +3849,16 @@ export const SETTINGS_SCHEMA = {
 		},
 	},
 
+	/**
+	 * Per-key aliases used by `/subagent using <alias> <task>`. Keys are matched
+	 * case-, space-, and hyphen-insensitively; values are concrete catalog
+	 * selectors (`<provider>/<model>`, optionally with `:thinkingLevel`).
+	 */
+	"subagent.modelAliases": {
+		type: "record",
+		default: {} as Record<string, string>,
+	},
+
 	// Skills
 	"skills.enabled": { type: "boolean", default: true },
 
@@ -4722,6 +4732,10 @@ export interface CodexResetsSettings {
 	keepCredits: number;
 }
 
+export interface SubagentSettings {
+	modelAliases: Record<string, string>;
+}
+
 /** Map group prefix -> typed settings interface */
 export interface GroupTypeMap {
 	compaction: CompactionSettings;
@@ -4741,6 +4755,7 @@ export interface GroupTypeMap {
 	cycleOrder: string[];
 	shellMinimizer: ShellMinimizerSettings;
 	codexResets: CodexResetsSettings;
+	subagent: SubagentSettings;
 }
 
 export type GroupPrefix = keyof GroupTypeMap;

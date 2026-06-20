@@ -343,7 +343,7 @@ export interface InteractiveModeContext {
 	handleDequeue(): void;
 	handleImagePaste(): Promise<boolean>;
 	handleBtwCommand(question: string): Promise<void>;
-	handleTanCommand(work: string): Promise<void>;
+	handleTanCommand(work: string, cwdOverride?: string): Promise<void>;
 	hasActiveBtw(): boolean;
 	handleBtwEscape(): boolean;
 	handleBtwBranchKey(): Promise<boolean>;

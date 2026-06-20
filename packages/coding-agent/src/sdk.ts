@@ -499,6 +499,8 @@ export interface CreateAgentSessionOptions {
 	agentId?: string;
 	/** Display name for the agent in IRC. Default: "main" or "sub". */
 	agentDisplayName?: string;
+	/** Optional theme color for roster displays. */
+	agentColor?: string;
 	/** Optional shared agent registry for IRC routing. Default: AgentRegistry.global(). */
 	agentRegistry?: AgentRegistry;
 	/** Parent task ID prefix for nested artifact naming (e.g., "Extensions") */
@@ -2344,6 +2346,8 @@ export async function createAgentSession(options: CreateAgentSessionOptions = {}
 			session: null,
 			sessionFile: sessionManager.getSessionFile() ?? null,
 			status: "running",
+			color: options.agentColor,
+			cwd,
 		});
 		hasRegistered = true;
 

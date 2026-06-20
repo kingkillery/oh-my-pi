@@ -181,6 +181,34 @@ describe("TanCommandController", () => {
 		expect(harness.ctx.showStatus).toHaveBeenCalledWith("Dispatched background tan job-123");
 	});
 
+	it("runs a tan clone in the requested cwd", async () => {
+		const harness = createContext();
+		const tanCwd = path.join(harness.tempDir.path(), "other-project");
+		const forkSpy = vi.spyOn(SessionManager, "forkFrom").mockResolvedValue(harness.cloneManager);
+		const clone = {
+			prompt: vi.fn(async () => {}),
+			waitForIdle: vi.fn(async () => {}),
+			getLastAssistantMessage: vi.fn(() => assistantText("done")),
+			abort: vi.fn(),
+			dispose: vi.fn(async () => {}),
+		};
+		const createAgentSessionSpy = vi
+			.spyOn(sdkModule, "createAgentSession")
+			.mockResolvedValue({ session: clone } as unknown as CreateAgentSessionResult);
+		const controller = new TanCommandController(harness.ctx);
+
+		await controller.start("work elsewhere", tanCwd);
+		const run = harness.capturedRun;
+		if (!run) throw new Error("run function was not captured");
+		await run({ jobId: "job-1", signal: new AbortController().signal, reportProgress: async () => {} });
+
+		expect(forkSpy).toHaveBeenCalledWith(harness.parentFile, tanCwd, harness.parentFile.slice(0, -6), undefined, {
+			suppressBreadcrumb: true,
+			sessionFile: expect.stringMatching(/Tan-.+\.jsonl$/),
+		});
+		expect(createAgentSessionSpy.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ cwd: tanCwd }));
+	});
+
 	it("aborts the cloned agent when the background job signal aborts", async () => {
 		const harness = createContext({ agentId: MAIN_AGENT_ID });
 		vi.spyOn(SessionManager, "forkFrom").mockResolvedValue(harness.cloneManager);

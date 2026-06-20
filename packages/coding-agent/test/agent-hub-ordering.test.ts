@@ -1,16 +1,18 @@
 /**
- * Regression: the agent hub row order must be stable while the hub is open.
- *
- * The hub is sorted by lastActivity on first open, but after that keyboard
- * selection must not jump around as agents heartbeat or update activity. New
- * agents that appear while the hub is open are appended at the end.
+ * Regression: the agent hub renders non-Main agents as a Main→children parent
+ * tree — depth-ordered with ├─/└─ branch connectors and │ ancestor columns,
+ * Main as the non-selectable root header, and agents whose parent is missing
+ * hoisted directly under Main. Each agent's sibling position is frozen on first
+ * open so keyboard selection does not jump as agents heartbeat; new agents
+ * appear at the end of their sibling group. cwd is surfaced inline only when it
+ * diverges from the parent's.
  */
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import { IrcBus } from "@pk-nerdsaver-ai/pi-coding-agent/irc/bus";
 import { AgentHubOverlayComponent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/agent-hub";
 import { SessionObserverRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/modes/session-observer-registry";
-import { initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
-import { AgentRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/registry/agent-registry";
+import { initTheme, theme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import { AgentRegistry, MAIN_AGENT_ID } from "@pk-nerdsaver-ai/pi-coding-agent/registry/agent-registry";
 import type { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
 import { visibleWidth } from "@pk-nerdsaver-ai/pi-tui/utils";
 
@@ -40,15 +42,20 @@ function stubStdoutGeometry(cols: number): GeometryStub {
 	};
 }
 
-function makeHub(agents: AgentRegistry) {
+function makeHub(
+	agents: AgentRegistry,
+	cwd?: string,
+	opts?: { focusAgent?: (id: string) => Promise<void>; onDone?: () => void },
+) {
 	return new AgentHubOverlayComponent({
 		observers: new SessionObserverRegistry(),
 		hubKeys: [],
-		onDone: () => {},
+		onDone: opts?.onDone ?? (() => {}),
 		requestRender: () => {},
 		registry: agents,
 		irc: new IrcBus(agents),
-		focusAgent: async () => {},
+		focusAgent: opts?.focusAgent ?? (async () => {}),
+		cwd,
 	});
 }
 
@@ -113,6 +120,97 @@ describe("Agent hub row ordering", () => {
 		agents.register({ id: "D", displayName: "Delta", kind: "sub", session: sessionD });
 
 		expect(renderedAgentIds(hub)).toEqual(["C", "B", "A", "D"]);
+
+		hub.dispose();
+	});
+
+	it("renders agents as a Main→children tree with connectors, depth, hoisted orphans, and divergent cwd inline", async () => {
+		geometry = stubStdoutGeometry(120);
+		const now = vi.spyOn(Date, "now");
+		const agents = new AgentRegistry();
+
+		// Parent is Main's child; Child/Child2 sit one level deeper under Parent;
+		// Orphan's parentId points at a missing agent, so it must be hoisted
+		// directly under Main rather than vanish.
+		now.mockReturnValue(4000);
+		agents.register({
+			id: "Parent",
+			displayName: "parent",
+			kind: "sub",
+			session: {} as AgentSession,
+			status: "running",
+			cwd: "alpha-repo",
+		});
+		now.mockReturnValue(3000);
+		agents.register({
+			id: "Child",
+			displayName: "child one",
+			kind: "sub",
+			session: {} as AgentSession,
+			status: "running",
+			parentId: "Parent",
+			cwd: "alpha-repo",
+		});
+		now.mockReturnValue(2000);
+		agents.register({
+			id: "Child2",
+			displayName: "child two",
+			kind: "sub",
+			session: {} as AgentSession,
+			status: "running",
+			parentId: "Parent",
+			cwd: "beta-repo",
+		});
+		now.mockReturnValue(1000);
+		agents.register({
+			id: "Orphan",
+			displayName: "orphan",
+			kind: "sub",
+			session: {} as AgentSession,
+			status: "running",
+			parentId: "Ghost",
+		});
+
+		const focusAgent = vi.fn(async (_id: string) => {});
+		const onDone = vi.fn();
+		const hub = makeHub(agents, "alpha-repo", { focusAgent, onDone });
+		const cleanLines = hub.render(120).map(line => Bun.stripANSI(line));
+		const rowFor = (id: string) =>
+			cleanLines.find(line => line.includes(`${theme.sep.dot}${id}${theme.sep.dot}`));
+
+		// Main is the non-selectable tree root header — it carries no " · " columns,
+		// so renderedAgentIds never lists it.
+		expect(cleanLines.some(line => line.includes(MAIN_AGENT_ID))).toBe(true);
+		expect(renderedAgentIds(hub)).toEqual(["Parent", "Child", "Child2", "Orphan"]);
+
+		const parentRow = rowFor("Parent");
+		const childRow = rowFor("Child");
+		const child2Row = rowFor("Child2");
+		const orphanRow = rowFor("Orphan");
+
+		// Depth + connectors: Parent/Orphan are Main's direct children (branch/last,
+		// no ancestor column); Child/Child2 are one level deeper under Parent, so
+		// each carries the │ continuation column.
+		expect(parentRow).toContain(`${theme.tree.branch} `);
+		expect(parentRow).not.toContain(theme.tree.vertical);
+		expect(orphanRow).toContain(`${theme.tree.last} `);
+		expect(orphanRow).not.toContain(theme.tree.vertical);
+		expect(childRow).toContain(theme.tree.vertical);
+		expect(childRow).toContain(`${theme.tree.branch} `);
+		expect(child2Row).toContain(theme.tree.vertical);
+		expect(child2Row).toContain(`${theme.tree.last} `);
+
+		// cwd is inlined only when it diverges from the parent's cwd.
+		expect(parentRow).toContain("cwd alpha-repo"); // diverges from Main (no cwd)
+		expect(childRow).not.toContain("cwd"); // identical to Parent's cwd
+		expect(child2Row).toContain("cwd beta-repo"); // diverges from Parent
+
+		// Enter focuses the selected agent's session and closes the hub; the old
+		// cwd-group collapse/expand toggle is gone.
+		hub.handleInput("\r");
+		await new Promise(resolve => setTimeout(resolve, 0));
+		expect(focusAgent).toHaveBeenCalledWith("Parent");
+		expect(onDone).toHaveBeenCalled();
 
 		hub.dispose();
 	});

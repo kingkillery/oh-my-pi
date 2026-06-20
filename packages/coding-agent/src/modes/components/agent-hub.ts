@@ -4,8 +4,8 @@
  * One overlay, two views:
  * - Table view: every registered agent except Main (Main IS the ambient
  *   chat), live from the global AgentRegistry — status, unread irc count,
- *   current/last task, last activity. Select with j/k, Enter opens a chat,
- *   `r` revives a parked agent, `x` aborts + releases one.
+ *   current/last task, last activity. Select with j/k, Enter focuses/opens one,
+ *   `r` revives a parked agent, and Ctrl+X twice removes one.
  * - Chat view: per-agent transcript (incremental session-file tail, absorbed
  *   from the old session observer overlay) plus an input line. Submitting
  *   revives a parked agent, then prompts/steers it; the message lands in the
@@ -25,9 +25,9 @@ import { IrcBus } from "../../irc/bus";
 import { AgentLifecycleManager } from "../../registry/agent-lifecycle";
 import { type AgentRef, AgentRegistry, type AgentStatus, MAIN_AGENT_ID } from "../../registry/agent-registry";
 import { USER_INTERRUPT_LABEL } from "../../session/messages";
-import { replaceTabs, TRUNCATE_LENGTHS, truncateToWidth } from "../../tools/render-utils";
+import { replaceTabs, shortenPath, TRUNCATE_LENGTHS, truncateToWidth } from "../../tools/render-utils";
 import type { ObservableSession, SessionObserverRegistry } from "../session-observer-registry";
-import { theme } from "../theme/theme";
+import { isValidThemeColor, type ThemeColor, theme } from "../theme/theme";
 import { matchesSelectDown, matchesSelectUp } from "../utils/keybinding-matchers";
 import { AgentTranscriptViewer } from "./agent-transcript-viewer";
 import { DynamicBorder } from "./dynamic-border";
@@ -36,7 +36,8 @@ import { DynamicBorder } from "./dynamic-border";
 const AGE_TICK_MS = 5_000;
 /** Double-tap window for the table's left-left "close hub" gesture. */
 const LEFT_TAP_WINDOW_MS = 500;
-
+/** Double-tap window for Ctrl+X "remove agent" gesture. */
+const REMOVE_TAP_WINDOW_MS = 2000;
 /** Compute the max content width for the current terminal, accounting for chrome. */
 function contentWidth(): number {
 	return Math.max(TRUNCATE_LENGTHS.SHORT, (process.stdout.columns || 80) - 6);
@@ -53,6 +54,21 @@ function clampHubLine(line: string, width: number): string {
 }
 
 const STATUS_ORDER: Record<AgentStatus, number> = { running: 0, idle: 1, parked: 2, aborted: 3 };
+
+function rosterColor(color: string | undefined): ThemeColor | undefined {
+	return color && isValidThemeColor(color) ? color : undefined;
+}
+
+/**
+ * One flattened tree row: an {@link AgentRef} plus its depth (Main root = 0,
+ * top-level children = 1) and the pre-built connector prefix that renders the
+ * `├─`/`└─` branch and the `│`/space ancestor-continuation columns.
+ */
+interface HubRow {
+	ref: AgentRef;
+	depth: number;
+	prefix: string;
+}
 
 /** Glyph + status word, colored per theme status conventions. */
 function statusBadge(status: AgentStatus): string {
@@ -180,14 +196,16 @@ export class AgentHubOverlayComponent extends Container {
 	#remote: AgentHubRemote | undefined;
 
 	// Table state
-	#rows: AgentRef[] = [];
+	/** Selectable subagent rows in Main→children tree order (Main itself is the non-selectable root header). */
+	#rows: HubRow[] = [];
 	#selectedRow = 0;
 	#notice: string | undefined;
-	/** Captured row order from the first refresh; keeps the hub stable while open. */
+	/** First-seen order per agent id; freezes sibling order while the hub is open. */
 	#rowOrder: Map<string, number> | undefined;
 	/** Double-tap window state for the table's left-left "close hub" gesture. */
 	#lastLeftTap = 0;
-
+	/** Agent-specific Ctrl+X confirmation state. */
+	#pendingRemove: { id: string; at: number } | undefined;
 	// Transcript-viewer launch deps (passed through to AgentTranscriptViewer).
 	#ui: TUI;
 	#getTool: ((name: string) => AgentTool | undefined) | undefined;
@@ -326,35 +344,88 @@ export class AgentHubOverlayComponent extends Container {
 	}
 
 	#refreshRows(): void {
-		const selectedId = this.#rows[this.#selectedRow]?.id;
+		const selectedId = this.#selectedRef()?.id;
 		const refs = this.#registry.list().filter(ref => ref.id !== MAIN_AGENT_ID);
 
+		// Freeze each agent's first-seen order so siblings keep a stable position
+		// while the hub is open (agents heartbeat / bump lastActivity constantly).
+		// Seed by status, then recency; new agents append at the end thereafter.
 		if (!this.#rowOrder) {
-			// First refresh (usually the constructor): order by status, then recency.
-			this.#rows = refs.sort(
+			const seeded = [...refs].sort(
 				(a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || b.lastActivity - a.lastActivity,
 			);
-			this.#rowOrder = new Map(this.#rows.map((ref, i) => [ref.id, i]));
+			this.#rowOrder = new Map(seeded.map((ref, i) => [ref.id, i]));
 		} else {
-			// After the hub is open, freeze the relative order so keyboard selection
-			// does not jump around as agents heartbeat or update activity. New agents
-			// are appended at the end and then stay put.
-			this.#rows = refs.sort((a, b) => {
-				const statusDiff = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
-				if (statusDiff !== 0) return statusDiff;
-				const aOrder = this.#rowOrder!.get(a.id) ?? Number.MAX_SAFE_INTEGER;
-				const bOrder = this.#rowOrder!.get(b.id) ?? Number.MAX_SAFE_INTEGER;
-				return aOrder - bOrder;
-			});
-			for (const ref of this.#rows) {
-				if (!this.#rowOrder.has(ref.id)) {
-					this.#rowOrder.set(ref.id, this.#rowOrder.size);
-				}
+			for (const ref of refs) {
+				if (!this.#rowOrder.has(ref.id)) this.#rowOrder.set(ref.id, this.#rowOrder.size);
 			}
 		}
 
-		const keptIndex = selectedId ? this.#rows.findIndex(ref => ref.id === selectedId) : -1;
+		this.#rows = this.#buildTree(refs);
+		const keptIndex = selectedId ? this.#rows.findIndex(row => row.ref.id === selectedId) : -1;
 		this.#selectedRow = keptIndex >= 0 ? keptIndex : Math.min(this.#selectedRow, Math.max(0, this.#rows.length - 1));
+	}
+
+	/**
+	 * Flatten the agent forest into Main→children tree order. Every non-Main ref
+	 * is parented to its `parentId` when that agent is also present, else hoisted
+	 * directly under Main; siblings keep the frozen {@link #rowOrder}. Each row
+	 * carries its depth (top-level children = 1) and a pre-built connector prefix
+	 * (`├─`/`└─` for the branch, `│`/spaces for each ancestor column).
+	 */
+	#buildTree(refs: AgentRef[]): HubRow[] {
+		const known = new Set(refs.map(ref => ref.id));
+		const childrenOf = new Map<string, AgentRef[]>();
+		for (const ref of refs) {
+			const parent =
+				ref.parentId && ref.parentId !== ref.id && known.has(ref.parentId) ? ref.parentId : MAIN_AGENT_ID;
+			const bucket = childrenOf.get(parent);
+			if (bucket) bucket.push(ref);
+			else childrenOf.set(parent, [ref]);
+		}
+
+		const order = this.#rowOrder;
+		const bySibling = (a: AgentRef, b: AgentRef): number =>
+			(order?.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (order?.get(b.id) ?? Number.MAX_SAFE_INTEGER);
+		// One indentation column is as wide as a connector ("├─ "); the ancestor
+		// continuation columns must match so branches line up at every depth.
+		const indent = theme.tree.branch.length + 1;
+		const continuation = (last: boolean): string =>
+			last
+				? " ".repeat(indent)
+				: `${theme.tree.vertical}${" ".repeat(Math.max(1, indent - theme.tree.vertical.length))}`;
+
+		const rows: HubRow[] = [];
+		const visited = new Set<string>();
+		const walk = (parentId: string, depth: number, ancestorPrefix: string): void => {
+			const kids = childrenOf.get(parentId);
+			if (!kids) return;
+			kids.sort(bySibling);
+			kids.forEach((ref, i) => {
+				if (visited.has(ref.id)) return; // defensive: never loop on a malformed parent cycle
+				visited.add(ref.id);
+				const last = i === kids.length - 1;
+				rows.push({ ref, depth, prefix: `${ancestorPrefix}${last ? theme.tree.last : theme.tree.branch} ` });
+				walk(ref.id, depth + 1, `${ancestorPrefix}${continuation(last)}`);
+			});
+		};
+		walk(MAIN_AGENT_ID, 1, "");
+
+		// Safety net: a ref whose parent chain never reaches Main (detached/cyclic)
+		// would otherwise vanish — surface it as a top-level row so it stays selectable.
+		const orphans = refs.filter(ref => !visited.has(ref.id)).sort(bySibling);
+		orphans.forEach((ref, i) => {
+			if (visited.has(ref.id)) return;
+			visited.add(ref.id);
+			const last = i === orphans.length - 1;
+			rows.push({ ref, depth: 1, prefix: `${last ? theme.tree.last : theme.tree.branch} ` });
+			walk(ref.id, 2, continuation(last));
+		});
+		return rows;
+	}
+
+	#selectedRef(): AgentRef | undefined {
+		return this.#rows[this.#selectedRow]?.ref;
 	}
 
 	#observableFor(id: string): ObservableSession | undefined {
@@ -375,9 +446,10 @@ export class AgentHubOverlayComponent extends Container {
 		if (this.#rows.length === 0) {
 			lines.push(` ${theme.fg("dim", "no subagents yet — task spawns appear here")}`);
 		} else {
+			lines.push(this.#renderMainHeader(width));
 			const termHeight = process.stdout.rows || 40;
-			// Chrome: 2 borders + title + notice? + blank + hints + border
-			const maxVisible = Math.max(3, termHeight - 7 - (this.#notice ? 1 : 0));
+			// Chrome: 2 borders + title + Main root + notice? + blank + hints + border
+			const maxVisible = Math.max(3, termHeight - 8 - (this.#notice ? 1 : 0));
 			let start = 0;
 			if (this.#rows.length > maxVisible) {
 				start = Math.min(
@@ -398,15 +470,24 @@ export class AgentHubOverlayComponent extends Container {
 			lines.push(` ${theme.fg("error", sanitizeLine(this.#notice, Math.max(10, width - 2)))}`);
 		}
 		lines.push("");
-		lines.push(` ${theme.fg("dim", "j/k:select  Enter:open  r:revive  x:kill  Esc/←←:close")}`);
+		lines.push(` ${theme.fg("dim", "j/k:select  Enter:open  r:revive  ctrl+x:remove  Esc/←←:close")}`);
 		lines.push(...new DynamicBorder().render(width));
 		return lines;
 	}
 
+	/** Main is the tree root, rendered as a non-selectable header above its children. */
+	#renderMainHeader(width: number): string {
+		const main = this.#registry.get(MAIN_AGENT_ID);
+		const color = rosterColor(main?.color);
+		const label = color ? theme.bold(theme.fg(color, MAIN_AGENT_ID)) : theme.bold(MAIN_AGENT_ID);
+		const rawLine = main ? ` ${statusBadge(main.status)} ${label}` : ` ${label}`;
+		return truncateToWidth(rawLine.replace(/[\r\n]+/g, " "), Math.max(1, width - 1));
+	}
+
 	#statusSummary(): string {
 		const counts: Record<AgentStatus, number> = { running: 0, idle: 0, parked: 0, aborted: 0 };
-		for (const ref of this.#rows) {
-			counts[ref.status]++;
+		for (const row of this.#rows) {
+			counts[row.ref.status]++;
 		}
 		const parts: string[] = [];
 		for (const status of ["running", "idle", "parked", "aborted"] as const) {
@@ -416,11 +497,20 @@ export class AgentHubOverlayComponent extends Container {
 		return parts.join(theme.sep.dot);
 	}
 
-	#renderRow(ref: AgentRef, selected: boolean, width: number): string {
+	#renderRow(row: HubRow, selected: boolean, width: number): string {
+		const { ref } = row;
 		const cursor = selected ? theme.fg("accent", theme.nav.cursor) : " ";
-		const parts: string[] = [statusBadge(ref.status), theme.bold(replaceTabs(ref.id))];
+		const color = rosterColor(ref.color);
+		const idText = color ? theme.bold(theme.fg(color, replaceTabs(ref.id))) : theme.bold(replaceTabs(ref.id));
+		const parts: string[] = [statusBadge(ref.status), idText];
 		parts.push(theme.fg("dim", replaceTabs(ref.displayName)));
-		parts.push(theme.fg("dim", ref.parentId ? `${ref.kind} · of ${ref.parentId}` : ref.kind));
+		// Parentage is conveyed by the tree connectors, so the kind stands alone.
+		parts.push(theme.fg("dim", ref.kind));
+		// Surface the cwd only when it diverges from the parent's (CWD-aware spawns).
+		const parentCwd = this.#registry.get(ref.parentId ?? MAIN_AGENT_ID)?.cwd;
+		if (ref.cwd && ref.cwd !== parentCwd) {
+			parts.push(theme.fg("dim", `cwd ${replaceTabs(shortenPath(ref.cwd))}`));
+		}
 		const observed = this.#observableFor(ref.id);
 		const task = observed?.description ?? observed?.progress?.task;
 		if (task) {
@@ -431,16 +521,23 @@ export class AgentHubOverlayComponent extends Container {
 			parts.push(theme.fg("warning", `⧉ ${unread}`));
 		}
 		parts.push(theme.fg("dim", formatAge(Math.max(1, Math.round((Date.now() - ref.lastActivity) / 1000)))));
-		const rawLine = ` ${cursor} ${parts.join(theme.sep.dot)}`;
+		const rawLine = ` ${cursor} ${theme.fg("dim", row.prefix)}${parts.join(theme.sep.dot)}`;
 		return truncateToWidth(rawLine.replace(/[\r\n]+/g, " "), Math.max(1, width - 1));
+	}
+
+	#clearPendingRemove(): void {
+		this.#pendingRemove = undefined;
 	}
 
 	#handleTableInput(keyData: string): void {
 		if (matchesKey(keyData, "escape")) {
+			this.#clearPendingRemove();
 			this.#onDone();
 			return;
 		}
 		if (matchesKey(keyData, "left")) {
+			this.#clearPendingRemove();
+			this.#notice = undefined;
 			const now = Date.now();
 			if (now - this.#lastLeftTap < LEFT_TAP_WINDOW_MS) {
 				this.#lastLeftTap = 0;
@@ -450,7 +547,13 @@ export class AgentHubOverlayComponent extends Container {
 			}
 			return;
 		}
+		if (matchesKey(keyData, "ctrl+x")) {
+			this.#handleRemoveTap();
+			return;
+		}
 		if (keyData === "j" || matchesSelectDown(keyData)) {
+			this.#clearPendingRemove();
+			this.#notice = undefined;
 			if (this.#rows.length > 0) {
 				this.#selectedRow = Math.min(this.#selectedRow + 1, this.#rows.length - 1);
 			}
@@ -458,6 +561,8 @@ export class AgentHubOverlayComponent extends Container {
 			return;
 		}
 		if (keyData === "k" || matchesSelectUp(keyData)) {
+			this.#clearPendingRemove();
+			this.#notice = undefined;
 			if (this.#rows.length > 0) {
 				this.#selectedRow = Math.max(this.#selectedRow - 1, 0);
 			}
@@ -465,7 +570,7 @@ export class AgentHubOverlayComponent extends Container {
 			return;
 		}
 		if (matchesKey(keyData, "enter") || keyData === "\r" || keyData === "\n") {
-			const selected = this.#rows[this.#selectedRow];
+			const selected = this.#selectedRef();
 			if (selected) this.#activateAgent(selected);
 			return;
 		}
@@ -473,10 +578,9 @@ export class AgentHubOverlayComponent extends Container {
 			this.#reviveSelected();
 			return;
 		}
-		if (keyData === "x") {
-			this.#killSelected();
-			return;
-		}
+		// Clear any pending remove confirmation on other keys
+		this.#clearPendingRemove();
+		this.#notice = undefined;
 	}
 
 	/**
@@ -486,6 +590,7 @@ export class AgentHubOverlayComponent extends Container {
 	 * in-hub chat view.
 	 */
 	#activateAgent(ref: AgentRef): void {
+		this.#clearPendingRemove();
 		this.#notice = undefined;
 		const focusAgent = this.#focusAgent;
 		// Advisor refs are read-only transcripts with no live/ revivable session;
@@ -506,7 +611,8 @@ export class AgentHubOverlayComponent extends Container {
 	}
 
 	#reviveSelected(): void {
-		const ref = this.#rows[this.#selectedRow];
+		this.#clearPendingRemove();
+		const ref = this.#selectedRef();
 		if (!ref) return;
 		if (ref.kind === "advisor") {
 			this.#notice = `"${ref.id}" is a read-only advisor transcript — nothing to revive.`;
@@ -534,29 +640,54 @@ export class AgentHubOverlayComponent extends Container {
 		this.#requestRender();
 	}
 
-	#killSelected(): void {
-		const ref = this.#rows[this.#selectedRow];
-		if (!ref) return;
+	#handleRemoveTap(): void {
+		const ref = this.#selectedRef();
+		if (!ref) {
+			this.#clearPendingRemove();
+			return;
+		}
+
+		const now = Date.now();
+		const pending = this.#pendingRemove;
+		if (pending?.id === ref.id && now - pending.at < REMOVE_TAP_WINDOW_MS) {
+			this.#clearPendingRemove();
+			this.#notice = undefined;
+			this.#removeAgent(ref);
+		} else {
+			this.#pendingRemove = { id: ref.id, at: now };
+			if (ref.kind === "advisor") {
+				this.#notice = `"${ref.id}" is a read-only advisor transcript — cannot be removed.`;
+				this.#clearPendingRemove();
+			} else {
+				this.#notice = `Press Ctrl+X again to remove agent "${ref.id}"`;
+			}
+		}
+		this.#requestRender();
+	}
+
+	#removeAgent(ref: AgentRef): void {
 		if (ref.kind === "advisor") {
-			this.#notice = `"${ref.id}" is a read-only advisor transcript — cannot be killed.`;
+			this.#notice = `"${ref.id}" is a read-only advisor transcript — cannot be removed.`;
 			this.#requestRender();
 			return;
 		}
-		this.#notice = undefined;
+
 		if (this.#remote) {
 			this.#remote.kill(ref.id);
 			this.#refreshRows();
 			this.#requestRender();
 			return;
 		}
+
 		void (async () => {
 			try {
 				if (ref.status === "running" && ref.session) {
 					await ref.session.abort({ reason: USER_INTERRUPT_LABEL });
 				}
 				await this.#lifecycle().release(ref.id);
+				this.#notice = `Removed agent "${ref.id}"`;
 			} catch (error) {
-				logger.warn("Agent hub: kill failed", { id: ref.id, error: String(error) });
+				logger.warn("Agent hub: remove failed", { id: ref.id, error: String(error) });
 				this.#notice = error instanceof Error ? error.message : String(error);
 			}
 			this.#refreshRows();

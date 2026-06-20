@@ -36,6 +36,7 @@ export interface AgentRef {
 	kind: AgentKind;
 	parentId?: string;
 	status: AgentStatus;
+	color?: string;
 	/** Null exactly when parked/aborted. */
 	session: AgentSession | null;
 	sessionFile: string | null;
@@ -43,6 +44,8 @@ export interface AgentRef {
 	lastActivity: number;
 	/** Short gist of what the agent is currently doing (latest intent or tool), for the work-aware roster. Display-only. */
 	activity?: string;
+	/** Working directory for this agent. Enables CWD-aware spawning where agents can operate in different directories. */
+	cwd?: string;
 }
 
 export type RegistryEvent =
@@ -60,6 +63,8 @@ export interface RegisterInput {
 	session: AgentSession | null;
 	sessionFile?: string | null;
 	status?: AgentStatus;
+	color?: string;
+	cwd?: string;
 }
 
 export class AgentRegistry {
@@ -88,10 +93,12 @@ export class AgentRegistry {
 			kind: input.kind,
 			parentId: input.parentId,
 			status: input.status ?? "running",
+			color: input.color,
 			session: input.session,
 			sessionFile: input.sessionFile ?? null,
 			createdAt: now,
 			lastActivity: now,
+			cwd: input.cwd,
 		};
 		this.#refs.set(ref.id, ref);
 		this.#emit({ type: "registered", ref });

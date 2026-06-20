@@ -289,6 +289,7 @@ export interface ExecutorOptions {
 	 */
 	parentActiveModelPattern?: string;
 	thinkingLevel?: ThinkingLevel;
+	color?: string;
 	outputSchema?: unknown;
 	/** Parent task recursion depth (0 = top-level, 1 = first child, etc.) */
 	taskDepth?: number;
@@ -2058,6 +2059,7 @@ export async function runSubprocess(options: ExecutorOptions): Promise<SingleRes
 				parentAgentId: options.parentAgentId,
 				agentId: id,
 				agentDisplayName: subagentDisplayName,
+				agentColor: options.color,
 				enableLsp: lspEnabled,
 				skipPythonPreflight,
 				enableMCP,

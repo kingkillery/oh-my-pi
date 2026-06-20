@@ -38,7 +38,7 @@ async function removeCloneSession(cloneFile: string): Promise<void> {
 export class TanCommandController {
 	constructor(private readonly ctx: InteractiveModeContext) {}
 
-	async start(work: string): Promise<void> {
+	async start(work: string, cwdOverride?: string): Promise<void> {
 		const trimmedWork = work.trim();
 		if (!trimmedWork) {
 			this.ctx.showStatus("Usage: /tan <work>");
@@ -72,7 +72,7 @@ export class TanCommandController {
 		const modelRegistry = session.modelRegistry;
 		const ownerId = session.getAgentId() ?? MAIN_AGENT_ID;
 		const mcpManager = this.ctx.mcpManager;
-		const cwd = this.ctx.sessionManager.getCwd();
+		const cwd = cwdOverride ?? this.ctx.sessionManager.getCwd();
 		// Nest the clone inside the parent's artifact directory (like a subagent
 		// session) rather than as a top-level sibling, so it shares the parent's
 		// artifacts in place — no copy needed.

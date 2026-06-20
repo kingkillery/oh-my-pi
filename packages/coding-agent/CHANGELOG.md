@@ -4,7 +4,12 @@
 
 ### Added
 
+- Added `/subagent` for interactively spawning configured subagents with model, thinking level, optional name/color, task text, and quick `using <alias-or-model>` model selection.
 - Added Codex-style explicit skill invocation: typing `$<skill-name> [args]` at the start of a prompt loads that skill's `SKILL.md` and runs it immediately (no model inference), with `$`-triggered autocomplete listing skills as you type. Works on both Enter (steer) and Ctrl+Enter (follow-up). The `$` sigil is disambiguated from the Python REPL (`$ code` / `$$ code`), and unregistered names like `$HOME` fall through to plain text.
+
+### Changed
+
+- Updated the Agent Hub roster to render a MAIN→children parent tree: every registered agent is grouped under its `parentId` with depth + `├─`/`└─`/`│` tree connectors, an orphans safety net for refs whose parent chain never reaches Main, and the row cursor / selection restored by agent id across refreshes. Per-agent color is rendered on the id; cwd is shown inline only when it diverges from the parent's.
 
 ## [16.1.8] - 2026-06-20
 

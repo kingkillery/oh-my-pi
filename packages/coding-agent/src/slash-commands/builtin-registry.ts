@@ -40,6 +40,7 @@ import { commandConsumed, errorMessage, parseSlashCommand, parseSubcommand, usag
 import { describeRedeemOutcome, type ResetUsageAccount, toResetUsageAccounts } from "./helpers/reset-usage";
 import { handleSshAcp } from "./helpers/ssh";
 import { launchStatsDashboard, parseStatsDashboardArgs } from "./helpers/stats-dashboard";
+import { handleSubagentSlashCommand } from "./helpers/subagent";
 import { handleTodoAcp } from "./helpers/todo";
 import { buildUsageReportText } from "./helpers/usage-report";
 import { parseMarketplaceInstallArgs, parsePluginScopeArgs } from "./marketplace-install-parser";
@@ -354,6 +355,16 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 		handleTui: (_command, runtime) => {
 			runtime.ctx.showModelSelector();
 			runtime.ctx.editor.setText("");
+		},
+	},
+	{
+		name: "subagent",
+		description: "Spawn a configured subagent",
+		inlineHint: "[using <alias-or-model>] [task]",
+		allowArgs: true,
+		handleTui: async (command, runtime) => {
+			runtime.ctx.editor.setText("");
+			await handleSubagentSlashCommand(command.args, runtime.ctx);
 		},
 	},
 	{
@@ -1361,12 +1372,34 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 	{
 		name: "tan",
 		description: "Run a full background agent on tangential work",
-		inlineHint: "<work>",
+		inlineHint: "[--cwd <path>] <work>",
 		allowArgs: true,
 		handleTui: async (command, runtime) => {
-			const work = command.text.slice(`/${command.name}`.length).trim();
+			const args = command.text.slice(`/${command.name}`.length).trim();
+
+			let cwdOverride: string | undefined;
+			let work = args;
+
+			if (args.startsWith("--cwd")) {
+				const cwdMatch =
+					args.match(/^--cwd\s+"([^"]+)"\s+(.+)$/s) ||
+					args.match(/^--cwd\s+'([^']+)'\s+(.+)$/s) ||
+					args.match(/^--cwd\s+(\S+)\s+(.+)$/s);
+				if (!cwdMatch) {
+					runtime.ctx.showStatus("Usage: /tan [--cwd <path>] <work>");
+					return;
+				}
+				cwdOverride = path.resolve(runtime.ctx.sessionManager.getCwd(), cwdMatch[1]);
+				work = cwdMatch[2].trim();
+				const stat = await fs.stat(cwdOverride).catch(() => null);
+				if (!stat?.isDirectory()) {
+					runtime.ctx.showError(`CWD does not exist or is not a directory: ${cwdOverride}`);
+					return;
+				}
+			}
+
 			runtime.ctx.editor.setText("");
-			await runtime.ctx.handleTanCommand(work);
+			await runtime.ctx.handleTanCommand(work, cwdOverride);
 		},
 	},
 	{

@@ -22,7 +22,7 @@ import { type } from "arktype";
 import type { Settings } from "../config/settings";
 import type { RenderResultOptions } from "../extensibility/custom-tools/types";
 import { IrcBus, type IrcDeliveryReceipt, type IrcMessage } from "../irc/bus";
-import type { Theme } from "../modes/theme/theme";
+import { isValidThemeColor, type Theme, type ThemeColor } from "../modes/theme/theme";
 import ircDescription from "../prompts/tools/irc.md" with { type: "text" };
 import type { AgentRegistry } from "../registry/agent-registry";
 import { canSpawnAtDepth } from "../task/types";
@@ -76,6 +76,11 @@ interface IrcPeerInfo {
 	unread: number;
 	lastActivity: number;
 	activity?: string;
+	color?: string;
+}
+
+function rosterColor(color: string | undefined): ThemeColor | undefined {
+	return color && isValidThemeColor(color) ? color : undefined;
 }
 
 export interface IrcDetails {
@@ -197,6 +202,7 @@ export class IrcTool implements AgentTool<typeof ircSchema, IrcDetails> {
 				unread: bus.unreadCount(ref.id),
 				lastActivity: ref.lastActivity,
 				activity: ref.activity,
+				color: ref.color,
 			}));
 		const lines: string[] = [];
 		if (peers.length === 0) {
@@ -210,7 +216,10 @@ export class IrcTool implements AgentTool<typeof ircSchema, IrcDetails> {
 					peer.parentId ? `parent ${peer.parentId}` : undefined,
 					`active ${formatDuration(Date.now() - peer.lastActivity)} ago`,
 				].filter(Boolean);
-				lines.push(`- ${peer.id} [${peer.displayName} · ${peer.kind} · ${peer.status}] — ${extras.join(", ")}`);
+				const color = peer.color ? ` · ${peer.color}` : "";
+				lines.push(
+					`- ${peer.id} [${peer.displayName} · ${peer.kind} · ${peer.status}${color}] — ${extras.join(", ")}`,
+				);
 			}
 			if (peers.some(peer => peer.status === "parked")) {
 				lines.push("");
@@ -727,7 +736,9 @@ function renderListResult(details: Partial<IrcDetails>, expanded: boolean, theme
 				const age = messageAge(peer.lastActivity);
 				const activity = peer.activity ? ` ${theme.fg("dim", replaceTabs(peer.activity))}` : "";
 				const name = theme.fg("dim", replaceTabs(peer.displayName));
-				return `${peerStatusBadge(peer.status, theme)} ${theme.bold(replaceTabs(peer.id))} ${name} ${theme.fg("dim", kindText)}${activity}${unread}${age ? ` ${theme.fg("dim", age)}` : ""}`;
+				const color = rosterColor(peer.color);
+				const id = color ? theme.bold(theme.fg(color, replaceTabs(peer.id))) : theme.bold(replaceTabs(peer.id));
+				return `${peerStatusBadge(peer.status, theme)} ${id} ${name} ${theme.fg("dim", kindText)}${activity}${unread}${age ? ` ${theme.fg("dim", age)}` : ""}`;
 			},
 		},
 		theme,

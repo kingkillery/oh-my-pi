@@ -3807,8 +3807,8 @@ export class InteractiveMode implements InteractiveModeContext {
 		return this.#btwController.start(question);
 	}
 
-	handleTanCommand(work: string): Promise<void> {
-		return this.#tanCommandController.start(work);
+	handleTanCommand(work: string, cwdOverride?: string): Promise<void> {
+		return this.#tanCommandController.start(work, cwdOverride);
 	}
 
 	hasActiveBtw(): boolean {
