@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added remote-control session list/load frames and per-agent cwd metadata to the collab wire contract.
+
 ## [15.12.4] - 2026-06-13
 
 ### Changed

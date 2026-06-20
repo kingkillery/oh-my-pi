@@ -240,12 +240,32 @@ export interface AgentSnapshot {
 	displayName: string;
 	kind: "main" | "sub";
 	parentId?: string;
+	/** Agent working directory; remote dashboards use it to group agents by repository/project. */
+	cwd?: string;
 	status: "running" | "idle" | "parked" | "aborted";
 	/** Whether the host has a transcript file for this agent (gates remote transcript fetch). */
 	hasSessionFile: boolean;
 	createdAt: number;
 	lastActivity: number;
 }
+
+export type RemoteSessionStatus = "complete" | "interrupted" | "aborted" | "error" | "pending" | "unknown";
+
+/** Session metadata exposed to remote-control clients for picker/resume UI. */
+export interface RemoteSessionSnapshot {
+	path: string;
+	id: string;
+	cwd: string;
+	title?: string;
+	created: string;
+	modified: string;
+	messageCount: number;
+	size: number;
+	firstMessage: string;
+	status?: RemoteSessionStatus;
+}
+
+export type RemoteSessionScope = "project" | "all";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Bus payloads (task subagent lifecycle/progress channels)
@@ -299,21 +319,13 @@ export interface SubagentLifecyclePayload {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export type GuestFrame =
-	| {
-			t: "hello";
-			proto: number;
-			name: string;
-			/**
-			 * base64url write token proving full-link possession; absent for
-			 * read-only (view) links. The host marks peers without a valid token
-			 * read-only and rejects their mutating frames.
-			 */
-			writeToken?: string;
-	  }
+	| { t: "hello"; proto: number; name: string; writeToken?: string }
 	| { t: "prompt"; text: string; images?: ImageContent[] }
 	| { t: "abort" }
 	| { t: "agent-cmd"; cmd: "chat" | "kill" | "revive"; agentId: string; text?: string }
-	| { t: "fetch-transcript"; reqId: number; agentId: string; fromByte: number };
+	| { t: "fetch-transcript"; reqId: number; agentId: string; fromByte: number }
+	| { t: "list-sessions"; reqId: number; scope?: RemoteSessionScope; limit?: number }
+	| { t: "load-session"; reqId: number; path: string };
 
 /** EventBus channels mirrored to guests (task subagent traffic only). */
 export type BusChannel = "task:subagent:progress" | "task:subagent:lifecycle";
@@ -326,7 +338,6 @@ export type HostFrame =
 			entries: SessionEntry[];
 			state: SessionState;
 			agents: AgentSnapshot[];
-			/** True when this peer joined through a read-only (view) link. */
 			readOnly?: boolean;
 	  }
 	| { t: "entry"; entry: SessionEntry }
@@ -337,6 +348,15 @@ export type HostFrame =
 	| { t: "agents"; agents: AgentSnapshot[] }
 	/** Targeted reply to fetch-transcript; `text` is decoded JSONL from `fromByte`, `newSize` the next offset base. */
 	| { t: "transcript"; reqId: number; text: string; newSize: number; error?: string }
+	| {
+			t: "sessions";
+			reqId: number;
+			scope: RemoteSessionScope;
+			sessions: RemoteSessionSnapshot[];
+			currentPath?: string;
+			error?: string;
+	  }
+	| { t: "session-loaded"; reqId: number; session?: RemoteSessionSnapshot; error?: string }
 	| { t: "bye"; reason: string }
 	| { t: "error"; message: string };
 

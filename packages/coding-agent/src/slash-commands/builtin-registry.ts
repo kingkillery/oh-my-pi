@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { getOAuthProviders } from "@pk-nerdsaver-ai/pi-ai/oauth";
 import { setNextRequestDebugPath } from "@pk-nerdsaver-ai/pi-ai/utils/request-debug";
 import { type AutocompleteItem, Spacer } from "@pk-nerdsaver-ai/pi-tui";
-import { APP_NAME, setProjectDir } from "@pk-nerdsaver-ai/pi-utils";
+import { $which, APP_NAME, setProjectDir } from "@pk-nerdsaver-ai/pi-utils";
 import { COLLAB_GUEST_ALLOWED_COMMANDS, CollabGuestLink } from "../collab/guest";
 import { CollabHost } from "../collab/host";
 import type { SettingPath, SettingValue } from "../config/settings";
@@ -113,6 +113,85 @@ function showCollabQrCode(ctx: InteractiveModeContext, webLink: string): void {
 function showCollabLink(ctx: InteractiveModeContext, host: CollabHost, heading: string, view = false): void {
 	ctx.showStatus(collabLinkHint(host, heading, view), { dim: false });
 	showCollabQrCode(ctx, view ? host.webViewLink : host.webLink);
+}
+
+async function startCollabShare(
+	ctx: InteractiveModeContext,
+	input: {
+		relayInput: string;
+		view: boolean;
+		missingRelayUsage: string;
+		startedHeading: string;
+		activeHeading: string;
+		errorPrefix: string;
+	},
+): Promise<void> {
+	if (ctx.collabGuest) {
+		ctx.showError("Already in a collab session as a guest (/leave first)");
+		return;
+	}
+	if (ctx.collabHost) {
+		showCollabLink(ctx, ctx.collabHost, input.activeHeading, input.view);
+		return;
+	}
+	const relayInput = input.relayInput || ctx.settings.get("collab.relayUrl") || "";
+	if (!relayInput) {
+		ctx.showError(input.missingRelayUsage);
+		return;
+	}
+	// Scheme-less relay args default to wss (ws:// must be spelled out for localhost).
+	const relayUrl = relayInput.includes("://") ? relayInput : `wss://${relayInput}`;
+	const webUrl = ctx.settings.get("collab.webUrl") || "";
+	const host = new CollabHost(ctx);
+	try {
+		await host.start(relayUrl, webUrl);
+	} catch (err) {
+		ctx.showError(`${input.errorPrefix}: ${errorMessage(err)}`);
+		return;
+	}
+	ctx.collabHost = host;
+	showCollabLink(ctx, host, input.startedHeading, input.view);
+}
+
+function formatRemoteControlStatus(ctx: InteractiveModeContext): string {
+	if (ctx.collabHost) {
+		const names = ctx.collabHost.participants.map(p =>
+			p.role === "host" ? `${p.name} (host)` : p.readOnly ? `${p.name} (view-only)` : p.name,
+		);
+		return [
+			`Remote control: ${names.join(", ")}`,
+			`Phone/web: ${collabWebLinkClickable(ctx.collabHost.webLink)}`,
+			"Capabilities: prompt, interrupt, agent hub chat/kill/revive, transcript fetch, session list/load.",
+		].join("\n");
+	}
+	if (ctx.collabGuest) {
+		return ctx.collabGuest.readOnly
+			? "In a remote collab session as a read-only guest (/leave to exit)"
+			: "In a remote collab session as a guest (/leave to exit)";
+	}
+	return "Remote control is not running";
+}
+
+function openKanbanForRemoteControl(ctx: InteractiveModeContext): void {
+	const bin = $which("pk-kanban");
+	if (!bin) {
+		ctx.showError("pk-kanban is not installed or not on PATH");
+		return;
+	}
+	try {
+		const proc = Bun.spawn({
+			cmd: [bin],
+			cwd: ctx.sessionManager.getCwd(),
+			stdin: "ignore",
+			stdout: "ignore",
+			stderr: "ignore",
+			windowsHide: true,
+		});
+		proc.unref();
+		ctx.showStatus(`Opening Kanban for ${ctx.sessionManager.getCwd()}`);
+	} catch (err) {
+		ctx.showError(`Failed to open Kanban: ${errorMessage(err)}`);
+	}
 }
 
 function formatFreshSessionResult(result: FreshSessionResult): string {
@@ -645,41 +724,67 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 				}
 				return;
 			}
-			if (ctx.collabGuest) {
-				ctx.showError("Already in a collab session as a guest (/leave first)");
+			const knownStartVerb = verb === "start" || verb === "view";
+			const view = verb === "view";
+			const explicitUrl = knownStartVerb ? rest : args;
+			await startCollabShare(ctx, {
+				relayInput: explicitUrl,
+				view,
+				missingRelayUsage:
+					"No relay configured. Set collab.relayUrl in /settings or pass one: /collab relay.example.com",
+				startedHeading: "Collab session started!",
+				activeHeading: view ? "Read-only collab session active" : "Collab session active",
+				errorPrefix: "Failed to start collab session",
+			});
+		},
+	},
+	{
+		name: "remote-control",
+		aliases: ["remote"],
+		description: "Control this session from a phone, browser, or Kanban",
+		inlineHint: "[start|view|status|stop|kanban] [relayUrl]",
+		subcommands: [
+			{ name: "start", description: "Share a writable remote-control link" },
+			{ name: "view", description: "Share a read-only watch link" },
+			{ name: "status", description: "Show link, participants, and capabilities" },
+			{ name: "stop", description: "Stop remote control" },
+			{ name: "kanban", description: "Open this repository in pk-kanban" },
+		],
+		allowArgs: true,
+		handleTui: async (command, runtime) => {
+			const ctx = runtime.ctx;
+			ctx.editor.setText("");
+			const args = command.args.trim();
+			const { verb, rest } = parseSubcommand(args);
+			if (verb === "stop") {
+				if (!ctx.collabHost) {
+					ctx.showStatus("Remote control is not running");
+					return;
+				}
+				await ctx.collabHost.stop("remote control stopped");
+				ctx.showStatus("Remote control stopped");
+				return;
+			}
+			if (verb === "status") {
+				ctx.showStatus(formatRemoteControlStatus(ctx));
+				return;
+			}
+			if (verb === "kanban") {
+				openKanbanForRemoteControl(ctx);
 				return;
 			}
 			const knownStartVerb = verb === "start" || verb === "view";
 			const view = verb === "view";
-			if (ctx.collabHost) {
-				showCollabLink(
-					ctx,
-					ctx.collabHost,
-					view ? "Read-only collab session active" : "Collab session active",
-					view,
-				);
-				return;
-			}
 			const explicitUrl = knownStartVerb ? rest : args;
-			const relayInput = explicitUrl || ctx.settings.get("collab.relayUrl") || "";
-			if (!relayInput) {
-				ctx.showError(
-					"No relay configured. Set collab.relayUrl in /settings or pass one: /collab relay.example.com",
-				);
-				return;
-			}
-			// Scheme-less relay args default to wss (ws:// must be spelled out for localhost).
-			const relayUrl = relayInput.includes("://") ? relayInput : `wss://${relayInput}`;
-			const webUrl = ctx.settings.get("collab.webUrl") || "";
-			const host = new CollabHost(ctx);
-			try {
-				await host.start(relayUrl, webUrl);
-			} catch (err) {
-				ctx.showError(`Failed to start collab session: ${errorMessage(err)}`);
-				return;
-			}
-			ctx.collabHost = host;
-			showCollabLink(ctx, host, "Collab session started!", view);
+			await startCollabShare(ctx, {
+				relayInput: explicitUrl,
+				view,
+				missingRelayUsage:
+					"No relay configured. Set collab.relayUrl in /settings or pass one: /remote-control relay.example.com",
+				startedHeading: view ? "Read-only remote control started!" : "Remote control started!",
+				activeHeading: view ? "Read-only remote control active" : "Remote control active",
+				errorPrefix: "Failed to start remote control",
+			});
 		},
 	},
 	{

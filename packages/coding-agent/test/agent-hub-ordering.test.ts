@@ -175,8 +175,7 @@ describe("Agent hub row ordering", () => {
 		const onDone = vi.fn();
 		const hub = makeHub(agents, "alpha-repo", { focusAgent, onDone });
 		const cleanLines = hub.render(120).map(line => Bun.stripANSI(line));
-		const rowFor = (id: string) =>
-			cleanLines.find(line => line.includes(`${theme.sep.dot}${id}${theme.sep.dot}`));
+		const rowFor = (id: string) => cleanLines.find(line => line.includes(`${theme.sep.dot}${id}${theme.sep.dot}`));
 
 		// Main is the non-selectable tree root header — it carries no " · " columns,
 		// so renderedAgentIds never lists it.

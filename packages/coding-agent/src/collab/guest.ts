@@ -44,6 +44,8 @@ export const COLLAB_GUEST_ALLOWED_COMMANDS: Record<string, true> = {
 	settings: true,
 	leave: true,
 	collab: true,
+	"remote-control": true,
+	remote: true,
 	exit: true,
 	quit: true,
 };
@@ -369,6 +371,7 @@ export class CollabGuestLink {
 					displayName: snap.displayName,
 					kind: snap.kind,
 					parentId: snap.parentId,
+					cwd: snap.cwd,
 					session: null,
 					status: snap.status,
 				});
@@ -380,6 +383,7 @@ export class CollabGuestLink {
 				ref.createdAt = snap.createdAt;
 				ref.lastActivity = snap.lastActivity;
 				ref.displayName = snap.displayName;
+				ref.cwd = snap.cwd;
 			}
 			this.#agentHasTranscript.set(snap.id, snap.hasSessionFile);
 		}

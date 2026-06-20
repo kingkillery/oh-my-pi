@@ -13,6 +13,8 @@ import type {
 	GuestFrame,
 	ParsedCollabLink,
 	Participant,
+	RemoteSessionScope,
+	RemoteSessionSnapshot,
 	SessionState,
 	AgentSnapshot as WireAgentSnapshot,
 } from "@pk-nerdsaver-ai/pi-wire";
@@ -57,7 +59,7 @@ export type CollabSessionState = SessionState & {
  * that serialize into those shapes.
  */
 export type CollabFrame =
-	// guest -> host (hello/abort/agent-cmd/fetch-transcript are taken verbatim from the wire grammar)
+	// guest -> host (hello/abort/agent-cmd/fetch-transcript/list/load are taken verbatim from the wire grammar)
 	| Exclude<GuestFrame, { t: "prompt" }>
 	| { t: "prompt"; text: string; images?: ImageContent[] }
 	// host -> guest
@@ -80,6 +82,15 @@ export type CollabFrame =
 	| { t: "agents"; agents: AgentSnapshot[] }
 	/** Targeted reply to fetch-transcript; `text` is decoded JSONL from `fromByte`, `newSize` the next offset base. */
 	| { t: "transcript"; reqId: number; text: string; newSize: number; error?: string }
+	| {
+			t: "sessions";
+			reqId: number;
+			scope: RemoteSessionScope;
+			sessions: RemoteSessionSnapshot[];
+			currentPath?: string;
+			error?: string;
+	  }
+	| { t: "session-loaded"; reqId: number; session?: RemoteSessionSnapshot; error?: string }
 	| { t: "bye"; reason: string }
 	| { t: "error"; message: string };
 

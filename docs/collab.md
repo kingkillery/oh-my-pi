@@ -20,7 +20,7 @@ Collab session started!
 
 The browser line is click-to-join (an OSC 8 hyperlink to the full `https://` deep link): the relay serves the web guest client at `/`, and the room id + key ride in the URL fragment. From another omp (any directory, any machine), either form works:
 
-Running `/collab` or `/collab view` starts or displays the active hosting session, rendering both the terminal/browser join links and their corresponding QR codes.
+Running `/collab`, `/remote-control`, `/collab view`, or `/remote-control view` starts or displays the active hosting session, rendering both the terminal/browser join links and their corresponding QR codes.
 
 ```
 /join my.omp.sh/#mgAYTZwEnpRQtca0CTgn-Q.gdJU…
@@ -37,6 +37,10 @@ The guest's previous session is restored on `/leave` (or when the host stops).
 | `/collab view` | Start sharing read-only (or re-print the link/QR when already hosting) |
 | `/collab status` | Show link + participants |
 | `/collab stop` | Stop sharing |
+| `/remote-control` | Start a full-control phone/browser remote (same encrypted transport as `/collab`) |
+| `/remote-control status` | Show remote-control link, participants, and supported remote actions |
+| `/remote-control kanban` | Open the current repository in pk-kanban, preserving Kanban's per-workspace project split |
+| `/remote-control stop` | Stop remote control |
 | `/join <link>` | Join a shared session as a guest |
 | `/leave` | Leave (guest) or stop sharing (host) |
 
@@ -85,11 +89,12 @@ Guests with a full link can:
 - read the entire session (including the back-transcript at join time),
 - prompt the agent (rendered with their name badge on every participant's transcript; the LLM sees the prompt text verbatim — names are display-only),
 - interrupt the agent (Esc),
-- use the Agent Hub against the host's subagents: live table and progress, chat (steers the host's subagent), kill, revive, and transcript viewing (fetched from the host on demand).
+- use the Agent Hub against the host's subagents: live table and progress, cwd/project grouping, chat (steers the host's subagent), kill, revive, and transcript viewing (fetched from the host on demand),
+- list known host sessions and ask the host TUI to load one; the host validates the requested path against its session index before resuming it and re-syncing every guest.
 
-Guests with a view-only link can read everything live — back-transcript, streaming text, tool cards, subagent transcripts — but the host rejects prompting, interrupting, and agent control from them.
+Guests with a view-only link can read everything live — back-transcript, streaming text, tool cards, subagent transcripts — but the host rejects prompting, interrupting, session listing/loading, and agent control from them.
 
-Everything that mutates the host session or machine is host-only: `/model`, `/compact`, `/resume`, `/branch`, bash (`!`), python (`$`), skills, etc. Guests keep a small local allowlist (`/dump`, `/export`, `/copy`, `/help`, `/hotkeys`, `/theme`, `/settings`, `/leave`, `/collab`, `/exit`, `/quit`).
+Everything that mutates the host session or machine is host-only: `/model`, `/compact`, `/resume`, `/branch`, bash (`!`), python (`$`), skills, etc. Guests keep a small local allowlist (`/dump`, `/export`, `/copy`, `/help`, `/hotkeys`, `/theme`, `/settings`, `/leave`, `/collab`, `/remote-control`, `/exit`, `/quit`).
 
 Known v1 limit for guests: a turn already streaming when you join becomes visible from its next message boundary.
 
@@ -127,6 +132,7 @@ Hub topology — the host is authoritative, guests never peer:
 2. `event` frames — live agent events, fed straight into the guest's normal event controller; rendering is events-only to prevent double-render.
 3. `state` frames — debounced footer snapshots: streaming flag, the host's full model object and thinking level (applied to the guest's replica agent state, so model display and context-window math are native), host context numbers, and participants.
 4. `bus` frames — mirrored task-subagent lifecycle/progress EventBus traffic, republished on the guest's local bus so the subagent HUD and status-line count work natively.
-5. `agents` frames — agent-registry snapshots feeding a guest-local registry, so the Agent Hub table renders host subagents.
+5. `agents` frames — agent-registry snapshots feeding a guest-local registry, so the Agent Hub table renders host subagents. Snapshots carry each agent cwd when known so remote dashboards can group agents by repository/project, matching Kanban's workspace boundary.
+6. `sessions` / `session-loaded` frames — targeted replies for phone/browser remote session pickers. Writable guests request `list-sessions` (`project` or `all`) and `load-session`; the host only loads paths found in its own session list, then broadcasts a fresh `welcome` snapshot so every guest follows the active session.
 
-Guest→host: `hello`, `prompt`, `abort`, `agent-cmd` (hub chat/kill/revive), and `fetch-transcript` (incremental subagent-transcript reads answered by targeted `transcript` frames). The replica loads through the regular `/resume` machinery, so theming, ctrl+o, and transcript behavior are native by construction; the guest process never chdirs to host paths.
+Guest→host: `hello`, `prompt`, `abort`, `agent-cmd` (hub chat/kill/revive), `fetch-transcript` (incremental subagent-transcript reads answered by targeted `transcript` frames), `list-sessions`, and `load-session`. The replica loads through the regular `/resume` machinery, so theming, ctrl+o, and transcript behavior are native by construction; the guest process never chdirs to host paths.

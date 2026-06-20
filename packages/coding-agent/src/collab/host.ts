@@ -16,6 +16,7 @@ import type { ImageContent, TextContent } from "@pk-nerdsaver-ai/pi-ai";
 import { logger } from "@pk-nerdsaver-ai/pi-utils";
 import type {
 	BusChannel,
+	RemoteSessionScope,
 	AgentEvent as WireAgentEvent,
 	SessionEntry as WireSessionEntry,
 } from "@pk-nerdsaver-ai/pi-wire";
@@ -25,6 +26,8 @@ import { type AgentRef, AgentRegistry } from "../registry/agent-registry";
 import type { AgentSessionEvent } from "../session/agent-session";
 import { stripImagesFromMessage, USER_INTERRUPT_LABEL } from "../session/messages";
 import type { SessionEntry as StoredSessionEntry } from "../session/session-entries";
+import type { SessionInfo } from "../session/session-listing";
+import { SessionManager } from "../session/session-manager";
 import { TASK_SUBAGENT_LIFECYCLE_CHANNEL, TASK_SUBAGENT_PROGRESS_CHANNEL } from "../task";
 import { generateRoomKey, generateWriteToken, importRoomKey } from "./crypto";
 import {
@@ -41,6 +44,7 @@ import {
 	parseCollabLink,
 } from "./protocol";
 import { CollabSocket } from "./relay-client";
+import { findLoadableRemoteSession, selectRemoteSessions, toRemoteSessionSnapshot } from "./remote-control";
 
 /** Events that change the footer state guests render. */
 const STATE_TRIGGER_EVENTS: Record<string, true> = {
@@ -128,6 +132,7 @@ export class CollabHost {
 	#busUnsubscribers: (() => void)[] = [];
 	#registryUnsubscribe?: () => void;
 	#stopped = false;
+	#loadingRemoteSession = false;
 
 	constructor(ctx: InteractiveModeContext) {
 		this.#ctx = ctx;
@@ -273,6 +278,7 @@ export class CollabHost {
 	#broadcast(frame: CollabFrame): void {
 		if (this.#stopped || !this.#socket) return;
 		if (this.#ctx.sessionManager.getSessionId() !== this.#sessionId) {
+			if (this.#loadingRemoteSession) return;
 			void this.stop("session switched");
 			this.#ctx.session.emitNotice("warning", "Collab ended: session switched", "collab");
 			return;
@@ -296,6 +302,12 @@ export class CollabHost {
 				break;
 			case "fetch-transcript":
 				void this.#handleFetchTranscript(frame.reqId, frame.agentId, frame.fromByte, fromPeer);
+				break;
+			case "list-sessions":
+				void this.#handleListSessions(frame.reqId, frame.scope, frame.limit, fromPeer);
+				break;
+			case "load-session":
+				void this.#handleLoadSession(frame.reqId, frame.path, fromPeer);
 				break;
 			default:
 				logger.debug("collab host ignoring unexpected frame", { type: frame.t, fromPeer });
@@ -327,6 +339,17 @@ export class CollabHost {
 		const canWrite = this.#verifyWriteToken(writeToken);
 		this.#peers.set(fromPeer, { name: cleanName, canWrite });
 
+		this.#sendWelcome(fromPeer, canWrite);
+		this.#ctx.session.emitNotice(
+			"info",
+			`${cleanName} joined the collab session${canWrite ? "" : " (read-only)"}`,
+			"collab",
+		);
+		this.#updateStatusSegment();
+		this.#scheduleStateBroadcast();
+	}
+
+	#sendWelcome(fromPeer: number, canWrite: boolean): void {
 		// Snapshot and send synchronously: no awaits between snapshot and send, so
 		// later entries/events queue behind the welcome on the same socket and the
 		// guest never sees a gap.
@@ -351,13 +374,12 @@ export class CollabHost {
 			},
 			fromPeer,
 		);
-		this.#ctx.session.emitNotice(
-			"info",
-			`${cleanName} joined the collab session${canWrite ? "" : " (read-only)"}`,
-			"collab",
-		);
-		this.#updateStatusSegment();
-		this.#scheduleStateBroadcast();
+	}
+
+	#resyncGuests(): void {
+		for (const [peer, { canWrite }] of this.#peers) {
+			this.#sendWelcome(peer, canWrite);
+		}
 	}
 
 	#handlePrompt(text: string, images: ImageContent[] | undefined, fromPeer: number): void {
@@ -461,6 +483,7 @@ export class CollabHost {
 					displayName: ref.displayName,
 					kind: ref.kind,
 					parentId: ref.parentId,
+					cwd: ref.cwd,
 					status: ref.status,
 					hasSessionFile: !!ref.sessionFile,
 					createdAt: ref.createdAt,
@@ -520,6 +543,92 @@ export class CollabHost {
 			case "revive":
 				AgentLifecycleManager.global().ensureLive(agentId).catch(fail);
 				break;
+		}
+	}
+
+	async #listSessionsForRemote(
+		scope: RemoteSessionScope | undefined,
+	): Promise<{ scope: RemoteSessionScope; sessions: SessionInfo[] }> {
+		const resolvedScope = scope === "all" ? "all" : "project";
+		const sessions =
+			resolvedScope === "all"
+				? await SessionManager.listAll()
+				: await SessionManager.list(this.#ctx.sessionManager.getCwd(), this.#ctx.sessionManager.getSessionDir());
+		return { scope: resolvedScope, sessions };
+	}
+
+	async #handleListSessions(
+		reqId: number,
+		scope: RemoteSessionScope | undefined,
+		limit: number | undefined,
+		fromPeer: number,
+	): Promise<void> {
+		if (!this.#peers.get(fromPeer)?.canWrite) {
+			this.#rejectReadOnly("session listing", fromPeer);
+			return;
+		}
+		try {
+			const { scope: resolvedScope, sessions } = await this.#listSessionsForRemote(scope);
+			this.#socket?.send(
+				{
+					t: "sessions",
+					reqId,
+					scope: resolvedScope,
+					sessions: selectRemoteSessions(sessions, limit),
+					currentPath: this.#ctx.sessionManager.getSessionFile(),
+				},
+				fromPeer,
+			);
+		} catch (err) {
+			logger.warn("collab list-sessions failed", { error: String(err) });
+			this.#socket?.send(
+				{
+					t: "sessions",
+					reqId,
+					scope: scope === "all" ? "all" : "project",
+					sessions: [],
+					error: String(err),
+				},
+				fromPeer,
+			);
+		}
+	}
+
+	async #handleLoadSession(reqId: number, requestedPath: string, fromPeer: number): Promise<void> {
+		if (!this.#peers.get(fromPeer)?.canWrite) {
+			this.#rejectReadOnly("session loading", fromPeer);
+			return;
+		}
+		const trimmedPath = requestedPath.trim();
+		if (!trimmedPath) {
+			this.#socket?.send({ t: "session-loaded", reqId, error: "empty session path" }, fromPeer);
+			return;
+		}
+		try {
+			const sessions = await SessionManager.listAll();
+			const session = findLoadableRemoteSession(sessions, trimmedPath);
+			if (!session) {
+				this.#socket?.send(
+					{ t: "session-loaded", reqId, error: "session is not in the known session list" },
+					fromPeer,
+				);
+				return;
+			}
+			this.#loadingRemoteSession = true;
+			try {
+				await this.#ctx.handleResumeSession(session.path);
+				this.#sessionId = this.#ctx.sessionManager.getSessionId();
+				this.#lastStateJson = "";
+			} finally {
+				this.#loadingRemoteSession = false;
+			}
+			this.#ctx.session.emitNotice("info", "Remote control loaded a session", "collab");
+			this.#socket?.send({ t: "session-loaded", reqId, session: toRemoteSessionSnapshot(session) }, fromPeer);
+			this.#resyncGuests();
+			this.#scheduleStateBroadcast();
+		} catch (err) {
+			logger.warn("collab load-session failed", { error: String(err) });
+			this.#socket?.send({ t: "session-loaded", reqId, error: String(err) }, fromPeer);
 		}
 	}
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { type Api, type Model } from "@pk-nerdsaver-ai/pi-ai";
+import type { Api, Model } from "@pk-nerdsaver-ai/pi-ai";
 import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import type { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
 import { resolveSubagentModelAlias } from "@pk-nerdsaver-ai/pi-coding-agent/config/subagent-model-aliases";
@@ -35,12 +35,20 @@ const registry = makeRegistry([
 
 describe("resolveSubagentModelAlias", () => {
 	test("resolves an exact alias match", () => {
-		const resolved = resolveSubagentModelAlias("minimax-code", { "minimax-code": "minimax-code/MiniMax-M3" }, registry);
+		const resolved = resolveSubagentModelAlias(
+			"minimax-code",
+			{ "minimax-code": "minimax-code/MiniMax-M3" },
+			registry,
+		);
 		expect(resolved).toBe("minimax-code/MiniMax-M3");
 	});
 
 	test("resolves aliases case-insensitively", () => {
-		const resolved = resolveSubagentModelAlias("MINIMAX-CODE", { "minimax-code": "minimax-code/MiniMax-M3" }, registry);
+		const resolved = resolveSubagentModelAlias(
+			"MINIMAX-CODE",
+			{ "minimax-code": "minimax-code/MiniMax-M3" },
+			registry,
+		);
 		expect(resolved).toBe("minimax-code/MiniMax-M3");
 	});
 
@@ -50,12 +58,20 @@ describe("resolveSubagentModelAlias", () => {
 	});
 
 	test("falls back to model resolver when no alias matches", () => {
-		const resolved = resolveSubagentModelAlias("openai/gpt-4o", { "minimax-code": "minimax-code/MiniMax-M3" }, registry);
+		const resolved = resolveSubagentModelAlias(
+			"openai/gpt-4o",
+			{ "minimax-code": "minimax-code/MiniMax-M3" },
+			registry,
+		);
 		expect(resolved).toBe("openai/gpt-4o");
 	});
 
 	test("returns null when neither alias nor model resolver matches", () => {
-		const resolved = resolveSubagentModelAlias("unknown-model", { "minimax-code": "minimax-code/MiniMax-M3" }, registry);
+		const resolved = resolveSubagentModelAlias(
+			"unknown-model",
+			{ "minimax-code": "minimax-code/MiniMax-M3" },
+			registry,
+		);
 		expect(resolved).toBeNull();
 	});
 });

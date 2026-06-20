@@ -6,6 +6,7 @@
 
 - Added `/subagent` for interactively spawning configured subagents with model, thinking level, optional name/color, task text, and quick `using <alias-or-model>` model selection.
 - Added Codex-style explicit skill invocation: typing `$<skill-name> [args]` at the start of a prompt loads that skill's `SKILL.md` and runs it immediately (no model inference), with `$`-triggered autocomplete listing skills as you type. Works on both Enter (steer) and Ctrl+Enter (follow-up). The `$` sigil is disambiguated from the Python REPL (`$ code` / `$$ code`), and unregistered names like `$HOME` fall through to plain text.
+- Added `/remote-control` as a phone/browser remote entry point over the existing encrypted collab transport, including remote session list/load support and a `/remote-control kanban` launcher for the current repository's pk-kanban workspace.
 
 ### Changed
 
