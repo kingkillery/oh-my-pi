@@ -66,6 +66,15 @@ describe("issue #2299 — NVIDIA NIM qwen thinking format", () => {
 		expect(buildOpenAICompat(dashscope).thinkingFormat).toBe("qwen");
 	});
 
+	it("bundles NVIDIA Diffusion Gemma for experimentation", () => {
+		const model = getBundledModel<"openai-completions">("nvidia", "google/diffusiongemma-26b-a4b-it");
+
+		expect(model.provider).toBe("nvidia");
+		expect(model.baseUrl).toBe("https://integrate.api.nvidia.com/v1");
+		expect(model.input).toEqual(["text"]);
+		expect(model.reasoning).toBe(false);
+	});
+
 	it("emits chat_template_kwargs.enable_thinking — never top-level enable_thinking — on the wire", async () => {
 		const model = getBundledModel<"openai-completions">("nvidia", "qwen/qwen3.5-397b-a17b");
 		expect(model.provider).toBe("nvidia");

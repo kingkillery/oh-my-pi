@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [16.1.7] - 2026-06-20
+
 ### Added
 
 - Added persistent background agent sessions with /background promotion and a switcher.
