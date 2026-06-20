@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [16.1.8] - 2026-06-20
+
 ### Added
 
 - Added NVIDIA Diffusion Gemma (`google/diffusiongemma-26b-a4b-it`) to the bundled catalog for experimentation.

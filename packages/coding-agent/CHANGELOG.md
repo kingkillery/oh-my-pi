@@ -2,11 +2,14 @@
 
 ## [Unreleased]
 
+## [16.1.8] - 2026-06-20
+
 ### Added
 
 - Added a `spiral` value to the `loop.mode` setting. Between `/loop` iterations it runs a verifier/synthesis pass (a stateless completion graded against the immutable objective), appends the resulting reflection to the next iteration's prompt, stops the loop when the objective is reported complete, and stops when progress stalls (the reflection repeats unchanged across iterations). A synthesis failure degrades to a plain re-submit so the loop never silently dies. Inspired by Self-Refine (arXiv:2303.17651) and Reflexion (arXiv:2303.11366).
 
 ## [16.1.7] - 2026-06-20
+
 ### Added
 
 - Added per-spawn `cwd` support for background task agents so parallel agents can run from distinct working directories.

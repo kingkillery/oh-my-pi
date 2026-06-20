@@ -21,7 +21,7 @@
     },
     "packages/agent": {
       "name": "@pk-nerdsaver-ai/pi-agent-core",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "dependencies": {
         "@opentelemetry/api": "catalog:",
         "@pk-nerdsaver-ai/pi-ai": "catalog:",
@@ -39,7 +39,7 @@
     },
     "packages/ai": {
       "name": "@pk-nerdsaver-ai/pi-ai",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "dependencies": {
         "@bufbuild/protobuf": "catalog:",
         "@pk-nerdsaver-ai/pi-catalog": "catalog:",
@@ -55,7 +55,7 @@
     },
     "packages/catalog": {
       "name": "@pk-nerdsaver-ai/pi-catalog",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "dependencies": {
         "@bufbuild/protobuf": "catalog:",
         "@pk-nerdsaver-ai/pi-utils": "catalog:",
@@ -69,7 +69,7 @@
     },
     "packages/coding-agent": {
       "name": "@pk-nerdsaver-ai/pi-coding-agent",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "bin": {
         "omp": "src/cli.ts",
       },
@@ -137,7 +137,7 @@
     },
     "packages/hashline": {
       "name": "@pk-nerdsaver-ai/hashline",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "dependencies": {
         "diff": "catalog:",
         "lru-cache": "catalog:",
@@ -148,7 +148,7 @@
     },
     "packages/mnemopi": {
       "name": "@pk-nerdsaver-ai/pi-mnemopi",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "bin": {
         "mnemopi": "src/cli.ts",
       },
@@ -174,7 +174,7 @@
     },
     "packages/natives": {
       "name": "@pk-nerdsaver-ai/pi-natives",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "devDependencies": {
         "@napi-rs/cli": "catalog:",
         "@types/bun": "catalog:",
@@ -182,7 +182,7 @@
     },
     "packages/snapcompact": {
       "name": "@pk-nerdsaver-ai/snapcompact",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "dependencies": {
         "@pk-nerdsaver-ai/pi-ai": "catalog:",
         "@pk-nerdsaver-ai/pi-natives": "catalog:",
@@ -195,7 +195,7 @@
     },
     "packages/stats": {
       "name": "@pk-nerdsaver-ai/omp-stats",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "bin": {
         "omp-stats": "./src/index.ts",
       },
@@ -221,7 +221,7 @@
     },
     "packages/swarm-extension": {
       "name": "@pk-nerdsaver-ai/swarm-extension",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "bin": {
         "omp-swarm": "src/cli.ts",
       },
@@ -237,7 +237,7 @@
     },
     "packages/tui": {
       "name": "@pk-nerdsaver-ai/pi-tui",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "dependencies": {
         "@pk-nerdsaver-ai/pi-natives": "catalog:",
         "@pk-nerdsaver-ai/pi-utils": "catalog:",
@@ -278,7 +278,7 @@
     },
     "packages/utils": {
       "name": "@pk-nerdsaver-ai/pi-utils",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "dependencies": {
         "@pk-nerdsaver-ai/pi-natives": "catalog:",
         "handlebars": "catalog:",
@@ -291,7 +291,7 @@
     },
     "packages/wire": {
       "name": "@pk-nerdsaver-ai/pi-wire",
-      "version": "16.1.7",
+      "version": "16.1.8",
       "devDependencies": {
         "@types/bun": "catalog:",
       },
@@ -333,18 +333,18 @@
     "@opentelemetry/resources": "^2.7.1",
     "@opentelemetry/sdk-trace-base": "^2.7.1",
     "@opentelemetry/sdk-trace-node": "^2.7.1",
-    "@pk-nerdsaver-ai/hashline": "16.1.7",
-    "@pk-nerdsaver-ai/omp-stats": "16.1.7",
-    "@pk-nerdsaver-ai/pi-agent-core": "16.1.7",
-    "@pk-nerdsaver-ai/pi-ai": "16.1.7",
-    "@pk-nerdsaver-ai/pi-catalog": "16.1.7",
-    "@pk-nerdsaver-ai/pi-coding-agent": "16.1.7",
-    "@pk-nerdsaver-ai/pi-mnemopi": "16.1.7",
-    "@pk-nerdsaver-ai/pi-natives": "16.1.7",
-    "@pk-nerdsaver-ai/pi-tui": "16.1.7",
-    "@pk-nerdsaver-ai/pi-utils": "16.1.7",
-    "@pk-nerdsaver-ai/pi-wire": "16.1.7",
-    "@pk-nerdsaver-ai/snapcompact": "16.1.7",
+    "@pk-nerdsaver-ai/hashline": "16.1.8",
+    "@pk-nerdsaver-ai/omp-stats": "16.1.8",
+    "@pk-nerdsaver-ai/pi-agent-core": "16.1.8",
+    "@pk-nerdsaver-ai/pi-ai": "16.1.8",
+    "@pk-nerdsaver-ai/pi-catalog": "16.1.8",
+    "@pk-nerdsaver-ai/pi-coding-agent": "16.1.8",
+    "@pk-nerdsaver-ai/pi-mnemopi": "16.1.8",
+    "@pk-nerdsaver-ai/pi-natives": "16.1.8",
+    "@pk-nerdsaver-ai/pi-tui": "16.1.8",
+    "@pk-nerdsaver-ai/pi-utils": "16.1.8",
+    "@pk-nerdsaver-ai/pi-wire": "16.1.8",
+    "@pk-nerdsaver-ai/snapcompact": "16.1.8",
     "@puppeteer/browsers": "^3.0.4",
     "@tailwindcss/node": "^4.3.0",
     "@tailwindcss/vite": "^4.3.0",
@@ -1061,7 +1061,7 @@
 
     "fast-xml-builder": ["fast-xml-builder@1.2.0", "", { "dependencies": { "path-expression-matcher": "^1.5.0", "xml-naming": "^0.1.0" } }, "sha512-00aAWieqff+ZJhsXA4g1g7M8k+7AYoMUUHF+/zFb5U6Uv/P0Vl4QZo84/IcufzYalLuEj9928bXN9PbbFzMF0Q=="],
 
-    "fast-xml-parser": ["fast-xml-parser@5.9.0", "", { "dependencies": { "@nodable/entities": "^2.2.0", "fast-xml-builder": "^1.2.0", "is-unsafe": "^1.0.1", "path-expression-matcher": "^1.5.0", "strnum": "^2.4.0", "xml-naming": "^0.1.0" }, "bin": { "fxparser": "src/cli/cli.js" } }, "sha512-duBuXbyIhEeNO4GjFuVqr0nF047oNwr18aum+zJyqo0MUG/n7Afgs3Qv3D6VN3ONedUKxiuFlPiMGIa0Z11chA=="],
+    "fast-xml-parser": ["fast-xml-parser@5.9.1", "", { "dependencies": { "@nodable/entities": "^2.2.0", "fast-xml-builder": "^1.2.0", "is-unsafe": "^1.0.1", "path-expression-matcher": "^1.5.0", "strnum": "^2.4.0", "xml-naming": "^0.1.0" }, "bin": { "fxparser": "src/cli/cli.js" } }, "sha512-S7c757RD3jvnkiKleILFONy5+kBzc2gLxbDBJmN8DvriXTVqBGOzcMZqUPkX/o259U7SbK9fy6td1EELt2zHSQ=="],
 
     "fastembed": ["fastembed@2.1.0", "", { "dependencies": { "@anush008/tokenizers": "^0.0.0", "@huggingface/hub": "^2.7.1", "onnxruntime-node": "1.21.0", "progress": "^2.0.3", "tar": "^6.2.0" } }, "sha512-oQkpcRHBppJ3+a3w9dU0uytSY0N1cnEa/iVMc8AXEd+tvT529GekOEFhNviJy89R3lvQXF6cdIMTXHj1Gi00xQ=="],
 
