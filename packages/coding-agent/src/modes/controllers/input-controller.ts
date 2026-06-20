@@ -64,6 +64,31 @@ function parsePythonCommandInput(text: string): { code: string; isExcluded: bool
 	};
 }
 
+/**
+ * Parse a Codex-style `$<skill-name> [args]` explicit skill invocation. Returns
+ * the bare skill name + trailing args, or null when the text is not a `$`-skill
+ * token: the Python sigils `$ `/`$$ ` (whitespace after `$`), `${…}` prose, and a
+ * bare `$` all return null. The caller still checks the name against the skill
+ * registry, so `$HOME`-style prose with no matching skill falls through too.
+ */
+export function parseDollarSkillInput(text: string): { name: string; args: string } | null {
+	if (text.charCodeAt(0) !== 36 /* $ */) return null;
+	const second = text.charCodeAt(1);
+	if (
+		Number.isNaN(second) ||
+		second === 36 /* $ */ ||
+		second === 123 /* { */ ||
+		second === 32 /* space */ ||
+		second === 9 /* tab */
+	) {
+		return null;
+	}
+	const spaceIndex = text.indexOf(" ");
+	const name = spaceIndex === -1 ? text.slice(1) : text.slice(1, spaceIndex);
+	const args = spaceIndex === -1 ? "" : text.slice(spaceIndex + 1).trim();
+	return { name, args };
+}
+
 /** Wrap pasted text in `<attachment>` tags so the model treats it as one quoted block. */
 function wrapPasteInAttachmentBlock(content: string): string {
 	return `<attachment>\n${content}\n</attachment>`;
@@ -600,6 +625,11 @@ export class InputController {
 				return;
 			}
 
+			// Codex-style `$<skill-name> [args]` explicit skill invocation (Enter ⇒ steer).
+			if (await this.#invokeDollarSkillCommand(text, "steer")) {
+				return;
+			}
+
 			// Handle bash command (! for normal, !! for excluded from context)
 			if (text.startsWith("!")) {
 				const isExcluded = text.startsWith("!!");
@@ -920,9 +950,39 @@ export class InputController {
 		const spaceIndex = text.indexOf(" ");
 		const commandName = spaceIndex === -1 ? text.slice(1) : text.slice(1, spaceIndex);
 		const args = spaceIndex === -1 ? "" : text.slice(spaceIndex + 1).trim();
+		return this.#dispatchSkillCommand(commandName, args, text, streamingBehavior);
+	}
+
+	/**
+	 * Codex-style explicit skill invocation: `$<skill-name> [args]`. The `$` sigil
+	 * is shared with the Python REPL, but that path requires whitespace right after
+	 * the sigil (`$ code` / `$$ code`), so `$name` is unambiguous. Returns false
+	 * (falls through to plain text) for `$`, `$$`, `${`, `$ …`, and any name that is
+	 * not a registered skill, leaving `$HOME`-style prose untouched.
+	 */
+	async #invokeDollarSkillCommand(text: string, streamingBehavior: "steer" | "followUp"): Promise<boolean> {
+		const parsed = parseDollarSkillInput(text);
+		if (!parsed) return false;
+		return this.#dispatchSkillCommand(`skill:${parsed.name}`, parsed.args, text, streamingBehavior);
+	}
+
+	/**
+	 * Load a registered skill's SKILL.md (frontmatter stripped) and dispatch it via
+	 * `promptCustomMessage`. `commandName` is the `skill:<name>` registry key and
+	 * `typedText` is the original input (history + queue chip). Returns false when
+	 * the skill isn't registered so the caller can fall through to plain-text
+	 * handling; returns true once dispatched (or after a load error is surfaced,
+	 * since the editor was already cleared on the success path).
+	 */
+	async #dispatchSkillCommand(
+		commandName: string,
+		args: string,
+		typedText: string,
+		streamingBehavior: "steer" | "followUp",
+	): Promise<boolean> {
 		const skillPath = this.ctx.skillCommands?.get(commandName);
 		if (!skillPath) return false;
-		this.ctx.editor.addToHistory(text);
+		this.ctx.editor.addToHistory(typedText);
 		this.ctx.editor.setText("");
 		try {
 			const content = await Bun.file(skillPath).text();
@@ -947,7 +1007,7 @@ export class InputController {
 					details,
 					attribution: "user",
 				},
-				{ streamingBehavior, queueChipText: text },
+				{ streamingBehavior, queueChipText: typedText },
 			);
 			if (this.ctx.session.isStreaming) {
 				this.ctx.updatePendingMessagesDisplay();
@@ -1012,6 +1072,11 @@ export class InputController {
 		// which keybinding submitted them. Enter routes them as `steer`;
 		// Ctrl+Enter (this handler) routes them as `followUp`.
 		if (await this.#invokeSkillCommand(text, "followUp")) {
+			return;
+		}
+
+		// Codex-style `$<skill-name> [args]` explicit skill invocation (Ctrl+Enter ⇒ followUp).
+		if (await this.#invokeDollarSkillCommand(text, "followUp")) {
 			return;
 		}
 

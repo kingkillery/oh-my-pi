@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added Codex-style explicit skill invocation: typing `$<skill-name> [args]` at the start of a prompt loads that skill's `SKILL.md` and runs it immediately (no model inference), with `$`-triggered autocomplete listing skills as you type. Works on both Enter (steer) and Ctrl+Enter (follow-up). The `$` sigil is disambiguated from the Python REPL (`$ code` / `$$ code`), and unregistered names like `$HOME` fall through to plain text.
+
 ## [16.1.8] - 2026-06-20
 
 ### Added

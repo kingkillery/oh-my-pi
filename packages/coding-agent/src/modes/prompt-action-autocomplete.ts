@@ -93,13 +93,28 @@ function getPromptActionPrefix(textBeforeCursor: string): string | null {
 	return textBeforeCursor.slice(hashIndex);
 }
 
+/**
+ * Detect a leading `$<partial>` skill-invocation prefix (no whitespace, not `$$`
+ * or `${`). Returns the prefix (`$` or `$partial`) for autocomplete, or null when
+ * it's the Python sigil / prose / not at a `$` token.
+ */
+function getDollarSkillPrefix(textBeforeCursor: string): string | null {
+	if (!textBeforeCursor.startsWith("$")) return null;
+	const rest = textBeforeCursor.slice(1);
+	if (rest.startsWith("$") || rest.startsWith("{")) return null;
+	if (/\s/.test(rest)) return null;
+	return textBeforeCursor;
+}
+
 export class PromptActionAutocompleteProvider implements AutocompleteProvider {
 	#baseProvider: CombinedAutocompleteProvider;
 	#actions: PromptActionDefinition[];
+	#skillCommands: SlashCommand[];
 
 	constructor(commands: SlashCommand[], basePath: string, actions: PromptActionDefinition[]) {
 		this.#baseProvider = new CombinedAutocompleteProvider(commands, basePath);
 		this.#actions = actions;
+		this.#skillCommands = commands.filter(command => command.name.startsWith("skill:"));
 	}
 
 	async getSuggestions(
@@ -130,6 +145,29 @@ export class PromptActionAutocompleteProvider implements AutocompleteProvider {
 				.map(({ score: _score, ...item }) => item);
 			if (items.length > 0) {
 				return { items, prefix: promptActionPrefix };
+			}
+		}
+
+		const dollarSkillPrefix = getDollarSkillPrefix(textBeforeCursor);
+		if (dollarSkillPrefix) {
+			const query = dollarSkillPrefix.slice(1).toLowerCase();
+			const items = this.#skillCommands
+				.map(command => {
+					const skillName = command.name.slice("skill:".length);
+					const searchable = `${skillName} ${command.description ?? ""}`.toLowerCase();
+					if (query && !fuzzyMatch(query, searchable)) return null;
+					return {
+						value: `$${skillName}`,
+						label: `$${skillName}`,
+						description: command.description ?? "",
+						score: query ? fuzzyScore(query, searchable) : 0,
+					};
+				})
+				.filter(item => item !== null)
+				.sort((a, b) => b.score - a.score || a.label.localeCompare(b.label))
+				.map(({ score: _score, ...item }) => item);
+			if (items.length > 0) {
+				return { items, prefix: dollarSkillPrefix };
 			}
 		}
 
@@ -176,6 +214,16 @@ export class PromptActionAutocompleteProvider implements AutocompleteProvider {
 				cursorCol: beforePrefix.length,
 				onApplied: () => item.execute(prefix),
 			};
+		}
+
+		if (prefix.startsWith("$") && !isPromptActionItem(item)) {
+			const currentLine = lines[cursorLine] || "";
+			const beforePrefix = currentLine.slice(0, cursorCol - prefix.length);
+			const afterCursor = currentLine.slice(cursorCol);
+			const insert = item.value;
+			const newLines = [...lines];
+			newLines[cursorLine] = beforePrefix + insert + afterCursor;
+			return { lines: newLines, cursorLine, cursorCol: (beforePrefix + insert).length };
 		}
 
 		if (isInternalUrlPrefix(prefix)) {
