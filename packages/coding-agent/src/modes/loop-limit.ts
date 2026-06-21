@@ -1,3 +1,5 @@
+export type LoopAction = "prompt" | "compact" | "reset" | "spiral";
+
 export type LoopLimitConfig =
 	| {
 			kind: "iterations";
@@ -38,34 +40,47 @@ const TIME_UNITS_MS = new Map<string, number>([
 	["hours", 3_600_000],
 ]);
 
-const LOOP_USAGE = "Usage: /loop [count|duration]. Examples: /loop 10, /loop 10m, /loop 10min.";
+const LOOP_USAGE =
+	"Usage: /loop [--spiral|--mode spiral] [count|duration] [prompt]. Examples: /loop --spiral 10, /loop --mode compact 10m, /loop 10min.";
+
+const LOOP_MODE_VALUES = new Set<LoopAction>(["prompt", "compact", "reset", "spiral"]);
 
 export interface ParsedLoopArgs {
+	/** One-off loop behavior override for this loop session. Falls back to loop.mode when omitted. */
+	mode?: LoopAction;
 	/** Iteration/duration budget, when the user supplied a leading limit token. */
 	limit?: LoopLimitConfig;
-	/** Inline loop prompt: text after the limit, or the whole argument when no limit was given. */
+	/** Inline loop prompt: text after the mode/limit, or the whole argument when no mode/limit was given. */
 	prompt?: string;
 }
 
 /**
- * Parse `/loop` arguments into an optional leading limit plus an optional inline
- * prompt. A token that *looks* like a limit (starts with a digit or sign) but
- * fails to parse is a hard error; anything else is treated as prompt text, so
- * plain prose after `/loop` keeps starting an unbounded loop instead of erroring
- * (the pre-arg-parsing behavior). Returns the error message string on failure.
+ * Parse `/loop` arguments into an optional leading mode override, optional
+ * leading limit, plus an optional inline prompt. Mode overrides intentionally
+ * require flags (`--spiral`, `--wall-climb`, `--mode spiral`) so prose prompts
+ * beginning with "spiral" or "compact" keep behaving as plain prompts.
+ * A token that *looks* like a limit (starts with a digit or sign) but fails to
+ * parse is a hard error; anything else is treated as prompt text. Returns the
+ * error message string on failure.
  */
 export function parseLoopLimitArgs(args: string): ParsedLoopArgs | string {
 	const trimmed = args.trim();
 	if (!trimmed) return {};
 
-	const firstSpace = trimmed.search(/\s/);
-	const firstToken = firstSpace === -1 ? trimmed : trimmed.slice(0, firstSpace);
-	const rest = firstSpace === -1 ? "" : trimmed.slice(firstSpace + 1).trim();
-	const token = firstToken.toLowerCase();
+	const modeParsed = parseLoopModePrefix(trimmed);
+	if (typeof modeParsed === "string") return modeParsed;
 
+	const mode = modeParsed.mode;
+	const afterMode = modeParsed.rest.trim();
+	if (!afterMode) return mode ? { mode } : {};
+
+	const firstSpace = afterMode.search(/\s/);
+	const firstToken = firstSpace === -1 ? afterMode : afterMode.slice(0, firstSpace);
+	const rest = firstSpace === -1 ? "" : afterMode.slice(firstSpace + 1).trim();
+	const token = firstToken.toLowerCase();
 	// Not a limit attempt (prose like "keep going") → unbounded loop, prompt = full args.
 	if (!/^[+-]?\d/.test(token)) {
-		return { prompt: trimmed };
+		return { mode, prompt: afterMode };
 	}
 
 	// Bare integer: iteration count, unless the next token is a time unit ("10 minutes").
@@ -76,23 +91,57 @@ export function parseLoopLimitArgs(args: string): ParsedLoopArgs | string {
 			if (unitMs !== undefined) {
 				const limit = makeDuration(token, unitMs);
 				if (typeof limit === "string") return limit;
-				return { limit, prompt: restTokens.slice(1).join(" ").trim() || undefined };
+				return { mode, limit, prompt: restTokens.slice(1).join(" ").trim() || undefined };
 			}
 		}
 		const limit = makeIterations(token);
 		if (typeof limit === "string") return limit;
-		return { limit, prompt: rest || undefined };
+		return { mode, limit, prompt: rest || undefined };
 	}
 
 	// Compact / compound duration: "10m", "90s", "1h30m".
 	const duration = parseCompoundDuration(token);
 	if (duration !== undefined) {
 		if (typeof duration === "string") return duration;
-		return { limit: duration, prompt: rest || undefined };
+		return { mode, limit: duration, prompt: rest || undefined };
 	}
 
 	// Limit-shaped but unparseable ("-1", "1.5h", "10x10").
 	return LOOP_USAGE;
+}
+
+function parseLoopModePrefix(args: string): { mode?: LoopAction; rest: string } | string {
+	const firstSpace = args.search(/\s/);
+	const firstToken = firstSpace === -1 ? args : args.slice(0, firstSpace);
+	const rest = firstSpace === -1 ? "" : args.slice(firstSpace + 1).trim();
+	const token = firstToken.toLowerCase();
+
+	if (token === "--spiral" || token === "--wall-climb") {
+		return { mode: "spiral", rest };
+	}
+	if (token === "--mode") {
+		if (!rest) return "Loop mode must be prompt, compact, reset, or spiral.";
+		const modeSpace = rest.search(/\s/);
+		const modeToken = modeSpace === -1 ? rest : rest.slice(0, modeSpace);
+		const afterMode = modeSpace === -1 ? "" : rest.slice(modeSpace + 1).trim();
+		const mode = parseLoopModeValue(modeToken);
+		if (mode === undefined) return "Loop mode must be prompt, compact, reset, or spiral.";
+		return { mode, rest: afterMode };
+	}
+	if (token.startsWith("--mode=")) {
+		const mode = parseLoopModeValue(token.slice("--mode=".length));
+		if (mode === undefined) return "Loop mode must be prompt, compact, reset, or spiral.";
+		return { mode, rest };
+	}
+
+	return { rest: args };
+}
+
+function parseLoopModeValue(value: string): LoopAction | undefined {
+	const normalized = value.trim().toLowerCase();
+	if (normalized === "wall-climb" || normalized === "wallclimb") return "spiral";
+	if (LOOP_MODE_VALUES.has(normalized as LoopAction)) return normalized as LoopAction;
+	return undefined;
 }
 
 function makeIterations(amountText: string): LoopLimitConfig | string {
