@@ -8,7 +8,18 @@ import type { AgentRef } from "../src/registry/agent-registry";
 
 class RecordingKanbanRunner implements KanbanCliRunner {
 	calls: Array<{ command: string; args: string[]; cwd: string }> = [];
-	listPayload: unknown = { ok: true, tasks: [] };
+	payload: unknown = {
+		ok: true,
+		results: [
+			{
+				agentId: "agent-1",
+				idempotencyKey: "omp-agent-hub:C:/work/repo:agent-1",
+				taskId: "task-synced",
+				created: true,
+				updated: false,
+			},
+		],
+	};
 
 	async run(
 		command: string,
@@ -16,18 +27,8 @@ class RecordingKanbanRunner implements KanbanCliRunner {
 		options: { cwd: string },
 	): Promise<{ exitCode: number; stdout: string; stderr: string }> {
 		this.calls.push({ command, args, cwd: options.cwd });
-		if (args[0] === "task" && args[1] === "list") {
-			return { exitCode: 0, stdout: JSON.stringify(this.listPayload), stderr: "" };
-		}
-		if (args[0] === "task" && args[1] === "create") {
-			return {
-				exitCode: 0,
-				stdout: JSON.stringify({ ok: true, idempotent: false, task: { id: "task-new" } }),
-				stderr: "",
-			};
-		}
-		if (args[0] === "task" && args[1] === "update") {
-			return { exitCode: 0, stdout: JSON.stringify({ ok: true, task: { id: "task-existing" } }), stderr: "" };
+		if (args[0] === "task" && args[1] === "sync-omp-background") {
+			return { exitCode: 0, stdout: JSON.stringify(this.payload), stderr: "" };
 		}
 		return { exitCode: 1, stdout: "", stderr: "unexpected command" };
 	}
@@ -56,19 +57,39 @@ describe("AgentHubKanbanSync", () => {
 
 		const result = await sync.syncAgent(createAgent());
 
-		expect(result).toMatchObject({ agentId: "agent-1", taskId: "task-new", created: true, updated: false, ok: true });
-		expect(runner.calls[0].args).toEqual(["task", "list", "--project-path", "C:/work/repo"]);
-		expect(runner.calls[1].args).toContain("--idempotency-key");
-		expect(runner.calls[1].args).toContain("omp-agent-hub:C:/work/repo:agent-1");
-		expect(runner.calls[1].args).toContain("--workspace-path");
-		expect(runner.calls[1].args).toContain("C:/work/repo");
+		expect(result).toMatchObject({
+			agentId: "agent-1",
+			taskId: "task-synced",
+			created: true,
+			updated: false,
+			ok: true,
+		});
+		expect(runner.calls).toHaveLength(1);
+		expect(runner.calls[0].args.slice(0, 5)).toEqual([
+			"task",
+			"sync-omp-background",
+			"--project-path",
+			"C:/work/repo",
+			"--agents-json",
+		]);
+		const agentsJson = runner.calls[0].args[5];
+		expect(agentsJson).toContain('"id":"agent-1"');
+		expect(agentsJson).toContain('"activity":"editing files"');
 	});
 
-	it("updates an existing Kanban task matched by idempotency key", async () => {
+	it("uses Kanban's native OMP background sync result", async () => {
 		const runner = new RecordingKanbanRunner();
-		runner.listPayload = {
+		runner.payload = {
 			ok: true,
-			tasks: [{ id: "task-existing", prompt: "old", idempotencyKey: "omp-agent-hub:C:/work/repo:agent-1" }],
+			results: [
+				{
+					agentId: "agent-1",
+					idempotencyKey: "omp-agent-hub:C:/work/repo:agent-1",
+					taskId: "task-existing",
+					created: false,
+					updated: true,
+				},
+			],
 		};
 		const sync = new AgentHubKanbanSync({ projectPath: "C:/work/repo", command: "pk-kanban", runner });
 
@@ -81,14 +102,7 @@ describe("AgentHubKanbanSync", () => {
 			updated: true,
 			ok: true,
 		});
-		expect(runner.calls[1].args.slice(0, 6)).toEqual([
-			"task",
-			"update",
-			"--project-path",
-			"C:/work/repo",
-			"--task-id",
-			"task-existing",
-		]);
+		expect(runner.calls).toHaveLength(1);
 	});
 
 	it("renders enough agent context for a durable Kanban card", () => {

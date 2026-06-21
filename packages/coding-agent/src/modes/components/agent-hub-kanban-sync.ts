@@ -37,23 +37,25 @@ export interface AgentHubKanbanSyncResult {
 	error: string | undefined;
 }
 
-interface KanbanTaskRecord {
+interface OmpBackgroundAgentSnapshot {
 	id: string;
-	prompt: string;
-	idempotencyKey: string | null;
+	displayName: string;
+	kind: string;
+	status: string;
+	activity?: string;
+	cwd?: string;
+	sessionFile?: string;
 }
 
-interface KanbanTaskListPayload {
+interface KanbanOmpBackgroundSyncPayload {
 	ok?: boolean;
-	tasks?: KanbanTaskRecord[];
-}
-
-interface KanbanTaskMutationPayload {
-	ok?: boolean;
-	idempotent?: boolean;
-	task?: {
-		id?: string;
-	};
+	results?: Array<{
+		agentId?: string;
+		idempotencyKey?: string;
+		taskId?: string;
+		created?: boolean;
+		updated?: boolean;
+	}>;
 }
 
 class BunKanbanCliRunner implements KanbanCliRunner {
@@ -86,79 +88,32 @@ export class AgentHubKanbanSync {
 	}
 
 	async syncAgent(agent: AgentRef): Promise<AgentHubKanbanSyncResult> {
-		const tasks = await this.#listTasks();
-		return await this.#syncAgentWithTasks(agent, tasks);
+		const results = await this.syncAgents([agent]);
+		const result = results[0];
+		if (result) return result;
+		return this.#failedResult(agent, "Kanban sync returned no result for selected agent.");
 	}
 
 	async syncAgents(agents: AgentRef[]): Promise<AgentHubKanbanSyncResult[]> {
-		const tasks = await this.#listTasks();
-		const results: AgentHubKanbanSyncResult[] = [];
-		for (const agent of agents) {
-			results.push(await this.#syncAgentWithTasks(agent, tasks));
+		if (agents.length === 0) return [];
+		try {
+			const payload = await this.#runJson<KanbanOmpBackgroundSyncPayload>([
+				"task",
+				"sync-omp-background",
+				"--project-path",
+				this.#projectPath,
+				"--agents-json",
+				JSON.stringify(agents.map(agent => toOmpBackgroundAgentSnapshot(agent))),
+			]);
+			return agents.map(agent => this.#resultForAgent(agent, payload));
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			return agents.map(agent => this.#failedResult(agent, message));
 		}
-		return results;
 	}
 
 	idempotencyKey(agentId: string): string {
 		return `${TASK_KEY_PREFIX}:${this.#projectPath}:${agentId}`;
-	}
-
-	async #syncAgentWithTasks(agent: AgentRef, tasks: KanbanTaskRecord[]): Promise<AgentHubKanbanSyncResult> {
-		const idempotencyKey = this.idempotencyKey(agent.id);
-		const existing = tasks.find(task => task.idempotencyKey === idempotencyKey);
-		const prompt = renderKanbanPrompt(agent);
-		if (existing) {
-			const payload = await this.#runJson<KanbanTaskMutationPayload>([
-				"task",
-				"update",
-				"--project-path",
-				this.#projectPath,
-				"--task-id",
-				existing.id,
-				"--prompt",
-				prompt,
-				"--idempotency-key",
-				idempotencyKey,
-			]);
-			return {
-				agentId: agent.id,
-				idempotencyKey,
-				taskId: payload.task?.id ?? existing.id,
-				created: false,
-				updated: true,
-				ok: true,
-				error: undefined,
-			};
-		}
-
-		const createArgs = [
-			"task",
-			"create",
-			"--project-path",
-			this.#projectPath,
-			"--prompt",
-			prompt,
-			"--idempotency-key",
-			idempotencyKey,
-		];
-		if (agent.cwd) {
-			createArgs.push("--workspace-kind", "dir", "--workspace-path", agent.cwd);
-		}
-		const payload = await this.#runJson<KanbanTaskMutationPayload>(createArgs);
-		return {
-			agentId: agent.id,
-			idempotencyKey,
-			taskId: payload.task?.id,
-			created: payload.idempotent !== true,
-			updated: payload.idempotent === true,
-			ok: true,
-			error: undefined,
-		};
-	}
-
-	async #listTasks(): Promise<KanbanTaskRecord[]> {
-		const payload = await this.#runJson<KanbanTaskListPayload>(["task", "list", "--project-path", this.#projectPath]);
-		return payload.tasks ?? [];
 	}
 
 	async #runJson<T>(args: string[]): Promise<T> {
@@ -175,9 +130,53 @@ export class AgentHubKanbanSync {
 			);
 		}
 	}
+
+	#resultForAgent(agent: AgentRef, payload: KanbanOmpBackgroundSyncPayload): AgentHubKanbanSyncResult {
+		const result = payload.results?.find(candidate => candidate.agentId === agent.id);
+		if (!payload.ok || !result) {
+			return this.#failedResult(agent, "Kanban sync returned no result for agent.");
+		}
+		return {
+			agentId: agent.id,
+			idempotencyKey: result.idempotencyKey ?? this.idempotencyKey(agent.id),
+			taskId: result.taskId,
+			created: result.created === true,
+			updated: result.updated === true,
+			ok: true,
+			error: undefined,
+		};
+	}
+
+	#failedResult(agent: AgentRef, error: string): AgentHubKanbanSyncResult {
+		return {
+			agentId: agent.id,
+			idempotencyKey: this.idempotencyKey(agent.id),
+			taskId: undefined,
+			created: false,
+			updated: false,
+			ok: false,
+			error,
+		};
+	}
 }
 
 export function renderKanbanPrompt(agent: AgentRef): string {
+	return renderOmpBackgroundAgentSnapshotPrompt(toOmpBackgroundAgentSnapshot(agent));
+}
+
+function toOmpBackgroundAgentSnapshot(agent: AgentRef): OmpBackgroundAgentSnapshot {
+	return {
+		id: agent.id,
+		displayName: agent.displayName,
+		kind: agent.kind,
+		status: agent.status,
+		activity: agent.activity,
+		cwd: agent.cwd,
+		sessionFile: agent.sessionFile ?? undefined,
+	};
+}
+
+function renderOmpBackgroundAgentSnapshotPrompt(agent: OmpBackgroundAgentSnapshot): string {
 	const lines = [
 		`[OMP background agent] ${agent.displayName} (${agent.id})`,
 		"",
