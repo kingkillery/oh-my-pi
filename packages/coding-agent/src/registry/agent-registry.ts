@@ -51,7 +51,8 @@ export interface AgentRef {
 export type RegistryEvent =
 	| { type: "registered"; ref: AgentRef }
 	| { type: "status_changed"; ref: AgentRef }
-	| { type: "removed"; ref: AgentRef };
+	| { type: "removed"; ref: AgentRef }
+	| { type: "renamed"; ref: AgentRef };
 
 type RegistryListener = (event: RegistryEvent) => void;
 
@@ -152,6 +153,14 @@ export class AgentRegistry {
 		const ref = this.#refs.get(id);
 		if (!ref) return;
 		ref.session = null;
+	}
+
+	setDisplayName(id: string, displayName: string): void {
+		const ref = this.#refs.get(id);
+		if (!ref || ref.displayName === displayName) return;
+		ref.displayName = displayName;
+		ref.lastActivity = Date.now();
+		this.#emit({ type: "renamed", ref });
 	}
 
 	unregister(id: string): void {

@@ -29,6 +29,7 @@ import { replaceTabs, shortenPath, TRUNCATE_LENGTHS, truncateToWidth } from "../
 import type { ObservableSession, SessionObserverRegistry } from "../session-observer-registry";
 import { isValidThemeColor, type ThemeColor, theme } from "../theme/theme";
 import { matchesSelectDown, matchesSelectUp } from "../utils/keybinding-matchers";
+import { AgentHubKanbanSync, type AgentHubKanbanSyncResult } from "./agent-hub-kanban-sync";
 import { AgentTranscriptViewer } from "./agent-transcript-viewer";
 import { DynamicBorder } from "./dynamic-border";
 
@@ -181,6 +182,8 @@ export interface AgentHubDeps {
 	sessionFile?: string | null;
 	/** Collab guest: route actions/transcripts to the host instead of local sessions. */
 	remote?: AgentHubRemote;
+	/** Kanban board synchronizer. Pass null to disable Kanban sync mode in tests/collab guests. */
+	kanbanSync?: AgentHubKanbanSync | null;
 }
 
 export class AgentHubOverlayComponent extends Container {
@@ -206,6 +209,14 @@ export class AgentHubOverlayComponent extends Container {
 	#lastLeftTap = 0;
 	/** Agent-specific Ctrl+X confirmation state. */
 	#pendingRemove: { id: string; at: number } | undefined;
+	/** Rename input mode: agent id being renamed. */
+	#renameInput: { id: string; buffer: string } | undefined;
+	/** Filter input mode: active filter query. */
+	#filterInput: string | undefined;
+	/** Kanban sync sub-mode: selected rows can be pushed into a pk-kanban board. */
+	#kanbanSyncMode = false;
+	#kanbanSync: AgentHubKanbanSync | undefined;
+	#kanbanSyncStatusByAgent = new Map<string, string>();
 	// Transcript-viewer launch deps (passed through to AgentTranscriptViewer).
 	#ui: TUI;
 	#getTool: ((name: string) => AgentTool | undefined) | undefined;
@@ -243,6 +254,8 @@ export class AgentHubOverlayComponent extends Container {
 		this.#hideThinkingBlock = deps.hideThinkingBlock;
 		this.#expandKeys = deps.expandKeys ?? ["ctrl+o"];
 		this.#focusAgent = deps.focusAgent;
+		this.#kanbanSync =
+			deps.kanbanSync === null ? undefined : (deps.kanbanSync ?? new AgentHubKanbanSync({ projectPath: this.#cwd }));
 
 		this.#unsubscribers.push(this.#registry.onChange(() => this.#onDataChange()));
 		this.#unsubscribers.push(this.#observers.onChange(() => this.#onDataChange()));
@@ -345,7 +358,19 @@ export class AgentHubOverlayComponent extends Container {
 
 	#refreshRows(): void {
 		const selectedId = this.#selectedRef()?.id;
-		const refs = this.#registry.list().filter(ref => ref.id !== MAIN_AGENT_ID);
+		let refs = this.#registry.list().filter(ref => ref.id !== MAIN_AGENT_ID);
+
+		// Apply filter if active
+		if (this.#filterInput !== undefined && this.#filterInput.length > 0) {
+			const query = this.#filterInput.toLowerCase();
+			refs = refs.filter(ref => {
+				return (
+					ref.id.toLowerCase().includes(query) ||
+					ref.displayName.toLowerCase().includes(query) ||
+					ref.activity?.toLowerCase().includes(query)
+				);
+			});
+		}
 
 		// Freeze each agent's first-seen order so siblings keep a stable position
 		// while the hub is open (agents heartbeat / bump lastActivity constantly).
@@ -440,7 +465,9 @@ export class AgentHubOverlayComponent extends Container {
 		const lines: string[] = [];
 		lines.push(...new DynamicBorder().render(width));
 		const counts = this.#statusSummary();
-		lines.push(` ${theme.fg("accent", "Agent Hub")}${counts ? theme.fg("dim", `${theme.sep.dot}${counts}`) : ""}`);
+		lines.push(
+			` ${theme.fg("accent", this.#kanbanSyncMode ? "Agent Hub · Kanban sync" : "Agent Hub")}${counts ? theme.fg("dim", `${theme.sep.dot}${counts}`) : ""}`,
+		);
 		lines.push(...new DynamicBorder().render(width));
 
 		if (this.#rows.length === 0) {
@@ -469,8 +496,26 @@ export class AgentHubOverlayComponent extends Container {
 		if (this.#notice) {
 			lines.push(` ${theme.fg("error", sanitizeLine(this.#notice, Math.max(10, width - 2)))}`);
 		}
+		if (this.#renameInput) {
+			const ref = this.#registry.get(this.#renameInput.id);
+			if (ref) {
+				lines.push(
+					` ${theme.fg("dim", "Rename:")} ${this.#renameInput.buffer}${theme.fg("accent", theme.nav.cursor)}`,
+				);
+			}
+		}
 		lines.push("");
-		lines.push(` ${theme.fg("dim", "j/k:select  Enter:open  r:revive  ctrl+x:remove  Esc/←←:close")}`);
+		if (this.#renameInput) {
+			lines.push(` ${theme.fg("dim", "Enter:save  Esc:cancel")}`);
+		} else if (this.#filterInput !== undefined) {
+			lines.push(` ${theme.fg("dim", `Filter: ${this.#filterInput}  Enter:apply  Esc:clear`)}`);
+		} else if (this.#kanbanSyncMode) {
+			lines.push(` ${theme.fg("dim", "j/k:select  Enter:sync  a:sync all  Esc:table  q:close")}`);
+		} else {
+			const selected = this.#selectedRef();
+			const hints = selected ? this.#getAdaptiveHints(selected.status) : "j/k:select  K:kanban  q:close";
+			lines.push(` ${theme.fg("dim", hints)}`);
+		}
 		lines.push(...new DynamicBorder().render(width));
 		return lines;
 	}
@@ -497,6 +542,22 @@ export class AgentHubOverlayComponent extends Container {
 		return parts.join(theme.sep.dot);
 	}
 
+	#getAdaptiveHints(status: AgentStatus): string {
+		const base = "j/k:select  ";
+		switch (status) {
+			case "running":
+				return `${base}Enter:focus  c:chat  r:rename  x:kill  K:kanban  q:close`;
+			case "parked":
+				return `${base}Enter:open  c:chat  r:rename  R:revive  x:remove  K:kanban  q:close`;
+			case "idle":
+				return `${base}Enter:focus  c:chat  r:rename  R:revive  x:remove  K:kanban  q:close`;
+			case "aborted":
+				return `${base}c:chat  r:rename  x:remove  K:kanban  q:close`;
+			default:
+				return `${base}Enter:focus  c:chat  r:rename  R:revive  x:remove  K:kanban  q:close`;
+		}
+	}
+
 	#renderRow(row: HubRow, selected: boolean, width: number): string {
 		const { ref } = row;
 		const cursor = selected ? theme.fg("accent", theme.nav.cursor) : " ";
@@ -520,9 +581,50 @@ export class AgentHubOverlayComponent extends Container {
 		if (unread > 0) {
 			parts.push(theme.fg("warning", `⧉ ${unread}`));
 		}
+		if (this.#kanbanSyncMode) {
+			const syncStatus = this.#kanbanSyncStatusByAgent.get(ref.id) ?? "not synced";
+			const colorName: ThemeColor = syncStatus.startsWith("✓")
+				? "success"
+				: syncStatus.startsWith("!")
+					? "error"
+					: "muted";
+			parts.push(theme.fg(colorName, syncStatus));
+		}
+
 		parts.push(theme.fg("dim", formatAge(Math.max(1, Math.round((Date.now() - ref.lastActivity) / 1000)))));
 		const rawLine = ` ${cursor} ${theme.fg("dim", row.prefix)}${parts.join(theme.sep.dot)}`;
 		return truncateToWidth(rawLine.replace(/[\r\n]+/g, " "), Math.max(1, width - 1));
+	}
+
+	#handleKanbanSyncInput(keyData: string): void {
+		if (keyData === "q") {
+			this.#onDone();
+			return;
+		}
+		if (matchesKey(keyData, "escape")) {
+			this.#kanbanSyncMode = false;
+			this.#notice = undefined;
+			this.#requestRender();
+			return;
+		}
+		if (keyData === "j" || matchesSelectDown(keyData)) {
+			if (this.#rows.length > 0) this.#selectedRow = Math.min(this.#selectedRow + 1, this.#rows.length - 1);
+			this.#requestRender();
+			return;
+		}
+		if (keyData === "k" || matchesSelectUp(keyData)) {
+			if (this.#rows.length > 0) this.#selectedRow = Math.max(this.#selectedRow - 1, 0);
+			this.#requestRender();
+			return;
+		}
+		if (matchesKey(keyData, "enter") || keyData === "\r" || keyData === "\n") {
+			this.#syncSelectedAgentToKanban();
+			return;
+		}
+		if (keyData === "a") {
+			this.#syncAllAgentsToKanban();
+			return;
+		}
 	}
 
 	#clearPendingRemove(): void {
@@ -530,6 +632,26 @@ export class AgentHubOverlayComponent extends Container {
 	}
 
 	#handleTableInput(keyData: string): void {
+		// Filter mode takes priority when active
+		if (this.#filterInput !== undefined) {
+			this.#handleFilterInput(keyData);
+			return;
+		}
+		// Rename mode takes priority when active
+		if (this.#renameInput) {
+			this.#handleRenameInput(keyData);
+			return;
+		}
+		if (this.#kanbanSyncMode) {
+			this.#handleKanbanSyncInput(keyData);
+			return;
+		}
+		// q or Esc closes the hub
+		if (keyData === "q") {
+			this.#clearPendingRemove();
+			this.#onDone();
+			return;
+		}
 		if (matchesKey(keyData, "escape")) {
 			this.#clearPendingRemove();
 			this.#onDone();
@@ -547,7 +669,8 @@ export class AgentHubOverlayComponent extends Container {
 			}
 			return;
 		}
-		if (matchesKey(keyData, "ctrl+x")) {
+		// x or ctrl+x triggers remove (double-tap confirmation)
+		if (keyData === "x" || matchesKey(keyData, "ctrl+x")) {
 			this.#handleRemoveTap();
 			return;
 		}
@@ -574,8 +697,35 @@ export class AgentHubOverlayComponent extends Container {
 			if (selected) this.#activateAgent(selected);
 			return;
 		}
-		if (keyData === "r") {
+		if (keyData === "c") {
+			const selected = this.#selectedRef();
+			if (selected) this.openChat(selected.id);
+			return;
+		}
+		// R (shift-r) revives parked agents
+		if (keyData === "R") {
 			this.#reviveSelected();
+			return;
+		}
+		// r (lowercase) starts rename mode for the selected agent
+		if (keyData === "r") {
+			this.#startRename();
+			return;
+		}
+		// / starts filter mode
+		if (keyData === "/") {
+			this.#filterInput = "";
+			this.#requestRender();
+			return;
+		}
+		if (keyData === "K") {
+			if (!this.#kanbanSync) {
+				this.#notice = "Kanban sync is unavailable in this session.";
+			} else {
+				this.#kanbanSyncMode = true;
+				this.#notice = "Kanban sync mode: Enter syncs selected, a syncs all.";
+			}
+			this.#requestRender();
 			return;
 		}
 		// Clear any pending remove confirmation on other keys
@@ -593,15 +743,19 @@ export class AgentHubOverlayComponent extends Container {
 		this.#clearPendingRemove();
 		this.#notice = undefined;
 		const focusAgent = this.#focusAgent;
-		// Advisor refs are read-only transcripts with no live/ revivable session;
+		// Advisor refs are read-only transcripts with no live/revivable session;
 		// open the in-hub chat view (file-backed) instead of trying to focus one.
 		if (ref.kind === "advisor" || this.#remote || !focusAgent) {
 			this.openChat(ref.id);
 			return;
 		}
+		// If the agent is parked, revive it first, then focus
+		if (ref.status === "parked") {
+			this.#reviveSelected();
+		}
 		void (async () => {
 			try {
-				await focusAgent(ref.id); // ensureLive inside revives parked agents; no parking, no session files
+				await focusAgent(ref.id);
 				this.#onDone();
 			} catch (error) {
 				this.#notice = error instanceof Error ? error.message : String(error);
@@ -637,6 +791,133 @@ export class AgentHubOverlayComponent extends Container {
 				this.#notice = error instanceof Error ? error.message : String(error);
 				this.#requestRender();
 			});
+		this.#requestRender();
+	}
+
+	#startRename(): void {
+		const ref = this.#selectedRef();
+		if (!ref) return;
+		this.#renameInput = { id: ref.id, buffer: ref.displayName };
+		this.#notice = undefined;
+		this.#requestRender();
+	}
+
+	#handleRenameInput(keyData: string): void {
+		if (!this.#renameInput) return;
+
+		if (matchesKey(keyData, "escape")) {
+			this.#renameInput = undefined;
+			this.#requestRender();
+			return;
+		}
+
+		if (matchesKey(keyData, "enter")) {
+			const newName = this.#renameInput.buffer.trim();
+			if (newName) {
+				this.#registry.setDisplayName(this.#renameInput.id, newName);
+			}
+			this.#renameInput = undefined;
+			this.#requestRender();
+			return;
+		}
+
+		if (matchesKey(keyData, "backspace")) {
+			if (this.#renameInput.buffer.length > 0) {
+				this.#renameInput.buffer = this.#renameInput.buffer.slice(0, -1);
+			}
+			this.#requestRender();
+			return;
+		}
+
+		// Regular character input
+		if (keyData.length === 1 && keyData.charCodeAt(0) >= 32) {
+			this.#renameInput.buffer += keyData;
+			this.#requestRender();
+		}
+	}
+
+	#handleFilterInput(keyData: string): void {
+		if (this.#filterInput === undefined) return;
+
+		if (matchesKey(keyData, "escape")) {
+			this.#filterInput = undefined;
+			this.#refreshRows();
+			this.#requestRender();
+			return;
+		}
+
+		if (matchesKey(keyData, "enter")) {
+			this.#filterInput = undefined;
+			this.#refreshRows();
+			// Activate the selected agent (respecting adaptive hints)
+			const selected = this.#selectedRef();
+			if (selected) this.#activateAgent(selected);
+			return;
+		}
+
+		if (matchesKey(keyData, "backspace")) {
+			if (this.#filterInput.length > 0) {
+				this.#filterInput = this.#filterInput.slice(0, -1);
+				this.#refreshRows();
+				this.#requestRender();
+			}
+			return;
+		}
+
+		// Regular character input
+		if (keyData.length === 1 && keyData.charCodeAt(0) >= 32) {
+			this.#filterInput += keyData;
+			this.#refreshRows();
+			this.#requestRender();
+		}
+	}
+
+	#syncSelectedAgentToKanban(): void {
+		const ref = this.#selectedRef();
+		if (!ref) return;
+		if (!this.#kanbanSync) {
+			this.#notice = "Kanban sync is unavailable in this session.";
+			this.#requestRender();
+			return;
+		}
+		this.#kanbanSyncStatusByAgent.set(ref.id, "syncing…");
+		this.#requestRender();
+		void this.#kanbanSync
+			.syncAgent(ref)
+			.then(result => this.#recordKanbanSyncResult(result))
+			.catch((error: unknown) => {
+				this.#kanbanSyncStatusByAgent.set(ref.id, `! ${error instanceof Error ? error.message : String(error)}`);
+				this.#requestRender();
+			});
+	}
+
+	#syncAllAgentsToKanban(): void {
+		if (!this.#kanbanSync) {
+			this.#notice = "Kanban sync is unavailable in this session.";
+			this.#requestRender();
+			return;
+		}
+		const agents = this.#rows.map(row => row.ref);
+		if (agents.length === 0) return;
+		for (const agent of agents) {
+			this.#kanbanSyncStatusByAgent.set(agent.id, "syncing…");
+		}
+		this.#requestRender();
+		void this.#kanbanSync
+			.syncAgents(agents)
+			.then(results => {
+				for (const result of results) this.#recordKanbanSyncResult(result);
+			})
+			.catch((error: unknown) => {
+				const message = `! ${error instanceof Error ? error.message : String(error)}`;
+				for (const agent of agents) this.#kanbanSyncStatusByAgent.set(agent.id, message);
+				this.#requestRender();
+			});
+	}
+
+	#recordKanbanSyncResult(result: AgentHubKanbanSyncResult): void {
+		const action = result.created ? "created" : result.updated ? "updated" : "synced";
+		this.#kanbanSyncStatusByAgent.set(result.agentId, `✓ ${action}${result.taskId ? ` ${result.taskId}` : ""}`);
 		this.#requestRender();
 	}
 
