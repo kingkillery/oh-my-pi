@@ -472,6 +472,24 @@ disabledProviders:
 
 String entries apply everywhere. Scoped entries apply when the current working directory is the configured path or one of its subdirectories. Use `path`, `paths`, `pathPrefix`, or `pathPrefixes`; use `models` for `enabledModels`, `providers` for `disabledProviders`, or `values` for either.
 
+### Subagent model aliases
+
+Subagent model aliases allow mapping user-defined names to concrete model selectors for spawned subagents (via `/subagent using <alias>` or `/delegate using <alias>`).
+
+Built-in subagent model aliases:
+- `browser-fast` maps to `google/gemini-2.5-flash-lite`. It is the recommended fast model for bounded browser executor tasks.
+
+You can customize these aliases via the `subagent.modelAliases` setting in your `config.yml` or settings file:
+
+```yaml
+subagent:
+  modelAliases:
+    browser-fast: "google/gemini-2.5-flash-lite"
+    my-fast-model: "openrouter/google/gemini-2.5-flash-lite"
+```
+
+Aliases can point to any available model selector discovered by `omp models find`.
+
 ## `/model` and `omp models`
 
 Both surfaces keep provider-prefixed models visible and selectable.

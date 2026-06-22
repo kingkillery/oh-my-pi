@@ -14,6 +14,12 @@ export interface SessionHeader {
 	timestamp: string;
 	cwd: string;
 	parentSession?: string;
+	backgroundInstance?: {
+		name: string;
+		status: "active" | "archived";
+		model?: string;
+		role?: string;
+	};
 }
 
 export interface NewSessionOptions {
@@ -90,6 +96,15 @@ export interface CustomEntry<T = unknown> extends SessionEntryBase {
 	type: "custom";
 	customType: string;
 	data?: T;
+}
+
+/** Background agent instance marker - promotes a top-level session into a persistent, named background agent that the Agent Hub lists and resumes. */
+export interface BackgroundInstanceEntry extends SessionEntryBase {
+	type: "background_instance";
+	name: string;
+	status: "active" | "archived";
+	model?: string;
+	role?: string;
 }
 
 /** Label entry for user-defined bookmarks/markers on entries. */
@@ -170,6 +185,7 @@ export type SessionEntry =
 	| CompactionEntry
 	| BranchSummaryEntry
 	| CustomEntry
+	| BackgroundInstanceEntry
 	| CustomMessageEntry
 	| LabelEntry
 	| TtsrInjectionEntry

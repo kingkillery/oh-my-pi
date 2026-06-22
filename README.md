@@ -128,6 +128,7 @@ _[Watch the capture ↗](https://omp.sh/clips/ttsr.mp4)_
 ### 05 · First-class subagents
 
 Split a job across workers and get typed results back. task fans out into isolated worktrees, each worker runs its own tool surface, and the final yield is a schema-validated object the parent reads directly. No prose to parse, no merge conflicts between siblings, no orphaned edits.
+Agent Hub can sync background agents into [pk-kanban](https://github.com/kingkillery/pk-kanban), keeping long-running worker state visible on the same local board you use for project coordination.
 
 ![omp TUI showing `task` spawning two subagents `ComponentsExports` and `RoutesExports`, the constraints block requiring an IRC DM between peers, the per-subagent status cards with cost and duration, and a final Findings section listing both exports plus an honest 'IRC coordination note' about a one-sided handshake.](https://omp.sh/clips/irc-poster.webp)
 
@@ -533,6 +534,7 @@ For architecture and contribution guidelines, see [packages/coding-agent/DEVELOP
 | **[@pk-nerdsaver-ai/pi-mnemopi](packages/mnemopi)**              | Local SQLite memory engine for Oh My Pi agents                             |
 | **[@pk-nerdsaver-ai/snapcompact](packages/snapcompact)**         | Bitmap-frame context compression package and SQuAD eval suite              |
 | **[@pk-nerdsaver-ai/swarm-extension](packages/swarm-extension)** | Swarm orchestration extension package                                      |
+| **[@pk-nerdsaver-ai/verifier-extension](packages/verifier-extension)** | LLM-as-verifier candidate comparison and audit extension package           |
 
 ### Rust Crates
 

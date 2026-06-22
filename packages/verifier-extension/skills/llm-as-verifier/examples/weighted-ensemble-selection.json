@@ -1,0 +1,61 @@
+{
+  "backend": "pi-model-ensemble",
+  "mode": "compare",
+  "task": "Choose the strongest patch for fixing a CLI command that should create /tmp/report.json and print 'report generated'. Prefer direct fixes backed by evidence.",
+  "context": "Treat terminal output and explicit evidence as more trustworthy than the agent's narration. Weight GPT-5.5 slightly higher because it is being used as the OpenAI/Codex-side tie-breaker verifier in this workflow.",
+  "models": [
+    "kimi:kimi-for-coding",
+    "minimax.io:minimax-m3",
+    "openai:gpt-5.5"
+  ],
+  "modelWeights": [
+    {
+      "model": "kimi:kimi-for-coding",
+      "weight": 1.0
+    },
+    {
+      "model": "minimax.io:minimax-m3",
+      "weight": 1.0
+    },
+    {
+      "model": "openai:gpt-5.5",
+      "weight": 1.4
+    }
+  ],
+  "criteria": [
+    {
+      "id": "correctness",
+      "name": "Correctness",
+      "description": "Check whether the candidate directly fixes the failing behavior and produces the requested artifact and message."
+    },
+    {
+      "id": "requirements",
+      "name": "Requirements adherence",
+      "description": "Check whether the candidate respects the exact file path, output string, and requested scope without inventing unrelated changes."
+    },
+    {
+      "id": "verification",
+      "name": "Empirical verification",
+      "description": "Check whether the candidate is supported by concrete evidence such as passing commands or observed output rather than unsupported claims."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "patch-a",
+      "summary": "Direct fix with passing evidence.",
+      "content": "Edited cli/report.py to write /tmp/report.json and print 'report generated'. Added a regression test. Verified with: pytest tests/test_report.py -q -> 1 passed. Verified runtime output: report generated."
+    },
+    {
+      "id": "patch-b",
+      "summary": "Narrated success but terminal still shows failure.",
+      "content": "Adjusted logging only. Claimed the issue is fixed, but the final command output still shows ERROR: command not found and the file was not created."
+    },
+    {
+      "id": "patch-c",
+      "summary": "Partial progress.",
+      "content": "Created report.json in the current directory and printed 'done'. Some tests passed, but the required /tmp/report.json path and exact output were not verified."
+    }
+  ],
+  "nVerifications": 3,
+  "granularity": 20
+}

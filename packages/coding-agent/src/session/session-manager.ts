@@ -30,6 +30,7 @@ import {
 } from "./messages";
 import { type BuildSessionContextOptions, buildSessionContext, type SessionContext } from "./session-context";
 import {
+	type BackgroundInstanceEntry,
 	type BranchSummaryEntry,
 	type CompactionEntry,
 	CURRENT_SESSION_VERSION,
@@ -311,6 +312,13 @@ interface SessionManagerStateSnapshot {
 	needsRewrite: boolean;
 	header: SessionHeader;
 	entries: SessionEntry[];
+}
+
+export interface BackgroundInstanceState {
+	name: string;
+	status: "active" | "archived";
+	model?: string;
+	role?: string;
 }
 
 interface DiskQueueOptions {
@@ -1185,6 +1193,51 @@ export class SessionManager {
 		const entry: ModeChangeEntry = { type: "mode_change", ...this.#freshEntryFields(), mode, data };
 		this.#recordEntry(entry);
 		return entry.id;
+	}
+
+	/** Latest active background-instance marker for this session, if it is currently a background agent. */
+	getBackgroundInstance(): BackgroundInstanceState | undefined {
+		for (let i = this.#entries.length - 1; i >= 0; i--) {
+			const entry = this.#entries[i];
+			if (entry?.type !== "background_instance") continue;
+			if (entry.status === "archived") return undefined;
+			return {
+				name: entry.name,
+				status: entry.status,
+				model: entry.model,
+				role: entry.role,
+			};
+		}
+		return undefined;
+	}
+
+	/** Append a background-instance marker and mirror it into the header cache so listing sees it without a full scan. */
+	appendBackgroundInstance(input: BackgroundInstanceState): string {
+		const entry: BackgroundInstanceEntry = { type: "background_instance", ...this.#freshEntryFields(), ...input };
+		this.#header.backgroundInstance = { ...input };
+		this.#recordEntry(entry);
+		this.#rewriteSynchronously();
+		return entry.id;
+	}
+
+	/** Promote the current session into a persistent named background agent. Returns false if the name sanitizes to empty. */
+	async backgroundCurrentSession(input: { name: string; model?: string; role?: string }): Promise<boolean> {
+		if (!(await this.setSessionName(input.name, "user"))) return false;
+		this.#forceFileCreation = true;
+		this.appendBackgroundInstance({
+			name: this.getSessionName()!,
+			status: "active",
+			model: input.model,
+			role: input.role,
+		});
+		return true;
+	}
+
+	/** Archive the active background-instance marker (the session stays on disk; it just drops out of the background roster). */
+	archiveBackgroundInstance(): string | undefined {
+		const current = this.getBackgroundInstance();
+		if (!current) return undefined;
+		return this.appendBackgroundInstance({ ...current, status: "archived" });
 	}
 
 	/**

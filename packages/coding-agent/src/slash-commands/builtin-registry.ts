@@ -33,6 +33,7 @@ import { urlHyperlinkAlways } from "../tui";
 import { getChangelogPath, parseChangelog } from "../utils/changelog";
 import { CollabQrCodeComponent } from "./helpers/collab-qrcode";
 import { buildContextReportText } from "./helpers/context-report";
+import { handleDelegateSlashCommand } from "./helpers/delegate";
 import { formatDuration } from "./helpers/format";
 import { createMarketplaceManager } from "./helpers/marketplace-manager";
 import { handleMcpAcp } from "./helpers/mcp";
@@ -385,8 +386,8 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 	{
 		name: "loop",
 		description:
-			"Toggle loop mode. While enabled, the next prompt you send re-submits after every yield. Esc cancels the current iteration; /loop again to disable.",
-		inlineHint: "[count|duration] [prompt]",
+			"Toggle loop mode. Use --spiral/--wall-climb for verifier-reflection iterations. Esc cancels the current iteration; /loop again disables.",
+		inlineHint: "[--spiral|--mode MODE] [count|duration] [prompt]",
 		allowArgs: true,
 		handleTui: async (command, runtime) => {
 			const prompt = await runtime.ctx.handleLoopCommand(command.args);
@@ -444,6 +445,16 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 		handleTui: async (command, runtime) => {
 			runtime.ctx.editor.setText("");
 			await handleSubagentSlashCommand(command.args, runtime.ctx);
+		},
+	},
+	{
+		name: "delegate",
+		description: "Spawn configured lanes or a delegate subagent",
+		inlineHint: "[using <alias-or-model> | legacy] [task]",
+		allowArgs: true,
+		handleTui: async (command, runtime) => {
+			runtime.ctx.editor.setText("");
+			await handleDelegateSlashCommand(command.args, runtime.ctx);
 		},
 	},
 	{
@@ -1027,6 +1038,32 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 		handleTui: async (_command, runtime) => {
 			await runtime.ctx.handleJobsCommand();
 			runtime.ctx.editor.setText("");
+		},
+	},
+	{
+		name: "background",
+		description: "Save this session as a named background agent and open the Agent Hub",
+		inlineHint: "[name]",
+		allowArgs: true,
+		handleTui: async (command, runtime) => {
+			const name = command.args.trim() || runtime.ctx.session.sessionManager.getSessionName() || "Background agent";
+			const ok = await runtime.ctx.session.backgroundCurrentSession(name);
+			runtime.ctx.editor.setText("");
+			if (!ok) {
+				runtime.ctx.showWarning("Could not background session: name is empty after sanitization.");
+				return;
+			}
+			const displayName = runtime.ctx.session.sessionManager.getSessionName() ?? name;
+			runtime.ctx.showStatus(`Backgrounded session as ${displayName}`);
+			runtime.ctx.showAgentHub();
+		},
+	},
+	{
+		name: "backgrounds",
+		description: "Open the Agent Hub (background sessions and subagents)",
+		handleTui: async (_command, runtime) => {
+			runtime.ctx.editor.setText("");
+			runtime.ctx.showAgentHub();
 		},
 	},
 	{

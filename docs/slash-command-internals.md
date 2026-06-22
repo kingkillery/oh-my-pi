@@ -242,3 +242,12 @@ Interactive mode separately hard-handles many built-ins in `InputController` (fo
   - native commands: fatal parse error bubbles
   - non-native commands: warning + fallback key/value parse
 - Extension/custom command handler exceptions are caught and reported via extension error channel (or logger fallback for custom commands without extension runner), and treated as handled (no unintended fallback execution).
+
+### Built-in `/delegate` Command
+
+The built-in `/delegate` command spawns background subagents (lanes) to parallelize tasks or routes to the fast browser executor (`ix-browser-fast`) for browser-based tasks.
+
+Lanes can be configured using the `delegate.lanes` setting. By default, it uses two lanes: `fast` mapped to `delegate.promptModel` and `verifier` mapped to `delegate.verifierModel`.
+
+Model overrides and provider configurations for these lanes (e.g., OpenRouter via `OPENROUTER_API_KEY`, NVIDIA/NIM via `NVIDIA_API_KEY`, or local engines like Ollama, llama.cpp, and LM-Studio) follow the same resolution paths as `/subagent` and model role aliases. For more details on configuring these providers, refer to [docs/providers.md](providers.md) and [docs/models.md](models.md).
+

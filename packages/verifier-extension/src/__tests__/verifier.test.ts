@@ -1,0 +1,347 @@
+import { describe, expect, it } from "bun:test";
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
+import type { CompareRepetition } from "../index";
+import {
+	buildCompareBreakdown,
+	chooseWinner,
+	extractTaggedScore,
+	extractTextSource,
+	isVerifierRequestParams,
+	planSubagentOrchestration,
+	readEvidenceBlocks,
+	truncate,
+	weightedMean,
+	weightedStdDev,
+} from "../index";
+
+describe("truncate", () => {
+	it("returns text unchanged when under the limit", () => {
+		const result = truncate("hello", 10);
+		expect(result.text).toBe("hello");
+		expect(result.truncated).toBe(false);
+	});
+
+	it("truncates text over the limit and marks truncated", () => {
+		const result = truncate("a".repeat(100), 50);
+		expect(result.truncated).toBe(true);
+		expect(result.text.length).toBeLessThan(100);
+		expect(result.text.endsWith("... (truncated)")).toBe(true);
+	});
+});
+
+describe("extractTaggedScore", () => {
+	it("extracts the score from a tagged response", () => {
+		const result = extractTaggedScore("Some reasoning\n<score>A</score>", "<score>");
+		expect(result.score).toBeCloseTo(1, 5);
+		expect(result.source).toBe("text");
+	});
+
+	it("handles lowercase tags", () => {
+		const result = extractTaggedScore("<score>t</score>", "<score>");
+		expect(result.score).toBeCloseTo(0, 5);
+		expect(result.source).toBe("text");
+	});
+
+	it("falls back to 0.5 when the tag is missing", () => {
+		const result = extractTaggedScore("No score here", "<score>");
+		expect(result.score).toBeCloseTo(0.5, 5);
+		expect(result.source).toBe("fallback");
+	});
+
+	it("detects mock responses", () => {
+		const result = extractTaggedScore("Mock verifier response.", "<score>");
+		expect(result.source).toBe("mock");
+	});
+});
+
+describe("chooseWinner", () => {
+	it("picks candidate_a when scoreA is higher", () => {
+		expect(chooseWinner(0.8, 0.3)).toBe("candidate_a");
+	});
+
+	it("picks candidate_b when scoreB is higher", () => {
+		expect(chooseWinner(0.2, 0.9)).toBe("candidate_b");
+	});
+
+	it("calls a tie when scores are within the threshold", () => {
+		expect(chooseWinner(0.5, 0.51, 0.05)).toBe("tie");
+	});
+});
+
+describe("planSubagentOrchestration", () => {
+	it("answers directly for simple low-risk requests without a specialist match", () => {
+		const plan = planSubagentOrchestration({
+			request: "format this sentence",
+			complexity: "single-step",
+			risk: "low",
+			evidenceNeed: "current-context",
+			decomposability: "not-decomposable",
+			dataSensitivity: "public",
+			specialists: [],
+		});
+
+		expect(plan.routing).toBe("direct");
+		expect(plan.mode).toBe("fast");
+		expect(plan.verification).toBe("V0");
+		expect(plan.subagents).toEqual([]);
+	});
+
+	it("routes independent multi-specialist work as a parallel deep plan", () => {
+		const plan = planSubagentOrchestration({
+			request: "review auth code for security and reliability issues",
+			complexity: "multi-step",
+			risk: "high",
+			evidenceNeed: "multi-source",
+			decomposability: "independent",
+			dataSensitivity: "confidential",
+			specialists: [
+				{ name: "SecurityReviewer", scope: "auth security vulnerabilities", costTier: "med" },
+				{ name: "ReliabilityReviewer", scope: "reliability retries timeouts", costTier: "low" },
+				{ name: "Verifier", scope: "independent verification", costTier: "high", role: "verifier" },
+			],
+		});
+
+		expect(plan.routing).toBe("parallel");
+		expect(plan.mode).toBe("deep");
+		expect(plan.verification).toBe("V3");
+		expect(plan.subagents).toEqual(["SecurityReviewer", "ReliabilityReviewer"]);
+		expect(plan.verifier).toBe("Verifier");
+		expect(plan.hiddenRoutePlan).toContain("Use this plan privately");
+	});
+
+	it("uses recursive routing only when explicitly allowed for open-ended decomposable work", () => {
+		const plan = planSubagentOrchestration({
+			request: "build a product strategy using market research and architecture review",
+			complexity: "open-ended",
+			risk: "med",
+			evidenceNeed: "multi-source",
+			decomposability: "sequential",
+			recursiveAllowed: true,
+			specialists: [
+				{ name: "Researcher", scope: "market research", costTier: "low" },
+				{ name: "Architect", scope: "architecture review", costTier: "med" },
+			],
+		});
+
+		expect(plan.routing).toBe("recursive");
+		expect(plan.maxDepth).toBe(2);
+		expect(plan.childCallLimit).toBe(12);
+	});
+});
+
+describe("weightedMean", () => {
+	it("computes a weighted mean", () => {
+		const items = [
+			{ value: 10, weight: 1 },
+			{ value: 20, weight: 2 },
+		];
+		expect(
+			weightedMean(
+				items,
+				item => item.value,
+				item => item.weight,
+			),
+		).toBeCloseTo(50 / 3, 5);
+	});
+
+	it("falls back to simple average when total weight is zero", () => {
+		const items = [{ value: 10, weight: 0 }];
+		expect(
+			weightedMean(
+				items,
+				item => item.value,
+				item => item.weight,
+			),
+		).toBe(10);
+	});
+
+	it("returns zero for an empty array", () => {
+		expect(
+			weightedMean(
+				[],
+				() => 1,
+				() => 1,
+			),
+		).toBe(0);
+	});
+});
+
+describe("weightedStdDev", () => {
+	it("returns zero for an empty array", () => {
+		expect(
+			weightedStdDev(
+				[],
+				() => 1,
+				() => 1,
+			),
+		).toBe(0);
+	});
+
+	it("returns zero for a single value", () => {
+		const items = [{ value: 5, weight: 1 }];
+		expect(
+			weightedStdDev(
+				items,
+				item => item.value,
+				item => item.weight,
+			),
+		).toBe(0);
+	});
+
+	it("computes standard deviation for weighted values", () => {
+		const items = [
+			{ value: 0, weight: 1 },
+			{ value: 10, weight: 1 },
+		];
+		expect(
+			weightedStdDev(
+				items,
+				item => item.value,
+				item => item.weight,
+			),
+		).toBeCloseTo(5, 5);
+	});
+});
+
+describe("buildCompareBreakdown", () => {
+	const base: CompareRepetition = {
+		rep: 1,
+		order: "original",
+		model: "test",
+		weight: 1,
+		score_a: 0.8,
+		score_b: 0.3,
+		canonical_score_a: 0.8,
+		canonical_score_b: 0.3,
+		source_a: "text",
+		source_b: "text",
+		response_excerpt: "ok",
+	};
+
+	it("computes breakdown for a swapped pair", () => {
+		const repetitions: CompareRepetition[] = [
+			{ ...base, order: "original" },
+			{ ...base, order: "swapped", score_a: 0.3, score_b: 0.8, canonical_score_a: 0.8, canonical_score_b: 0.3 },
+		];
+		const result = buildCompareBreakdown(repetitions);
+		expect(result.score_a).toBeCloseTo(0.8, 5);
+		expect(result.score_b).toBeCloseTo(0.3, 5);
+		expect(result.swap_consistency).toBeCloseTo(1, 5);
+	});
+
+	it("throws when repetitions are not paired", () => {
+		const repetitions: CompareRepetition[] = [base];
+		expect(() => buildCompareBreakdown(repetitions)).toThrow("even number of repetitions");
+	});
+
+	it("throws when adjacent repetitions share the same order", () => {
+		const repetitions: CompareRepetition[] = [base, { ...base, order: "original" }];
+		expect(() => buildCompareBreakdown(repetitions)).toThrow("both have order");
+	});
+});
+
+describe("isVerifierRequestParams", () => {
+	it("accepts a valid example shape", () => {
+		const example = {
+			task: "pick the best patch",
+			candidates: [{ id: "a" }],
+			criteria: [{ name: "correctness", description: "works" }],
+		};
+		expect(isVerifierRequestParams(example)).toBe(true);
+	});
+
+	it("rejects a missing task", () => {
+		const example = {
+			candidates: [{ id: "a" }],
+			criteria: [{ name: "correctness", description: "works" }],
+		};
+		expect(isVerifierRequestParams(example)).toBe(false);
+	});
+
+	it("rejects a candidate without an id", () => {
+		const example = {
+			task: "pick the best patch",
+			candidates: [{}],
+			criteria: [{ name: "correctness", description: "works" }],
+		};
+		expect(isVerifierRequestParams(example)).toBe(false);
+	});
+
+	it("rejects a criterion without a name", () => {
+		const example = {
+			task: "pick the best patch",
+			candidates: [{ id: "a" }],
+			criteria: [{ description: "works" }],
+		};
+		expect(isVerifierRequestParams(example)).toBe(false);
+	});
+});
+
+describe("extractTextSource", () => {
+	it("reads a text file", async () => {
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "lav-test-"));
+		const filePath = path.join(tempDir, "candidate.txt");
+		await fs.writeFile(filePath, "hello world");
+		try {
+			const result = await extractTextSource(tempDir, "candidate", { path: "candidate.txt" }, 100);
+			expect(result.text).toBe("hello world");
+			expect(result.source).toBe(filePath);
+		} finally {
+			await fs.rm(tempDir, { recursive: true, force: true });
+		}
+	});
+
+	it("rejects a binary file", async () => {
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "lav-test-"));
+		const filePath = path.join(tempDir, "candidate.bin");
+		await fs.writeFile(filePath, Buffer.from([0x00, 0x01, 0x02]));
+		try {
+			await expect(extractTextSource(tempDir, "candidate", { path: "candidate.bin" }, 100)).rejects.toThrow(
+				"binary",
+			);
+		} finally {
+			await fs.rm(tempDir, { recursive: true, force: true });
+		}
+	});
+
+	it("rejects an oversized file", async () => {
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "lav-test-"));
+		const filePath = path.join(tempDir, "candidate.txt");
+		await fs.writeFile(filePath, "x".repeat(100));
+		try {
+			await expect(extractTextSource(tempDir, "candidate", { path: "candidate.txt" }, 10)).rejects.toThrow(
+				"too large",
+			);
+		} finally {
+			await fs.rm(tempDir, { recursive: true, force: true });
+		}
+	});
+});
+
+describe("readEvidenceBlocks", () => {
+	it("reads evidence files", async () => {
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "lav-test-"));
+		const filePath = path.join(tempDir, "evidence.txt");
+		await fs.writeFile(filePath, "test log");
+		try {
+			const blocks = await readEvidenceBlocks(tempDir, ["evidence.txt"], 100);
+			expect(blocks).toHaveLength(1);
+			expect(blocks[0]?.content).toBe("test log");
+		} finally {
+			await fs.rm(tempDir, { recursive: true, force: true });
+		}
+	});
+
+	it("rejects binary evidence", async () => {
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "lav-test-"));
+		const filePath = path.join(tempDir, "evidence.bin");
+		await fs.writeFile(filePath, Buffer.from([0x00, 0x01]));
+		try {
+			await expect(readEvidenceBlocks(tempDir, ["evidence.bin"], 100)).rejects.toThrow("binary");
+		} finally {
+			await fs.rm(tempDir, { recursive: true, force: true });
+		}
+	});
+});

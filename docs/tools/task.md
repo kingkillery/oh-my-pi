@@ -106,7 +106,7 @@ Artifacts and side channels:
   - off — single spawn per call; `tasks`/`context` are rejected and removed from the schema.
 - Isolation mode (`task.isolation.mode`): `none`, `auto`, `apfs`, `btrfs`, `zfs`, `reflink`, `overlayfs`, `projfs`, `block-clone`, `rcopy` (legacy `worktree`, `fuse-overlay`, `fuse-projfs` accepted for back-compat); the PAL resolves the actual backend with fallback.
 - Isolation merge strategy: patch mode (capture/apply root patches) or branch mode (commit to `omp/task/<id>`, cherry-pick into parent).
-- Agent source precedence: project custom agents, then user custom agents, then bundled agents (`explore`, `plan`, `designer`, `reviewer`, `task`, `quick_task`, `librarian`, `oracle`).
+ - Agent source precedence: project custom agents, then user custom agents, then bundled agents (`explore`, `plan`, `designer`, `reviewer`, `task`, `quick_task`, `librarian`, `oracle`, `ix-browser-fast`).
 
 ## Side Effects
 - Filesystem
@@ -166,3 +166,8 @@ Artifacts and side channels:
 - Branch-mode merge temporarily stashes the parent repo before cherry-picking; a stash-pop conflict does not unmerge the cherry-picked commits — they stay on HEAD, the stash entry is preserved, and the conflict is surfaced separately as `stashConflict`. Patch mode only applies the combined root patch when `git.patch.canApplyText(...)` succeeds; failures leave the `.patch` artifact for manual handling.
 - Nested git repos are diffed independently inside isolated workspaces and merged separately with `applyNestedPatches(...)`.
 - `agent://` ids are name-based (`Task` first, `Task-2`/`Task-3` only when the name repeats, nested like `Parent.Child`) by `AgentOutputManager`; this is what prevents artifact collisions across repeated or nested invocations.
+
+### Bounded Browser Executor (`ix-browser-fast`)
+
+The `ix-browser-fast` agent is a bundled, bounded browser-action executor. It is designed to run browser automation tasks through the local IX Bridge HTTP API (`http://127.0.0.1:18086/ix-bridge/command`) rather than the built-in `browser` tool. It converts IX Bridge snapshots and `@e` references into action payloads and escalates ambiguity back to the planner rather than doing deep reasoning.
+

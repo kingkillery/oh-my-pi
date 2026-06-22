@@ -1,0 +1,117 @@
+/**
+ * Agent Hub background-lane contract: persistent background sessions discovered
+ * on disk render as top-level lanes that are COLLAPSED by default; Space expands
+ * a lane to reveal its nested subagents, and Enter resumes the session. This is
+ * the consolidation of the old `/backgrounds` switcher into the Agent Hub.
+ */
+
+import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
+import { IrcBus } from "@pk-nerdsaver-ai/pi-coding-agent/irc/bus";
+import { AgentHubOverlayComponent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/agent-hub";
+import { SessionObserverRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/modes/session-observer-registry";
+import { initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import { AgentRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/registry/agent-registry";
+
+const LANE_NAME = "api-worker";
+
+async function seedBackgroundSession(dir: string): Promise<string> {
+	const sessionFile = path.join(dir, "bgsess.jsonl");
+	const headerObj = {
+		type: "session",
+		version: 3,
+		id: "bgsess",
+		cwd: dir,
+		timestamp: new Date().toISOString(),
+		backgroundInstance: { name: LANE_NAME, status: "active", model: "anthropic/claude" },
+	};
+	const userMsg = {
+		type: "message",
+		id: "e1",
+		parentId: null,
+		timestamp: new Date().toISOString(),
+		message: { role: "user", content: "kick off the worker" },
+	};
+	await fs.writeFile(sessionFile, `${JSON.stringify(headerObj)}\n${JSON.stringify(userMsg)}\n`);
+	// One nested subagent transcript in the session's artifact dir.
+	const artifactDir = path.join(dir, "bgsess");
+	await fs.mkdir(artifactDir, { recursive: true });
+	await fs.writeFile(
+		path.join(artifactDir, "Sub-1.jsonl"),
+		`${JSON.stringify({ type: "session", version: 3, id: "Sub-1", cwd: dir, timestamp: new Date().toISOString() })}\n`,
+	);
+	return sessionFile;
+}
+
+/**
+ * Poll the rendered output until `needle` appears. The hub loads background
+ * sessions via a real async filesystem scan kicked off in its constructor and
+ * exposes no completion signal, so an integration test must wait on the
+ * observable render rather than a deterministic fake clock.
+ */
+async function renderUntil(hub: AgentHubOverlayComponent, needle: string, timeoutMs = 3000): Promise<string> {
+	const deadline = Date.now() + timeoutMs;
+	for (;;) {
+		const text = Bun.stripANSI(hub.render(120).join("\n"));
+		if (text.includes(needle) || Date.now() >= deadline) return text;
+		await Bun.sleep(25);
+	}
+}
+
+describe("Agent hub background lanes", () => {
+	beforeAll(async () => {
+		await initTheme();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("shows a background session as a collapsed lane, expands to its subagents, resumes on Enter", async () => {
+		const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "omp-bg-hub-"));
+		try {
+			const sessionFile = await seedBackgroundSession(tmp);
+			const resumed = Promise.withResolvers<string>();
+			const resume = vi.fn(async (p: string) => {
+				resumed.resolve(p);
+			});
+			const hub = new AgentHubOverlayComponent({
+				observers: new SessionObserverRegistry(),
+				hubKeys: [],
+				onDone: () => {},
+				requestRender: () => {},
+				registry: new AgentRegistry(),
+				irc: new IrcBus(new AgentRegistry()),
+				focusAgent: async () => {},
+				cwd: tmp,
+				sessionDir: tmp,
+				resumeSession: resume,
+				kanbanSync: null,
+			});
+			try {
+				// Lane appears once the async disk scan completes.
+				const collapsed = await renderUntil(hub, LANE_NAME);
+				expect(collapsed).toContain(LANE_NAME);
+				// Collapsed by default: the nested subagent stays hidden.
+				expect(collapsed).not.toContain("Sub-1");
+
+				// Move cursor down from current session (row 0) to background session lane (row 1).
+				hub.handleInput("j");
+				// Space expands the selected lane to reveal its subagent.
+				hub.handleInput(" ");
+				const expanded = Bun.stripANSI(hub.render(120).join("\n"));
+				expect(expanded).toContain("Sub-1");
+
+				// Enter on the lane resumes that background session (await the real call).
+				hub.handleInput("\r");
+				expect(await resumed.promise).toBe(sessionFile);
+			} finally {
+				hub.dispose();
+			}
+		} finally {
+			await fs.rm(tmp, { recursive: true, force: true });
+		}
+	});
+});

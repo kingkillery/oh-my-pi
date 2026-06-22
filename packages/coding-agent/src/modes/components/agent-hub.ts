@@ -25,10 +25,13 @@ import { IrcBus } from "../../irc/bus";
 import { AgentLifecycleManager } from "../../registry/agent-lifecycle";
 import { type AgentRef, AgentRegistry, type AgentStatus, MAIN_AGENT_ID } from "../../registry/agent-registry";
 import { USER_INTERRUPT_LABEL } from "../../session/messages";
+import { backgroundInstanceDisplayName, isBackgroundInstanceSession } from "../../session/session-listing";
+import { SessionManager } from "../../session/session-manager";
 import { replaceTabs, shortenPath, TRUNCATE_LENGTHS, truncateToWidth } from "../../tools/render-utils";
 import type { ObservableSession, SessionObserverRegistry } from "../session-observer-registry";
 import { isValidThemeColor, type ThemeColor, theme } from "../theme/theme";
 import { matchesSelectDown, matchesSelectUp } from "../utils/keybinding-matchers";
+import { AgentHubKanbanSync, type AgentHubKanbanSyncResult } from "./agent-hub-kanban-sync";
 import { AgentTranscriptViewer } from "./agent-transcript-viewer";
 import { DynamicBorder } from "./dynamic-border";
 
@@ -65,9 +68,58 @@ function rosterColor(color: string | undefined): ThemeColor | undefined {
  * `├─`/`└─` branch and the `│`/space ancestor-continuation columns.
  */
 interface HubRow {
-	ref: AgentRef;
+	ref: HubAgentRef;
 	depth: number;
 	prefix: string;
+}
+type HubAgentKind = AgentRef["kind"] | "background";
+type HubAgentRef = Omit<AgentRef, "kind"> & { kind: HubAgentKind };
+
+function isRegistryAgentRef(ref: HubAgentRef): ref is AgentRef {
+	return ref.kind !== "background" && ref.id !== MAIN_AGENT_ID;
+}
+
+function isBackgroundLane(ref: HubAgentRef): boolean {
+	return ref.kind === "background" && (ref.parentId ?? MAIN_AGENT_ID) === MAIN_AGENT_ID;
+}
+
+function isLane(ref: HubAgentRef): boolean {
+	return ref.id === MAIN_AGENT_ID || isBackgroundLane(ref);
+}
+/** Scan a background session's artifact dir for its direct subagent transcripts (read-only, hub-local rows). */
+function collectBackgroundLaneSubagents(sessionFile: string, laneId: string): HubAgentRef[] {
+	if (!sessionFile.endsWith(".jsonl")) return [];
+	const dir = sessionFile.slice(0, -6);
+	let entries: fs.Dirent[];
+	try {
+		entries = fs.readdirSync(dir, { withFileTypes: true });
+	} catch {
+		return [];
+	}
+	const subs: HubAgentRef[] = [];
+	for (const entry of entries) {
+		if (!entry.isFile() || !entry.name.endsWith(".jsonl") || entry.name.includes(".bak")) continue;
+		if (entry.name === ADVISOR_TRANSCRIPT_FILENAME) continue;
+		const subId = entry.name.slice(0, -6);
+		const subFile = path.join(dir, entry.name);
+		let lastActivity = Date.now();
+		try {
+			lastActivity = fs.statSync(subFile).mtimeMs;
+		} catch {}
+		subs.push({
+			id: `${laneId}/${subId}`,
+			displayName: subId,
+			kind: "background",
+			parentId: laneId,
+			status: "parked",
+			session: null,
+			sessionFile: subFile,
+			createdAt: lastActivity,
+			lastActivity,
+			activity: "background subagent",
+		});
+	}
+	return subs;
 }
 
 /** Glyph + status word, colored per theme status conventions. */
@@ -179,8 +231,14 @@ export interface AgentHubDeps {
 	focusAgent?: (id: string) => Promise<void>;
 	/** Current main session file; used to seed parked historical subagents after restart. */
 	sessionFile?: string | null;
+	/** Session directory for persisted background-agent discovery. */
+	sessionDir?: string;
+	/** Resume a persisted background-agent session selected from the hub. */
+	resumeSession?: (sessionPath: string) => Promise<void>;
 	/** Collab guest: route actions/transcripts to the host instead of local sessions. */
 	remote?: AgentHubRemote;
+	/** Kanban board synchronizer. Pass null to disable Kanban sync mode in tests/collab guests. */
+	kanbanSync?: AgentHubKanbanSync | null;
 }
 
 export class AgentHubOverlayComponent extends Container {
@@ -194,6 +252,13 @@ export class AgentHubOverlayComponent extends Container {
 	#unsubscribers: Array<() => void> = [];
 	#ageTimer: NodeJS.Timeout | undefined;
 	#remote: AgentHubRemote | undefined;
+	#sessionDir: string | undefined;
+	#resumeSession: ((sessionPath: string) => Promise<void>) | undefined;
+	#backgroundRefs: HubAgentRef[] = [];
+	#backgroundSessionPaths = new Map<string, string>();
+	#backgroundLoadGeneration = 0;
+	#expandedLanes = new Set<string>([MAIN_AGENT_ID]);
+	#backgroundSubagents = new Map<string, HubAgentRef[]>();
 
 	// Table state
 	/** Selectable subagent rows in Main→children tree order (Main itself is the non-selectable root header). */
@@ -206,6 +271,14 @@ export class AgentHubOverlayComponent extends Container {
 	#lastLeftTap = 0;
 	/** Agent-specific Ctrl+X confirmation state. */
 	#pendingRemove: { id: string; at: number } | undefined;
+	/** Rename input mode: agent id being renamed. */
+	#renameInput: { id: string; buffer: string } | undefined;
+	/** Filter input mode: active filter query. */
+	#filterInput: string | undefined;
+	/** Kanban sync sub-mode: selected rows can be pushed into a pk-kanban board. */
+	#kanbanSyncMode = false;
+	#kanbanSync: AgentHubKanbanSync | undefined;
+	#kanbanSyncStatusByAgent = new Map<string, string>();
 	// Transcript-viewer launch deps (passed through to AgentTranscriptViewer).
 	#ui: TUI;
 	#getTool: ((name: string) => AgentTool | undefined) | undefined;
@@ -243,13 +316,20 @@ export class AgentHubOverlayComponent extends Container {
 		this.#hideThinkingBlock = deps.hideThinkingBlock;
 		this.#expandKeys = deps.expandKeys ?? ["ctrl+o"];
 		this.#focusAgent = deps.focusAgent;
+		this.#sessionDir = deps.sessionDir;
+		this.#resumeSession = deps.resumeSession;
+		this.#kanbanSync =
+			deps.kanbanSync === null ? undefined : (deps.kanbanSync ?? new AgentHubKanbanSync({ projectPath: this.#cwd }));
 
 		this.#unsubscribers.push(this.#registry.onChange(() => this.#onDataChange()));
 		this.#unsubscribers.push(this.#observers.onChange(() => this.#onDataChange()));
 		this.#ageTimer = setInterval(() => this.#requestRender(), AGE_TICK_MS);
 		this.#ageTimer.unref?.();
 
-		if (!this.#remote) registerPersistedSubagents(this.#registry, deps.sessionFile);
+		if (!this.#remote) {
+			registerPersistedSubagents(this.#registry, deps.sessionFile);
+			void this.#loadBackgroundInstances();
+		}
 		this.#refreshRows();
 	}
 
@@ -338,6 +418,52 @@ export class AgentHubOverlayComponent extends Container {
 	// Live data plumbing
 	// ========================================================================
 
+	async #loadBackgroundInstances(): Promise<void> {
+		const generation = ++this.#backgroundLoadGeneration;
+		try {
+			let sessions = await SessionManager.list(this.#cwd, this.#sessionDir);
+			sessions = sessions.filter(isBackgroundInstanceSession);
+			if (sessions.length === 0) {
+				sessions = (await SessionManager.listAll()).filter(isBackgroundInstanceSession);
+			}
+			if (generation !== this.#backgroundLoadGeneration) return;
+			const refs: HubAgentRef[] = [];
+			const sessionPaths = new Map<string, string>();
+			const subagentsByLane = new Map<string, HubAgentRef[]>();
+			for (const session of sessions) {
+				const id = `background:${session.id}`;
+				const name = backgroundInstanceDisplayName(session);
+				const createdAt = session.created.getTime();
+				const lastActivity = session.modified.getTime();
+				const resolvedLastActivity = Number.isFinite(lastActivity) ? lastActivity : Date.now();
+				refs.push({
+					id,
+					displayName: name,
+					kind: "background",
+					parentId: MAIN_AGENT_ID,
+					status: "parked",
+					session: null,
+					sessionFile: session.path,
+					createdAt: Number.isFinite(createdAt) ? createdAt : resolvedLastActivity,
+					lastActivity: resolvedLastActivity,
+					activity: session.backgroundInstance?.model
+						? `background session · ${session.backgroundInstance.model}`
+						: "background session",
+					cwd: session.cwd,
+				});
+				sessionPaths.set(id, session.path);
+				subagentsByLane.set(id, collectBackgroundLaneSubagents(session.path, id));
+			}
+			this.#backgroundRefs = refs;
+			this.#backgroundSessionPaths = sessionPaths;
+			this.#backgroundSubagents = subagentsByLane;
+			this.#refreshRows();
+			this.#requestRender();
+		} catch (error) {
+			logger.warn("Agent hub: failed to load background sessions", { error: String(error) });
+		}
+	}
+
 	#onDataChange(): void {
 		this.#refreshRows();
 		this.#requestRender();
@@ -345,23 +471,72 @@ export class AgentHubOverlayComponent extends Container {
 
 	#refreshRows(): void {
 		const selectedId = this.#selectedRef()?.id;
-		const refs = this.#registry.list().filter(ref => ref.id !== MAIN_AGENT_ID);
+		const rawQuery = this.#filterInput && this.#filterInput.length > 0 ? this.#filterInput.toLowerCase() : undefined;
+		const matches = (ref: HubAgentRef): boolean =>
+			!rawQuery ||
+			ref.id.toLowerCase().includes(rawQuery) ||
+			ref.displayName.toLowerCase().includes(rawQuery) ||
+			(ref.activity?.toLowerCase().includes(rawQuery) ?? false);
+
+		// Current session's subagents (the live registry tree). Background sessions
+		// are handled separately as top-level lanes below — they are NOT registry agents.
+		let registryRefs: HubAgentRef[] = this.#registry.list().filter(ref => ref.id !== MAIN_AGENT_ID);
+		if (rawQuery) registryRefs = registryRefs.filter(matches);
 
 		// Freeze each agent's first-seen order so siblings keep a stable position
 		// while the hub is open (agents heartbeat / bump lastActivity constantly).
 		// Seed by status, then recency; new agents append at the end thereafter.
 		if (!this.#rowOrder) {
-			const seeded = [...refs].sort(
+			const seeded = [...registryRefs].sort(
 				(a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || b.lastActivity - a.lastActivity,
 			);
 			this.#rowOrder = new Map(seeded.map((ref, i) => [ref.id, i]));
 		} else {
-			for (const ref of refs) {
+			for (const ref of registryRefs) {
 				if (!this.#rowOrder.has(ref.id)) this.#rowOrder.set(ref.id, this.#rowOrder.size);
 			}
 		}
 
-		this.#rows = this.#buildTree(refs);
+		const rows: HubRow[] = [];
+
+		// 1. Current Session Lane
+		let mainRef = this.#registry.get(MAIN_AGENT_ID) as HubAgentRef | undefined;
+		if (!mainRef) {
+			mainRef = {
+				id: MAIN_AGENT_ID,
+				displayName: "current session",
+				kind: "main",
+				status: "running",
+				session: null,
+				sessionFile: null,
+				createdAt: Date.now(),
+				lastActivity: Date.now(),
+			};
+		}
+		const mainLane = mainRef;
+		if (!rawQuery || matches(mainLane) || registryRefs.length > 0) {
+			rows.push({ ref: mainLane, depth: 0, prefix: "" });
+			if (this.#expandedLanes.has(MAIN_AGENT_ID)) {
+				const subTree = this.#buildTree(registryRefs);
+				rows.push(...subTree);
+			}
+		}
+
+		// 2. Background Lanes
+		const lanes = [...this.#backgroundRefs].sort((a, b) => b.lastActivity - a.lastActivity);
+		for (const lane of lanes) {
+			const laneSubs = this.#backgroundSubagents.get(lane.id) ?? [];
+			const visibleSubs = this.#expandedLanes.has(lane.id) ? (rawQuery ? laneSubs.filter(matches) : laneSubs) : [];
+			// While filtering, a lane that neither matches nor has a matching visible subagent drops out.
+			if (rawQuery && !matches(lane) && visibleSubs.length === 0) continue;
+			rows.push({ ref: lane, depth: 0, prefix: "" });
+			visibleSubs.forEach((sub, i) => {
+				const last = i === visibleSubs.length - 1;
+				rows.push({ ref: sub, depth: 1, prefix: `${last ? theme.tree.last : theme.tree.branch} ` });
+			});
+		}
+
+		this.#rows = rows;
 		const keptIndex = selectedId ? this.#rows.findIndex(row => row.ref.id === selectedId) : -1;
 		this.#selectedRow = keptIndex >= 0 ? keptIndex : Math.min(this.#selectedRow, Math.max(0, this.#rows.length - 1));
 	}
@@ -373,9 +548,9 @@ export class AgentHubOverlayComponent extends Container {
 	 * carries its depth (top-level children = 1) and a pre-built connector prefix
 	 * (`├─`/`└─` for the branch, `│`/spaces for each ancestor column).
 	 */
-	#buildTree(refs: AgentRef[]): HubRow[] {
+	#buildTree(refs: HubAgentRef[]): HubRow[] {
 		const known = new Set(refs.map(ref => ref.id));
-		const childrenOf = new Map<string, AgentRef[]>();
+		const childrenOf = new Map<string, HubAgentRef[]>();
 		for (const ref of refs) {
 			const parent =
 				ref.parentId && ref.parentId !== ref.id && known.has(ref.parentId) ? ref.parentId : MAIN_AGENT_ID;
@@ -385,7 +560,7 @@ export class AgentHubOverlayComponent extends Container {
 		}
 
 		const order = this.#rowOrder;
-		const bySibling = (a: AgentRef, b: AgentRef): number =>
+		const bySibling = (a: HubAgentRef, b: HubAgentRef): number =>
 			(order?.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (order?.get(b.id) ?? Number.MAX_SAFE_INTEGER);
 		// One indentation column is as wide as a connector ("├─ "); the ancestor
 		// continuation columns must match so branches line up at every depth.
@@ -424,7 +599,7 @@ export class AgentHubOverlayComponent extends Container {
 		return rows;
 	}
 
-	#selectedRef(): AgentRef | undefined {
+	#selectedRef(): HubAgentRef | undefined {
 		return this.#rows[this.#selectedRow]?.ref;
 	}
 
@@ -440,13 +615,15 @@ export class AgentHubOverlayComponent extends Container {
 		const lines: string[] = [];
 		lines.push(...new DynamicBorder().render(width));
 		const counts = this.#statusSummary();
-		lines.push(` ${theme.fg("accent", "Agent Hub")}${counts ? theme.fg("dim", `${theme.sep.dot}${counts}`) : ""}`);
+		lines.push(
+			` ${theme.fg("accent", this.#kanbanSyncMode ? "Agent Hub · Kanban sync" : "Agent Hub")}${counts ? theme.fg("dim", `${theme.sep.dot}${counts}`) : ""}`,
+		);
 		lines.push(...new DynamicBorder().render(width));
 
 		if (this.#rows.length === 0) {
-			lines.push(` ${theme.fg("dim", "no subagents yet — task spawns appear here")}`);
+			lines.push(` ${theme.fg("dim", "no agents yet — /tan and /background sessions appear here")}`);
 		} else {
-			lines.push(this.#renderMainHeader(width));
+			// mainRef is now a regular row in rows; termHeight calculations stay the same.
 			const termHeight = process.stdout.rows || 40;
 			// Chrome: 2 borders + title + Main root + notice? + blank + hints + border
 			const maxVisible = Math.max(3, termHeight - 8 - (this.#notice ? 1 : 0));
@@ -469,43 +646,111 @@ export class AgentHubOverlayComponent extends Container {
 		if (this.#notice) {
 			lines.push(` ${theme.fg("error", sanitizeLine(this.#notice, Math.max(10, width - 2)))}`);
 		}
+		if (this.#renameInput) {
+			const ref = this.#registry.get(this.#renameInput.id);
+			if (ref) {
+				lines.push(
+					` ${theme.fg("dim", "Rename:")} ${this.#renameInput.buffer}${theme.fg("accent", theme.nav.cursor)}`,
+				);
+			}
+		}
 		lines.push("");
-		lines.push(` ${theme.fg("dim", "j/k:select  Enter:open  r:revive  ctrl+x:remove  Esc/←←:close")}`);
+		if (this.#renameInput) {
+			lines.push(` ${theme.fg("dim", "Enter:save  Esc:cancel")}`);
+		} else if (this.#filterInput !== undefined) {
+			lines.push(` ${theme.fg("dim", `Filter: ${this.#filterInput}  Enter:apply  Esc:clear`)}`);
+		} else if (this.#kanbanSyncMode) {
+			lines.push(` ${theme.fg("dim", "j/k:select  Enter:sync  a:sync all  Esc:table  q:close")}`);
+		} else {
+			const selected = this.#selectedRef();
+			const hints = selected ? this.#getAdaptiveHints(selected) : "j/k:select  K:kanban  q:close";
+			lines.push(` ${theme.fg("dim", hints)}`);
+		}
 		lines.push(...new DynamicBorder().render(width));
 		return lines;
 	}
 
-	/** Main is the tree root, rendered as a non-selectable header above its children. */
-	#renderMainHeader(width: number): string {
-		const main = this.#registry.get(MAIN_AGENT_ID);
-		const color = rosterColor(main?.color);
-		const label = color ? theme.bold(theme.fg(color, MAIN_AGENT_ID)) : theme.bold(MAIN_AGENT_ID);
-		const rawLine = main ? ` ${statusBadge(main.status)} ${label}` : ` ${label}`;
-		return truncateToWidth(rawLine.replace(/[\r\n]+/g, " "), Math.max(1, width - 1));
-	}
+	// renderMainHeader deleted; Main renders as a selectable depth-0 row.
 
 	#statusSummary(): string {
 		const counts: Record<AgentStatus, number> = { running: 0, idle: 0, parked: 0, aborted: 0 };
-		for (const row of this.#rows) {
+		let backgroundCount = 0;
+		const subagentRows = this.#rows.filter(row => !isLane(row.ref));
+		for (const row of subagentRows) {
 			counts[row.ref.status]++;
+			if (row.ref.kind === "background") backgroundCount++;
 		}
-		const parts: string[] = [];
+		const parts: string[] = [`${subagentRows.length} ${subagentRows.length === 1 ? "agent" : "agents"}`];
 		for (const status of ["running", "idle", "parked", "aborted"] as const) {
 			const count = counts[status];
 			if (count > 0) parts.push(`${count} ${status}`);
 		}
+		if (backgroundCount > 0) parts.push(`${backgroundCount} background`);
 		return parts.join(theme.sep.dot);
+	}
+
+	#getAdaptiveHints(ref: HubAgentRef): string {
+		const base = "j/k:select  ";
+		if (ref.id === MAIN_AGENT_ID) {
+			const verb = this.#expandedLanes.has(ref.id) ? "collapse" : "expand";
+			return `${base}Space:${verb}  Enter:focus  /:filter  q:close`;
+		}
+		if (ref.kind === "background") {
+			if (isBackgroundLane(ref)) {
+				const verb = this.#expandedLanes.has(ref.id) ? "collapse" : "expand";
+				return `${base}Space:${verb}  Enter:resume  /:filter  q:close`;
+			}
+			return `${base}Enter:open session  /:filter  q:close`;
+		}
+		switch (ref.status) {
+			case "running":
+				return `${base}Enter:focus  c:chat  r:rename  x×2:kill  K:kanban  q:close`;
+			case "parked":
+				return `${base}Enter:open  c:chat  r:rename  R:revive  x×2:remove  K:kanban  q:close`;
+			case "idle":
+				return `${base}Enter:focus  c:chat  r:rename  R:revive  x×2:remove  K:kanban  q:close`;
+			case "aborted":
+				return `${base}c:chat  r:rename  x×2:remove  K:kanban  q:close`;
+			default:
+				return `${base}Enter:focus  c:chat  r:rename  R:revive  x×2:remove  K:kanban  q:close`;
+		}
 	}
 
 	#renderRow(row: HubRow, selected: boolean, width: number): string {
 		const { ref } = row;
 		const cursor = selected ? theme.fg("accent", theme.nav.cursor) : " ";
 		const color = rosterColor(ref.color);
-		const idText = color ? theme.bold(theme.fg(color, replaceTabs(ref.id))) : theme.bold(replaceTabs(ref.id));
-		const parts: string[] = [statusBadge(ref.status), idText];
-		parts.push(theme.fg("dim", replaceTabs(ref.displayName)));
-		// Parentage is conveyed by the tree connectors, so the kind stands alone.
-		parts.push(theme.fg("dim", ref.kind));
+		const lane = isLane(ref);
+		const caret = lane ? `${this.#expandedLanes.has(ref.id) ? "▾" : "▸"} ` : "";
+		const label =
+			ref.id === MAIN_AGENT_ID
+				? `${caret}current session`
+				: ref.kind === "background"
+					? `${caret}${ref.displayName}`
+					: ref.id;
+		const idText = color ? theme.bold(theme.fg(color, replaceTabs(label))) : theme.bold(replaceTabs(label));
+		const parts: string[] = lane ? [idText] : [statusBadge(ref.status), idText];
+		if (ref.id === MAIN_AGENT_ID) {
+			const subCount = this.#registry.list().filter(r => r.id !== MAIN_AGENT_ID).length;
+			const bits = [subCount > 0 ? `${subCount} ${subCount === 1 ? "agent" : "agents"}` : "0 agents"];
+			parts.push(theme.fg("muted", bits.join(theme.sep.dot)));
+		} else if (ref.kind === "background") {
+			if (lane) {
+				const subCount = this.#backgroundSubagents.get(ref.id)?.length ?? 0;
+				const model = ref.activity?.startsWith("background session · ")
+					? ref.activity.slice("background session · ".length)
+					: undefined;
+				const bits = [`session${subCount > 0 ? ` · ${subCount} ${subCount === 1 ? "agent" : "agents"}` : ""}`];
+				if (model) bits.push(`model ${model}`);
+				parts.push(theme.fg("muted", bits.join(theme.sep.dot)));
+			} else {
+				parts.push(theme.fg("muted", "background subagent"));
+			}
+		} else {
+			parts.push(theme.fg("dim", replaceTabs(ref.displayName)));
+			// Parentage is conveyed by the tree connectors, so the kind stands alone.
+			parts.push(theme.fg("dim", ref.kind));
+		}
 		// Surface the cwd only when it diverges from the parent's (CWD-aware spawns).
 		const parentCwd = this.#registry.get(ref.parentId ?? MAIN_AGENT_ID)?.cwd;
 		if (ref.cwd && ref.cwd !== parentCwd) {
@@ -520,16 +765,86 @@ export class AgentHubOverlayComponent extends Container {
 		if (unread > 0) {
 			parts.push(theme.fg("warning", `⧉ ${unread}`));
 		}
+		if (this.#kanbanSyncMode) {
+			const syncStatus = this.#kanbanSyncStatusByAgent.get(ref.id) ?? "not synced";
+			const colorName: ThemeColor = syncStatus.startsWith("✓")
+				? "success"
+				: syncStatus.startsWith("!")
+					? "error"
+					: "muted";
+			parts.push(theme.fg(colorName, syncStatus));
+		}
+
 		parts.push(theme.fg("dim", formatAge(Math.max(1, Math.round((Date.now() - ref.lastActivity) / 1000)))));
 		const rawLine = ` ${cursor} ${theme.fg("dim", row.prefix)}${parts.join(theme.sep.dot)}`;
 		return truncateToWidth(rawLine.replace(/[\r\n]+/g, " "), Math.max(1, width - 1));
+	}
+
+	#handleKanbanSyncInput(keyData: string): void {
+		if (keyData === "q") {
+			this.#onDone();
+			return;
+		}
+		if (matchesKey(keyData, "escape")) {
+			this.#kanbanSyncMode = false;
+			this.#notice = undefined;
+			this.#requestRender();
+			return;
+		}
+		if (keyData === "j" || matchesSelectDown(keyData)) {
+			if (this.#rows.length > 0) this.#selectedRow = Math.min(this.#selectedRow + 1, this.#rows.length - 1);
+			this.#requestRender();
+			return;
+		}
+		if (keyData === "k" || matchesSelectUp(keyData)) {
+			if (this.#rows.length > 0) this.#selectedRow = Math.max(this.#selectedRow - 1, 0);
+			this.#requestRender();
+			return;
+		}
+		if (matchesKey(keyData, "enter") || keyData === "\r" || keyData === "\n") {
+			this.#syncSelectedAgentToKanban();
+			return;
+		}
+		if (keyData === "a") {
+			this.#syncAllAgentsToKanban();
+			return;
+		}
 	}
 
 	#clearPendingRemove(): void {
 		this.#pendingRemove = undefined;
 	}
 
+	#toggleLane(id: string): void {
+		this.#clearPendingRemove();
+		this.#notice = undefined;
+		if (this.#expandedLanes.has(id)) this.#expandedLanes.delete(id);
+		else this.#expandedLanes.add(id);
+		this.#refreshRows();
+		this.#requestRender();
+	}
+
 	#handleTableInput(keyData: string): void {
+		// Filter mode takes priority when active
+		if (this.#filterInput !== undefined) {
+			this.#handleFilterInput(keyData);
+			return;
+		}
+		// Rename mode takes priority when active
+		if (this.#renameInput) {
+			this.#handleRenameInput(keyData);
+			return;
+		}
+		if (this.#kanbanSyncMode) {
+			this.#handleKanbanSyncInput(keyData);
+			return;
+		}
+		// q or Esc closes the hub
+		if (keyData === "q") {
+			this.#clearPendingRemove();
+			this.#onDone();
+			return;
+		}
 		if (matchesKey(keyData, "escape")) {
 			this.#clearPendingRemove();
 			this.#onDone();
@@ -547,7 +862,8 @@ export class AgentHubOverlayComponent extends Container {
 			}
 			return;
 		}
-		if (matchesKey(keyData, "ctrl+x")) {
+		// x or ctrl+x triggers remove (double-tap confirmation)
+		if (keyData === "x" || matchesKey(keyData, "ctrl+x")) {
 			this.#handleRemoveTap();
 			return;
 		}
@@ -574,8 +890,49 @@ export class AgentHubOverlayComponent extends Container {
 			if (selected) this.#activateAgent(selected);
 			return;
 		}
-		if (keyData === "r") {
+		// Space expands/collapses the selected background session lane to reveal its subagents.
+		// Space expands/collapses the selected session lane to reveal its subagents.
+		if (keyData === " ") {
+			const selected = this.#selectedRef();
+			if (selected && isLane(selected)) this.#toggleLane(selected.id);
+			return;
+		}
+		if (keyData === "c") {
+			const selected = this.#selectedRef();
+			if (selected?.id === MAIN_AGENT_ID) {
+				this.#onDone();
+			} else if (selected?.kind === "background") {
+				this.#notice = `Press Enter to resume background session for "${selected.displayName}".`;
+				this.#requestRender();
+			} else if (selected) {
+				this.openChat(selected.id);
+			}
+			return;
+		}
+		// R (shift-r) revives parked agents
+		if (keyData === "R") {
 			this.#reviveSelected();
+			return;
+		}
+		// r (lowercase) starts rename mode for the selected agent
+		if (keyData === "r") {
+			this.#startRename();
+			return;
+		}
+		// / starts filter mode
+		if (keyData === "/") {
+			this.#filterInput = "";
+			this.#requestRender();
+			return;
+		}
+		if (keyData === "K") {
+			if (!this.#kanbanSync) {
+				this.#notice = "Kanban sync is unavailable in this session.";
+			} else {
+				this.#kanbanSyncMode = true;
+				this.#notice = "Kanban sync mode: Enter syncs selected, a syncs all.";
+			}
+			this.#requestRender();
 			return;
 		}
 		// Clear any pending remove confirmation on other keys
@@ -589,19 +946,49 @@ export class AgentHubOverlayComponent extends Container {
 	 * exact parity by construction. Collab guests (no local sessions) keep the
 	 * in-hub chat view.
 	 */
-	#activateAgent(ref: AgentRef): void {
+	#activateAgent(ref: HubAgentRef): void {
 		this.#clearPendingRemove();
 		this.#notice = undefined;
+		if (ref.id === MAIN_AGENT_ID) {
+			this.#onDone();
+			return;
+		}
+		if (ref.kind === "background") {
+			const sessionPath =
+				this.#backgroundSessionPaths.get(ref.id) ??
+				(ref.parentId ? this.#backgroundSessionPaths.get(ref.parentId) : undefined) ??
+				ref.sessionFile;
+			const resumeSession = this.#resumeSession;
+			if (!sessionPath || !resumeSession) {
+				this.#notice = `Background session "${ref.displayName}" cannot be resumed here.`;
+				this.#requestRender();
+				return;
+			}
+			void (async () => {
+				try {
+					await resumeSession(sessionPath);
+					this.#onDone();
+				} catch (error) {
+					this.#notice = error instanceof Error ? error.message : String(error);
+					this.#requestRender();
+				}
+			})();
+			return;
+		}
 		const focusAgent = this.#focusAgent;
-		// Advisor refs are read-only transcripts with no live/ revivable session;
+		// Advisor refs are read-only transcripts with no live/revivable session;
 		// open the in-hub chat view (file-backed) instead of trying to focus one.
 		if (ref.kind === "advisor" || this.#remote || !focusAgent) {
 			this.openChat(ref.id);
 			return;
 		}
+		// If the agent is parked, revive it first, then focus
+		if (ref.status === "parked") {
+			this.#reviveSelected();
+		}
 		void (async () => {
 			try {
-				await focusAgent(ref.id); // ensureLive inside revives parked agents; no parking, no session files
+				await focusAgent(ref.id);
 				this.#onDone();
 			} catch (error) {
 				this.#notice = error instanceof Error ? error.message : String(error);
@@ -614,6 +1001,13 @@ export class AgentHubOverlayComponent extends Container {
 		this.#clearPendingRemove();
 		const ref = this.#selectedRef();
 		if (!ref) return;
+		if (ref.id === MAIN_AGENT_ID) {
+			this.#notice = "The current session is already active.";
+			this.#requestRender();
+			return;
+		}
+		if (ref.kind === "background") {
+		}
 		if (ref.kind === "advisor") {
 			this.#notice = `"${ref.id}" is a read-only advisor transcript — nothing to revive.`;
 			this.#requestRender();
@@ -640,6 +1034,154 @@ export class AgentHubOverlayComponent extends Container {
 		this.#requestRender();
 	}
 
+	#startRename(): void {
+		const ref = this.#selectedRef();
+		if (!ref) return;
+		if (ref.id === MAIN_AGENT_ID) {
+			this.#notice = "The current session can be renamed with /background <name>.";
+			this.#requestRender();
+			return;
+		}
+		if (ref.kind === "background") {
+		}
+		this.#renameInput = { id: ref.id, buffer: ref.displayName };
+		this.#notice = undefined;
+		this.#requestRender();
+	}
+
+	#handleRenameInput(keyData: string): void {
+		if (!this.#renameInput) return;
+
+		if (matchesKey(keyData, "escape")) {
+			this.#renameInput = undefined;
+			this.#requestRender();
+			return;
+		}
+
+		if (matchesKey(keyData, "enter")) {
+			const newName = this.#renameInput.buffer.trim();
+			if (newName) {
+				this.#registry.setDisplayName(this.#renameInput.id, newName);
+			}
+			this.#renameInput = undefined;
+			this.#requestRender();
+			return;
+		}
+
+		if (matchesKey(keyData, "backspace")) {
+			if (this.#renameInput.buffer.length > 0) {
+				this.#renameInput.buffer = this.#renameInput.buffer.slice(0, -1);
+			}
+			this.#requestRender();
+			return;
+		}
+
+		// Regular character input
+		if (keyData.length === 1 && keyData.charCodeAt(0) >= 32) {
+			this.#renameInput.buffer += keyData;
+			this.#requestRender();
+		}
+	}
+
+	#handleFilterInput(keyData: string): void {
+		if (this.#filterInput === undefined) return;
+
+		if (matchesKey(keyData, "escape")) {
+			this.#filterInput = undefined;
+			this.#refreshRows();
+			this.#requestRender();
+			return;
+		}
+
+		if (matchesKey(keyData, "enter")) {
+			this.#filterInput = undefined;
+			this.#refreshRows();
+			// Activate the selected agent (respecting adaptive hints)
+			const selected = this.#selectedRef();
+			if (selected) this.#activateAgent(selected);
+			return;
+		}
+
+		if (matchesKey(keyData, "backspace")) {
+			if (this.#filterInput.length > 0) {
+				this.#filterInput = this.#filterInput.slice(0, -1);
+				this.#refreshRows();
+				this.#requestRender();
+			}
+			return;
+		}
+
+		// Regular character input
+		if (keyData.length === 1 && keyData.charCodeAt(0) >= 32) {
+			this.#filterInput += keyData;
+			this.#refreshRows();
+			this.#requestRender();
+		}
+	}
+
+	#syncSelectedAgentToKanban(): void {
+		const ref = this.#selectedRef();
+		if (!ref) return;
+		if (ref.id === MAIN_AGENT_ID) {
+			this.#notice = "The current session cannot be synced to Kanban.";
+			this.#requestRender();
+			return;
+		}
+		if (!isRegistryAgentRef(ref)) {
+			this.#notice = `Background sessions are resumed from the hub, not synced to Kanban.`;
+			this.#requestRender();
+			return;
+		}
+		if (!this.#kanbanSync) {
+			this.#notice = "Kanban sync is unavailable in this session.";
+			this.#requestRender();
+			return;
+		}
+		this.#kanbanSyncStatusByAgent.set(ref.id, "syncing…");
+		this.#requestRender();
+		void this.#kanbanSync
+			.syncAgent(ref)
+			.then(result => this.#recordKanbanSyncResult(result))
+			.catch((error: unknown) => {
+				this.#kanbanSyncStatusByAgent.set(ref.id, `! ${error instanceof Error ? error.message : String(error)}`);
+				this.#requestRender();
+			});
+	}
+
+	#syncAllAgentsToKanban(): void {
+		if (!this.#kanbanSync) {
+			this.#notice = "Kanban sync is unavailable in this session.";
+			this.#requestRender();
+			return;
+		}
+		const agents = this.#rows.map(row => row.ref).filter(isRegistryAgentRef);
+		if (agents.length === 0) {
+			this.#notice = "No live or parked subagents to sync.";
+			this.#requestRender();
+			return;
+		}
+		for (const agent of agents) {
+			this.#kanbanSyncStatusByAgent.set(agent.id, "syncing…");
+		}
+		this.#requestRender();
+		void this.#kanbanSync
+			.syncAgents(agents)
+			.then(results => {
+				for (const result of results) this.#recordKanbanSyncResult(result);
+			})
+			.catch((error: unknown) => {
+				const message = `! ${error instanceof Error ? error.message : String(error)}`;
+				for (const agent of agents) this.#kanbanSyncStatusByAgent.set(agent.id, message);
+				this.#requestRender();
+			});
+	}
+
+	#recordKanbanSyncResult(result: AgentHubKanbanSyncResult): void {
+		const action = result.created ? "created" : result.updated ? "updated" : "synced";
+		this.#kanbanSyncStatusByAgent.set(result.agentId, `✓ ${action}${result.taskId ? ` ${result.taskId}` : ""}`);
+		this.#requestRender();
+	}
+
 	#handleRemoveTap(): void {
 		const ref = this.#selectedRef();
 		if (!ref) {
@@ -655,21 +1197,29 @@ export class AgentHubOverlayComponent extends Container {
 			this.#removeAgent(ref);
 		} else {
 			this.#pendingRemove = { id: ref.id, at: now };
-			if (ref.kind === "advisor") {
+			if (ref.id === MAIN_AGENT_ID) {
+				this.#notice = "The current session cannot be removed.";
+				this.#clearPendingRemove();
+			} else if (ref.kind === "background") {
+				this.#notice = `Background sessions stay on disk. Resume "${ref.displayName}" to archive or rename it.`;
+				this.#clearPendingRemove();
+			} else if (ref.kind === "advisor") {
 				this.#notice = `"${ref.id}" is a read-only advisor transcript — cannot be removed.`;
 				this.#clearPendingRemove();
 			} else {
-				this.#notice = `Press Ctrl+X again to remove agent "${ref.id}"`;
+				this.#notice = `Press x again (or Ctrl+X) to remove agent "${ref.id}"`;
 			}
 		}
 		this.#requestRender();
 	}
 
-	#removeAgent(ref: AgentRef): void {
-		if (ref.kind === "advisor") {
-			this.#notice = `"${ref.id}" is a read-only advisor transcript — cannot be removed.`;
+	#removeAgent(ref: HubAgentRef): void {
+		if (ref.id === MAIN_AGENT_ID) {
+			this.#notice = "The current session cannot be removed.";
 			this.#requestRender();
 			return;
+		}
+		if (ref.kind === "background") {
 		}
 
 		if (this.#remote) {
