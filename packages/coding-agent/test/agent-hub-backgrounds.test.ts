@@ -104,9 +104,24 @@ describe("Agent hub background lanes", () => {
 				const expanded = Bun.stripANSI(hub.render(120).join("\n"));
 				expect(expanded).toContain("Sub-1");
 
-				// Enter on the lane resumes that background session (await the real call).
-				hub.handleInput("\r");
-				expect(await resumed.promise).toBe(sessionFile);
+				// Press x once to warn
+				hub.handleInput("x");
+				const warned = Bun.stripANSI(hub.render(120).join("\n"));
+				expect(warned).toContain('Press x again (or Ctrl+X) to remove background session "api-worker"');
+
+				// Press x again to confirm removal (archives on disk and deletes from UI)
+				hub.handleInput("x");
+				const postRemove = await renderUntil(hub, "Removed background session", 1000);
+				expect(postRemove).toContain('Removed background session "api-worker"');
+
+				// Clear the notice (e.g. by moving the cursor) and verify the lane is gone
+				hub.handleInput("k");
+				const finalRender = Bun.stripANSI(hub.render(120).join("\n"));
+				expect(finalRender).not.toContain(LANE_NAME);
+
+				// Verify session file on disk contains the archived status entry
+				const fileContent = await fs.readFile(sessionFile, "utf-8");
+				expect(fileContent).toContain('"status":"archived"');
 			} finally {
 				hub.dispose();
 			}

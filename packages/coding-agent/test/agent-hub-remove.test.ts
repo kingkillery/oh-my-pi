@@ -46,13 +46,13 @@ describe("Agent hub removal confirmation", () => {
 		// Current session lane is row 0. Move selection down to subagent A (row 1).
 		hub.handleInput("j");
 		hub.handleInput("\x18");
-		expect(Bun.stripANSI(hub.render(120).join("\n"))).toContain('Press x again (or Ctrl+X) to remove agent "A"');
+		expect(Bun.stripANSI(hub.render(120).join("\n"))).toContain('Press x again (or Ctrl+X) to remove agent "Alpha"');
 
 		// Move selection down to subagent B (row 2).
 		hub.handleInput("j");
 		hub.handleInput("\x18");
 		expect(release).not.toHaveBeenCalled();
-		expect(Bun.stripANSI(hub.render(120).join("\n"))).toContain('Press x again (or Ctrl+X) to remove agent "B"');
+		expect(Bun.stripANSI(hub.render(120).join("\n"))).toContain('Press x again (or Ctrl+X) to remove agent "Beta"');
 
 		hub.handleInput("\x18");
 		await released.promise;

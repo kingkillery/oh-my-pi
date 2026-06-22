@@ -1200,14 +1200,15 @@ export class AgentHubOverlayComponent extends Container {
 			if (ref.id === MAIN_AGENT_ID) {
 				this.#notice = "The current session cannot be removed.";
 				this.#clearPendingRemove();
-			} else if (ref.kind === "background") {
-				this.#notice = `Background sessions stay on disk. Resume "${ref.displayName}" to archive or rename it.`;
+			} else if (ref.kind === "background" && !isBackgroundLane(ref)) {
+				this.#notice = `"${ref.id}" is a read-only background subagent — cannot be removed.`;
 				this.#clearPendingRemove();
 			} else if (ref.kind === "advisor") {
 				this.#notice = `"${ref.id}" is a read-only advisor transcript — cannot be removed.`;
 				this.#clearPendingRemove();
 			} else {
-				this.#notice = `Press x again (or Ctrl+X) to remove agent "${ref.id}"`;
+				const label = ref.kind === "background" ? "background session" : "agent";
+				this.#notice = `Press x again (or Ctrl+X) to remove ${label} "${ref.displayName ?? ref.id}"`;
 			}
 		}
 		this.#requestRender();
@@ -1220,6 +1221,31 @@ export class AgentHubOverlayComponent extends Container {
 			return;
 		}
 		if (ref.kind === "background") {
+			if (!isBackgroundLane(ref)) {
+				this.#notice = `"${ref.id}" is a read-only background subagent — cannot be removed.`;
+				this.#requestRender();
+				return;
+			}
+			const sessionPath = this.#backgroundSessionPaths.get(ref.id) ?? ref.sessionFile;
+			if (!sessionPath) {
+				this.#notice = `Could not resolve path for background session "${ref.displayName}".`;
+				this.#requestRender();
+				return;
+			}
+			void (async () => {
+				try {
+					const sm = await SessionManager.open(sessionPath, this.#sessionDir ?? "");
+					sm.archiveBackgroundInstance();
+					await sm.flush();
+					this.#backgroundRefs = this.#backgroundRefs.filter(r => r.id !== ref.id);
+					this.#notice = `Removed background session "${ref.displayName}"`;
+				} catch (error) {
+					this.#notice = `Failed to remove session: ${error instanceof Error ? error.message : String(error)}`;
+				}
+				this.#refreshRows();
+				this.#requestRender();
+			})();
+			return;
 		}
 
 		if (this.#remote) {

@@ -1208,6 +1208,15 @@ export class SessionManager {
 				role: entry.role,
 			};
 		}
+		const headerVal = this.#header.backgroundInstance;
+		if (headerVal && headerVal.status === "active") {
+			return {
+				name: headerVal.name,
+				status: headerVal.status,
+				model: headerVal.model,
+				role: headerVal.role,
+			};
+		}
 		return undefined;
 	}
 
