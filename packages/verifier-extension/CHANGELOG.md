@@ -7,6 +7,8 @@
 - Added the LLM-as-verifier extension package with the `llm_as_verifier` tool and smoke-test commands.
 - Added `groundTruthNote` tool parameter.
 - Added regression tests in `src/__tests__/verifier.test.ts`.
+- Added `subagent_orchestrator_plan` for deterministic Oh My Pi route planning.
+- Reworked the `pk-subagent-orchestrator` skill around OMP-native task batching, recursion caps, and verifier tiers.
 
 ### Fixed
 

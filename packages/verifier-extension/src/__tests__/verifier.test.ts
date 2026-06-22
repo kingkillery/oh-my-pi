@@ -9,6 +9,7 @@ import {
 	extractTaggedScore,
 	extractTextSource,
 	isVerifierRequestParams,
+	planSubagentOrchestration,
 	readEvidenceBlocks,
 	truncate,
 	weightedMean,
@@ -66,6 +67,67 @@ describe("chooseWinner", () => {
 
 	it("calls a tie when scores are within the threshold", () => {
 		expect(chooseWinner(0.5, 0.51, 0.05)).toBe("tie");
+	});
+});
+
+describe("planSubagentOrchestration", () => {
+	it("answers directly for simple low-risk requests without a specialist match", () => {
+		const plan = planSubagentOrchestration({
+			request: "format this sentence",
+			complexity: "single-step",
+			risk: "low",
+			evidenceNeed: "current-context",
+			decomposability: "not-decomposable",
+			dataSensitivity: "public",
+			specialists: [],
+		});
+
+		expect(plan.routing).toBe("direct");
+		expect(plan.mode).toBe("fast");
+		expect(plan.verification).toBe("V0");
+		expect(plan.subagents).toEqual([]);
+	});
+
+	it("routes independent multi-specialist work as a parallel deep plan", () => {
+		const plan = planSubagentOrchestration({
+			request: "review auth code for security and reliability issues",
+			complexity: "multi-step",
+			risk: "high",
+			evidenceNeed: "multi-source",
+			decomposability: "independent",
+			dataSensitivity: "confidential",
+			specialists: [
+				{ name: "SecurityReviewer", scope: "auth security vulnerabilities", costTier: "med" },
+				{ name: "ReliabilityReviewer", scope: "reliability retries timeouts", costTier: "low" },
+				{ name: "Verifier", scope: "independent verification", costTier: "high", role: "verifier" },
+			],
+		});
+
+		expect(plan.routing).toBe("parallel");
+		expect(plan.mode).toBe("deep");
+		expect(plan.verification).toBe("V3");
+		expect(plan.subagents).toEqual(["SecurityReviewer", "ReliabilityReviewer"]);
+		expect(plan.verifier).toBe("Verifier");
+		expect(plan.hiddenRoutePlan).toContain("Use this plan privately");
+	});
+
+	it("uses recursive routing only when explicitly allowed for open-ended decomposable work", () => {
+		const plan = planSubagentOrchestration({
+			request: "build a product strategy using market research and architecture review",
+			complexity: "open-ended",
+			risk: "med",
+			evidenceNeed: "multi-source",
+			decomposability: "sequential",
+			recursiveAllowed: true,
+			specialists: [
+				{ name: "Researcher", scope: "market research", costTier: "low" },
+				{ name: "Architect", scope: "architecture review", costTier: "med" },
+			],
+		});
+
+		expect(plan.routing).toBe("recursive");
+		expect(plan.maxDepth).toBe(2);
+		expect(plan.childCallLimit).toBe(12);
 	});
 });
 

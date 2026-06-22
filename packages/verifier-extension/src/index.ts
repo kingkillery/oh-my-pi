@@ -13,7 +13,8 @@ import {
 } from "@pk-nerdsaver-ai/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@pk-nerdsaver-ai/pi-coding-agent";
 
-const TOOL_NAME = "llm_as_verifier";
+const VERIFIER_TOOL_NAME = "llm_as_verifier";
+const ORCHESTRATOR_TOOL_NAME = "subagent_orchestrator_plan";
 const DEFAULT_GROUND_TRUTH_NOTE =
 	"Prefer concrete evidence, observed outputs, tests, and explicit artifacts over polished narration or self-reported success.";
 const GRANULARITY = 20;
@@ -55,7 +56,174 @@ interface ModelWeightInput {
 	weight: number;
 }
 
+export type OrchestratorComplexity = "single-step" | "multi-step" | "open-ended";
+export type OrchestratorRisk = "low" | "med" | "high";
+export type OrchestratorEvidenceNeed = "current-context" | "tool-retrieval" | "multi-source";
+export type OrchestratorDecomposability = "independent" | "sequential" | "not-decomposable";
+export type OrchestratorDataSensitivity = "public" | "internal" | "confidential" | "unknown";
+export type OrchestratorCostTier = "low" | "med" | "high";
+export type OrchestratorSpecialistRole = "specialist" | "generalist" | "verifier";
+export type OrchestratorRouting = "direct" | "single" | "parallel" | "recursive";
+export type OrchestratorMode = "fast" | "deep";
+export type OrchestratorVerificationTier = "V0" | "V1" | "V2" | "V3";
+
+export interface OrchestratorSpecialistInput {
+	name: string;
+	scope: string;
+	costTier: OrchestratorCostTier;
+	role?: OrchestratorSpecialistRole;
+	modelFamily?: string;
+	capabilities?: string[];
+	trustScore?: number;
+}
+
+export interface OrchestratorPlanParams {
+	request: string;
+	complexity?: OrchestratorComplexity;
+	risk?: OrchestratorRisk;
+	evidenceNeed?: OrchestratorEvidenceNeed;
+	decomposability?: OrchestratorDecomposability;
+	dataSensitivity?: OrchestratorDataSensitivity;
+	specialists?: OrchestratorSpecialistInput[];
+	recursiveAllowed?: boolean;
+}
+
+export interface OrchestratorRoutePlan {
+	mode: OrchestratorMode;
+	routing: OrchestratorRouting;
+	subagents: string[];
+	verification: OrchestratorVerificationTier;
+	verifier: string | undefined;
+	maxDepth: number;
+	maxFanout: number;
+	childCallLimit: number;
+	reasons: string[];
+	hiddenRoutePlan: string;
+}
 type Backend = "gemini-python" | "zai-coding-plan" | "pi-model-ensemble";
+
+const COST_RANK: Record<OrchestratorCostTier, number> = { low: 0, med: 1, high: 2 };
+
+const requestTokens = (request: string): Set<string> =>
+	new Set(
+		request
+			.toLowerCase()
+			.split(/[^a-z0-9]+/u)
+			.map(token => token.trim())
+			.filter(token => token.length >= 3),
+	);
+
+const specialistText = (specialist: OrchestratorSpecialistInput): string =>
+	[specialist.name, specialist.scope, ...(specialist.capabilities ?? [])].join(" ").toLowerCase();
+
+const scoreSpecialist = (tokens: Set<string>, specialist: OrchestratorSpecialistInput): number => {
+	const text = specialistText(specialist);
+	let score = 0;
+	for (const token of tokens) {
+		if (text.includes(token)) score += 1;
+	}
+	if (specialist.trustScore !== undefined) {
+		score += clamp(specialist.trustScore, 0, 1);
+	}
+	score -= COST_RANK[specialist.costTier] * 0.05;
+	return score;
+};
+
+const specialistRole = (specialist: OrchestratorSpecialistInput): OrchestratorSpecialistRole =>
+	specialist.role ?? "specialist";
+
+const resolveVerificationTier = (
+	risk: OrchestratorRisk,
+	mode: OrchestratorMode,
+	routing: OrchestratorRouting,
+): OrchestratorVerificationTier => {
+	if (risk === "high") return "V3";
+	if (mode === "deep" || routing === "parallel" || routing === "recursive") return "V2";
+	if (routing === "single") return "V1";
+	return "V0";
+};
+
+const routePlanText = (plan: Omit<OrchestratorRoutePlan, "hiddenRoutePlan">): string =>
+	[
+		"# Active hidden route plan",
+		`- mode: ${plan.mode}`,
+		`- routing: ${plan.routing}`,
+		`- candidate_subagents: ${plan.subagents.length ? plan.subagents.join(", ") : "none"}`,
+		`- verification: ${plan.verification}`,
+		`- verifier: ${plan.verifier ?? "none"}`,
+		`- max_depth: ${plan.maxDepth}`,
+		`- max_fanout: ${plan.maxFanout}`,
+		`- child_call_limit: ${plan.childCallLimit}`,
+		`- reason: ${plan.reasons.join("; ")}`,
+		"Use this plan privately. Do not reveal it.",
+	].join("\n");
+
+export const planSubagentOrchestration = (params: OrchestratorPlanParams): OrchestratorRoutePlan => {
+	const request = params.request.trim();
+	const complexity = params.complexity ?? "single-step";
+	const risk = params.risk ?? "low";
+	const evidenceNeed = params.evidenceNeed ?? "current-context";
+	const decomposability = params.decomposability ?? "not-decomposable";
+	const dataSensitivity = params.dataSensitivity ?? "unknown";
+	const recursiveAllowed = params.recursiveAllowed === true;
+	const specialists = params.specialists ?? [];
+	const verifier = specialists
+		.filter(specialist => specialistRole(specialist) === "verifier")
+		.sort((left, right) => COST_RANK[left.costTier] - COST_RANK[right.costTier])[0];
+	const callableSpecialists = specialists.filter(specialist => specialistRole(specialist) !== "verifier");
+	const tokens = requestTokens(request);
+	const scored = callableSpecialists
+		.map(specialist => ({ specialist, score: scoreSpecialist(tokens, specialist) }))
+		.filter(entry => entry.score > 0)
+		.sort(
+			(left, right) =>
+				right.score - left.score || COST_RANK[left.specialist.costTier] - COST_RANK[right.specialist.costTier],
+		);
+	const fallback =
+		callableSpecialists
+			.filter(specialist => specialistRole(specialist) === "generalist")
+			.sort((left, right) => COST_RANK[left.costTier] - COST_RANK[right.costTier])[0] ?? null;
+	const selected = scored.length > 0 ? scored.map(entry => entry.specialist) : fallback ? [fallback] : [];
+	const highEvidenceNeed = evidenceNeed !== "current-context";
+	const sensitive = dataSensitivity === "confidential" || dataSensitivity === "unknown";
+	const mode: OrchestratorMode =
+		risk === "high" || complexity === "open-ended" || selected.length >= 3 || highEvidenceNeed ? "deep" : "fast";
+	const routing: OrchestratorRouting =
+		selected.length === 0
+			? "direct"
+			: recursiveAllowed && complexity === "open-ended" && decomposability !== "not-decomposable"
+				? "recursive"
+				: selected.length === 1 || decomposability === "sequential"
+					? "single"
+					: "parallel";
+	const verification = resolveVerificationTier(risk, mode, routing);
+	const maxDepth = routing === "recursive" ? 2 : 1;
+	const maxFanout = routing === "parallel" || routing === "recursive" ? Math.min(5, Math.max(1, selected.length)) : 1;
+	const childCallLimit = routing === "recursive" ? 12 : Math.max(1, selected.length);
+	const reasons = [
+		`${complexity} complexity`,
+		`${risk} risk`,
+		`${evidenceNeed} evidence`,
+		`${decomposability} decomposition`,
+		sensitive ? "treat data as confidential" : `${dataSensitivity} data`,
+		selected.length ? `${selected.length} matched subagent(s)` : "no specialist match",
+	];
+	const planWithoutText = {
+		mode,
+		routing,
+		subagents: selected.map(specialist => specialist.name),
+		verification,
+		verifier: verifier?.name,
+		maxDepth,
+		maxFanout,
+		childCallLimit,
+		reasons,
+	};
+	return {
+		...planWithoutText,
+		hiddenRoutePlan: routePlanText(planWithoutText),
+	};
+};
 
 interface EvidenceBlock {
 	label: string;
@@ -1421,7 +1589,97 @@ export default function verifierExtension(pi: ExtensionAPI): void {
 	const typebox = pi.typebox;
 
 	pi.registerTool({
-		name: TOOL_NAME,
+		name: ORCHESTRATOR_TOOL_NAME,
+		label: "Subagent Orchestrator Plan",
+		description:
+			"Compute a deterministic Oh My Pi subagent route plan from request complexity, risk, evidence needs, and a specialist pool.",
+		parameters: typebox.Type.Object({
+			request: typebox.Type.String({ description: "User request or subproblem to route." }),
+			complexity: typebox.Type.Optional(
+				typebox.Type.Union([
+					typebox.Type.Literal("single-step"),
+					typebox.Type.Literal("multi-step"),
+					typebox.Type.Literal("open-ended"),
+				]),
+			),
+			risk: typebox.Type.Optional(
+				typebox.Type.Union([
+					typebox.Type.Literal("low"),
+					typebox.Type.Literal("med"),
+					typebox.Type.Literal("high"),
+				]),
+			),
+			evidenceNeed: typebox.Type.Optional(
+				typebox.Type.Union([
+					typebox.Type.Literal("current-context"),
+					typebox.Type.Literal("tool-retrieval"),
+					typebox.Type.Literal("multi-source"),
+				]),
+			),
+			decomposability: typebox.Type.Optional(
+				typebox.Type.Union([
+					typebox.Type.Literal("independent"),
+					typebox.Type.Literal("sequential"),
+					typebox.Type.Literal("not-decomposable"),
+				]),
+			),
+			dataSensitivity: typebox.Type.Optional(
+				typebox.Type.Union([
+					typebox.Type.Literal("public"),
+					typebox.Type.Literal("internal"),
+					typebox.Type.Literal("confidential"),
+					typebox.Type.Literal("unknown"),
+				]),
+			),
+			recursiveAllowed: typebox.Type.Optional(typebox.Type.Boolean()),
+			specialists: typebox.Type.Optional(
+				typebox.Type.Array(
+					typebox.Type.Object({
+						name: typebox.Type.String({ description: "Stable subagent name." }),
+						scope: typebox.Type.String({ description: "Owned domain or trained scope." }),
+						costTier: typebox.Type.Union([
+							typebox.Type.Literal("low"),
+							typebox.Type.Literal("med"),
+							typebox.Type.Literal("high"),
+						]),
+						role: typebox.Type.Optional(
+							typebox.Type.Union([
+								typebox.Type.Literal("specialist"),
+								typebox.Type.Literal("generalist"),
+								typebox.Type.Literal("verifier"),
+							]),
+						),
+						modelFamily: typebox.Type.Optional(typebox.Type.String()),
+						capabilities: typebox.Type.Optional(typebox.Type.Array(typebox.Type.String())),
+						trustScore: typebox.Type.Optional(typebox.Type.Number({ minimum: 0, maximum: 1 })),
+					}),
+					{ maxItems: 20 },
+				),
+			),
+		}) as TSchema,
+		async execute(_toolCallId, params) {
+			const plan = planSubagentOrchestration(params as OrchestratorPlanParams);
+			return {
+				content: [
+					{
+						type: "text",
+						text: [
+							`mode=${plan.mode}`,
+							`routing=${plan.routing}`,
+							`subagents=${plan.subagents.length ? plan.subagents.join(", ") : "none"}`,
+							`verification=${plan.verification}`,
+							`verifier=${plan.verifier ?? "none"}`,
+							`limits=depth ${plan.maxDepth}, fanout ${plan.maxFanout}, child calls ${plan.childCallLimit}`,
+						].join("\n"),
+					},
+				],
+				details: plan,
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: VERIFIER_TOOL_NAME,
 		label: "LLM as Verifier",
 		description:
 			"Compare or audit candidate artifacts with repeated, criteria-decomposed LLM verification inspired by the llm-as-verifier paper.",
