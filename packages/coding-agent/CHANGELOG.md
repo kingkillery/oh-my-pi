@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [16.1.10] - 2026-06-22
+
 ### Added
 
 - Added explicit `/loop --spiral` and `/loop --wall-climb` activation flags for one-off verifier-reflection loop sessions without changing the saved `loop.mode` setting.

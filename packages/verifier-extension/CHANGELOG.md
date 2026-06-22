@@ -1,6 +1,6 @@
 # @pk-nerdsaver-ai/verifier-extension
 
-## [Unreleased]
+## [16.1.10] - 2026-06-22
 
 ### Added
 
