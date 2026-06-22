@@ -1,0 +1,48 @@
+{
+	"name": "@pk-nerdsaver-ai/clips-extension",
+	"version": "0.1.0",
+	"description": "Agent-native screen/voice recorder and Loom alternative",
+	"type": "module",
+	"main": "src/index.ts",
+	"types": "src/index.ts",
+	"exports": {
+		".": {
+			"import": "./src/index.ts",
+			"types": "./src/index.ts"
+		}
+	},
+	"scripts": {
+		"test": "bun test",
+		"dev": "cd worker && wrangler dev",
+		"upload": "bun run src/upload.ts",
+		"deploy": "cd worker && wrangler deploy",
+		"check": "biome check . && bun run check:types",
+		"check:types": "tsgo -p tsconfig.json --noEmit && tsgo -p worker/tsconfig.json --noEmit",
+		"lint": "biome lint .",
+		"fix": "biome check --write --unsafe .",
+		"fmt": "biome format --write ."
+	},
+	"dependencies": {
+		"@pk-nerdsaver-ai/pi-coding-agent": "workspace:*",
+		"@pk-nerdsaver-ai/pi-ai": "workspace:*",
+		"@pk-nerdsaver-ai/pi-utils": "workspace:*"
+	},
+	"omp": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"files": [
+		"src",
+		"CHANGELOG.md"
+	],
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20241022.0",
+		"@types/bun": "^1.3.14",
+		"typescript": "^6.0.3",
+		"wrangler": "^4.80.0"
+	},
+	"peerDependencies": {
+		"@pk-nerdsaver-ai/pi-coding-agent": "^13"
+	}
+}
