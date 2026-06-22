@@ -68,6 +68,9 @@ describe("Agent hub Enter activation", () => {
 			focusedIds.push(id);
 		});
 
+		// Rows: folder (0) → current session (1) → Worker (2). Select Worker.
+		hub.handleInput("j");
+		hub.handleInput("j");
 		hub.handleInput("\r");
 		await done; // activation is fire-and-forget async; onDone signals completion
 
@@ -80,6 +83,8 @@ describe("Agent hub Enter activation", () => {
 		const message = 'Agent "X" is aborted and cannot be revived';
 		const { hub, doneCalls, renderRequested } = makeHub(() => Promise.reject(new Error(message)));
 
+		hub.handleInput("j");
+		hub.handleInput("j");
 		hub.handleInput("\r");
 		await renderRequested; // the rejection path requests a render after setting the notice
 
@@ -157,7 +162,7 @@ describe("Agent hub Enter activation", () => {
 				focusResolved.resolve();
 			},
 			session: { getToolByName: () => undefined, extensionRunner: undefined },
-			sessionManager: { getCwd: () => TEST_CWD, getSessionFile: () => null },
+			sessionManager: { getCwd: () => TEST_CWD, getSessionFile: () => null, getSessionDir: () => undefined },
 			hideThinkingBlock: false,
 		};
 		const controller = new SelectorController(ctx as unknown as InteractiveModeContext);
@@ -167,6 +172,8 @@ describe("Agent hub Enter activation", () => {
 		expect(capturedHub).toBeDefined();
 		expect(focusTargets[0]).toBe(capturedHub);
 
+		capturedHub!.handleInput("j");
+		capturedHub!.handleInput("j");
 		capturedHub!.handleInput("\r");
 		await focusResolved.promise;
 		await editorFocused.promise;
@@ -206,7 +213,7 @@ describe("Agent hub double-← gating", () => {
 			collabGuest: { agentRegistry: agents, hubRemote: undefined },
 			focusAgentSession: async () => {},
 			session: { getToolByName: () => undefined, extensionRunner: undefined },
-			sessionManager: { getCwd: () => TEST_CWD, getSessionFile: () => null },
+			sessionManager: { getCwd: () => TEST_CWD, getSessionFile: () => null, getSessionDir: () => undefined },
 			hideThinkingBlock: false,
 		};
 		const controller = new SelectorController(ctx as unknown as InteractiveModeContext);

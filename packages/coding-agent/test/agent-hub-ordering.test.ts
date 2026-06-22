@@ -12,7 +12,7 @@ import { IrcBus } from "@pk-nerdsaver-ai/pi-coding-agent/irc/bus";
 import { AgentHubOverlayComponent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/agent-hub";
 import { SessionObserverRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/modes/session-observer-registry";
 import { initTheme, theme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
-import { AgentRegistry, MAIN_AGENT_ID } from "@pk-nerdsaver-ai/pi-coding-agent/registry/agent-registry";
+import { AgentRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/registry/agent-registry";
 import type { AgentSession } from "@pk-nerdsaver-ai/pi-coding-agent/session/agent-session";
 import { visibleWidth } from "@pk-nerdsaver-ai/pi-tui/utils";
 
@@ -177,9 +177,9 @@ describe("Agent hub row ordering", () => {
 		const cleanLines = hub.render(120).map(line => Bun.stripANSI(line));
 		const rowFor = (id: string) => cleanLines.find(line => line.includes(`${theme.sep.dot}${id}${theme.sep.dot}`));
 
-		// Main is the non-selectable tree root header — it carries no " · " columns,
-		// so renderedAgentIds never lists it.
-		expect(cleanLines.some(line => line.includes(MAIN_AGENT_ID))).toBe(true);
+		// The current session renders as a selectable lane (the friendly "current
+		// session" label, not the raw "Main" id) under its folder; subagents nest beneath.
+		expect(cleanLines.some(line => line.includes("current session"))).toBe(true);
 		expect(renderedAgentIds(hub)).toEqual(["Parent", "Child", "Child2", "Orphan"]);
 
 		const parentRow = rowFor("Parent");
@@ -206,6 +206,8 @@ describe("Agent hub row ordering", () => {
 
 		// Enter focuses the selected agent's session and closes the hub; the old
 		// cwd-group collapse/expand toggle is gone.
+		hub.handleInput("j");
+		hub.handleInput("j");
 		hub.handleInput("\r");
 		await new Promise(resolve => setTimeout(resolve, 0));
 		expect(focusAgent).toHaveBeenCalledWith("Parent");

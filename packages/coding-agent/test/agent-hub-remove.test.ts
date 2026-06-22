@@ -43,12 +43,14 @@ describe("Agent hub removal confirmation", () => {
 			cwd: "repo",
 		});
 
-		// Current session lane is row 0. Move selection down to subagent A (row 1).
+		// Rows: folder (0) → current session (1) → subagent A (2) → subagent B (3).
+		// Move selection down to subagent A.
+		hub.handleInput("j");
 		hub.handleInput("j");
 		hub.handleInput("\x18");
 		expect(Bun.stripANSI(hub.render(120).join("\n"))).toContain('Press x again (or Ctrl+X) to remove agent "Alpha"');
 
-		// Move selection down to subagent B (row 2).
+		// Move selection down to subagent B.
 		hub.handleInput("j");
 		hub.handleInput("\x18");
 		expect(release).not.toHaveBeenCalled();

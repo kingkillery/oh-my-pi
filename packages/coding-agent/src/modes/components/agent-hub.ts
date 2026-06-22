@@ -63,28 +63,61 @@ function rosterColor(color: string | undefined): ThemeColor | undefined {
 }
 
 /**
- * One flattened tree row: an {@link AgentRef} plus its depth (Main root = 0,
- * top-level children = 1) and the pre-built connector prefix that renders the
- * `├─`/`└─` branch and the `│`/space ancestor-continuation columns.
+ * One flattened tree row: an {@link AgentRef} plus its depth (folder root = 0,
+ * session lane = 1, subagents = 2+) and the pre-built connector prefix that
+ * renders the `├─`/`└─` branch and the `│`/space ancestor-continuation columns.
  */
 interface HubRow {
 	ref: HubAgentRef;
 	depth: number;
 	prefix: string;
 }
-type HubAgentKind = AgentRef["kind"] | "background";
-type HubAgentRef = Omit<AgentRef, "kind"> & { kind: HubAgentKind };
+type HubAgentKind = AgentRef["kind"] | "background" | "folder";
+type HubAgentRef = Omit<AgentRef, "kind"> & {
+	kind: HubAgentKind;
+	/** Folder rows only: number of session lanes grouped under this folder. */
+	laneCount?: number;
+	/** Folder rows only: whether this folder holds the active (current) session. */
+	isCurrentFolder?: boolean;
+};
 
 function isRegistryAgentRef(ref: HubAgentRef): ref is AgentRef {
-	return ref.kind !== "background" && ref.id !== MAIN_AGENT_ID;
+	return ref.kind !== "background" && ref.kind !== "folder" && ref.id !== MAIN_AGENT_ID;
 }
 
 function isBackgroundLane(ref: HubAgentRef): boolean {
 	return ref.kind === "background" && (ref.parentId ?? MAIN_AGENT_ID) === MAIN_AGENT_ID;
 }
 
+function isFolder(ref: HubAgentRef): boolean {
+	return ref.kind === "folder";
+}
+
 function isLane(ref: HubAgentRef): boolean {
 	return ref.id === MAIN_AGENT_ID || isBackgroundLane(ref);
+}
+
+/** Stable grouping key for a session's working directory (folder). Empty cwd → "" (unknown bucket). */
+function folderKey(cwd: string | undefined): string {
+	return cwd ? path.resolve(cwd) : "";
+}
+
+/** Human-facing folder label: directory basename, or "(unknown folder)" for sessions with no recorded cwd. */
+function folderDisplayName(cwd: string | undefined): string {
+	if (!cwd) return "(unknown folder)";
+	return path.basename(path.resolve(cwd)) || cwd;
+}
+
+/**
+ * One ancestor-continuation column matching a connector's width: spaces when the
+ * branch was the last sibling, else the `│` vertical plus padding. Computed per
+ * call so a live theme switch updates the glyphs.
+ */
+function treeContinuation(last: boolean): string {
+	const indent = theme.tree.branch.length + 1;
+	return last
+		? " ".repeat(indent)
+		: `${theme.tree.vertical}${" ".repeat(Math.max(1, indent - theme.tree.vertical.length))}`;
 }
 /** Scan a background session's artifact dir for its direct subagent transcripts (read-only, hub-local rows). */
 function collectBackgroundLaneSubagents(sessionFile: string, laneId: string): HubAgentRef[] {
@@ -258,6 +291,7 @@ export class AgentHubOverlayComponent extends Container {
 	#backgroundSessionPaths = new Map<string, string>();
 	#backgroundLoadGeneration = 0;
 	#expandedLanes = new Set<string>([MAIN_AGENT_ID]);
+	#collapsedFolders = new Set<string>();
 	#backgroundSubagents = new Map<string, HubAgentRef[]>();
 
 	// Table state
@@ -334,12 +368,12 @@ export class AgentHubOverlayComponent extends Container {
 	}
 
 	/**
-	 * Whether the table view has no agents to show (every registered agent except
-	 * Main, after the persisted-subagent scan in the constructor). The double-←
-	 * gesture reads this to stay inert when there is nothing to open.
+	 * Whether the hub has nothing worth opening: only the folder + current-session
+	 * scaffold, no subagents and no background sessions. The double-← gesture reads
+	 * this to stay inert when there is nothing to open.
 	 */
 	get isEmpty(): boolean {
-		return this.#rows.length === 0;
+		return this.#rows.every(row => isFolder(row.ref) || row.ref.id === MAIN_AGENT_ID);
 	}
 
 	/** Tear down every subscription and timer. Called by the overlay owner on close. */
@@ -499,7 +533,7 @@ export class AgentHubOverlayComponent extends Container {
 
 		const rows: HubRow[] = [];
 
-		// 1. Current Session Lane
+		// The current session lane is always present, even with no subagents.
 		let mainRef = this.#registry.get(MAIN_AGENT_ID) as HubAgentRef | undefined;
 		if (!mainRef) {
 			mainRef = {
@@ -513,26 +547,103 @@ export class AgentHubOverlayComponent extends Container {
 				lastActivity: Date.now(),
 			};
 		}
-		const mainLane = mainRef;
-		if (!rawQuery || matches(mainLane) || registryRefs.length > 0) {
-			rows.push({ ref: mainLane, depth: 0, prefix: "" });
-			if (this.#expandedLanes.has(MAIN_AGENT_ID)) {
-				const subTree = this.#buildTree(registryRefs);
-				rows.push(...subTree);
-			}
+
+		// Every session lane (current + background instances), tagged with its folder.
+		const currentFolderKey = folderKey(this.#cwd);
+		interface LaneEntry {
+			lane: HubAgentRef;
+			folderKey: string;
+			folderCwd: string;
+			isCurrent: boolean;
+		}
+		const laneEntries: LaneEntry[] = [];
+		const mainVisible = !rawQuery || matches(mainRef) || registryRefs.length > 0;
+		if (mainVisible) {
+			laneEntries.push({ lane: mainRef, folderKey: currentFolderKey, folderCwd: this.#cwd, isCurrent: true });
+		}
+		for (const lane of this.#backgroundRefs) {
+			laneEntries.push({ lane, folderKey: folderKey(lane.cwd), folderCwd: lane.cwd ?? "", isCurrent: false });
 		}
 
-		// 2. Background Lanes
-		const lanes = [...this.#backgroundRefs].sort((a, b) => b.lastActivity - a.lastActivity);
-		for (const lane of lanes) {
-			const laneSubs = this.#backgroundSubagents.get(lane.id) ?? [];
-			const visibleSubs = this.#expandedLanes.has(lane.id) ? (rawQuery ? laneSubs.filter(matches) : laneSubs) : [];
-			// While filtering, a lane that neither matches nor has a matching visible subagent drops out.
-			if (rawQuery && !matches(lane) && visibleSubs.length === 0) continue;
-			rows.push({ ref: lane, depth: 0, prefix: "" });
-			visibleSubs.forEach((sub, i) => {
-				const last = i === visibleSubs.length - 1;
-				rows.push({ ref: sub, depth: 1, prefix: `${last ? theme.tree.last : theme.tree.branch} ` });
+		// Group lanes by folder. Current folder first, then by most-recent activity.
+		interface FolderGroup {
+			key: string;
+			cwd: string;
+			lanes: LaneEntry[];
+			maxActivity: number;
+		}
+		const folderByKey = new Map<string, FolderGroup>();
+		for (const entry of laneEntries) {
+			let group = folderByKey.get(entry.folderKey);
+			if (!group) {
+				group = { key: entry.folderKey, cwd: entry.folderCwd, lanes: [], maxActivity: 0 };
+				folderByKey.set(entry.folderKey, group);
+			}
+			// The current session owns its folder's display cwd even if a background lane created the bucket first.
+			if (entry.isCurrent && entry.folderCwd) group.cwd = entry.folderCwd;
+			group.lanes.push(entry);
+			group.maxActivity = Math.max(group.maxActivity, entry.lane.lastActivity);
+		}
+		const folderGroups = [...folderByKey.values()].sort((a, b) => {
+			const aCurrent = a.key === currentFolderKey;
+			const bCurrent = b.key === currentFolderKey;
+			if (aCurrent !== bCurrent) return aCurrent ? -1 : 1;
+			return b.maxActivity - a.maxActivity;
+		});
+
+		// Folder → session lane → subagents. Folders default-expanded; background
+		// session lanes default-collapsed (Space reveals their subagents).
+		for (const group of folderGroups) {
+			const groupLanes = [...group.lanes].sort((a, b) => {
+				if (a.isCurrent !== b.isCurrent) return a.isCurrent ? -1 : 1;
+				return b.lane.lastActivity - a.lane.lastActivity;
+			});
+			const visibleLanes = groupLanes.filter(entry => {
+				if (!rawQuery) return true;
+				if (entry.isCurrent) return matches(entry.lane) || registryRefs.length > 0;
+				const laneSubs = this.#backgroundSubagents.get(entry.lane.id) ?? [];
+				const hasMatchingSub = this.#expandedLanes.has(entry.lane.id) && laneSubs.some(matches);
+				return matches(entry.lane) || hasMatchingSub;
+			});
+			if (rawQuery && visibleLanes.length === 0) continue;
+
+			const folderId = `folder:${group.key}`;
+			const folderRef: HubAgentRef = {
+				id: folderId,
+				displayName: folderDisplayName(group.cwd),
+				kind: "folder",
+				status: "running",
+				session: null,
+				sessionFile: null,
+				createdAt: 0,
+				lastActivity: group.maxActivity || Date.now(),
+				cwd: group.cwd,
+				laneCount: visibleLanes.length,
+				isCurrentFolder: group.key === currentFolderKey,
+			};
+			rows.push({ ref: folderRef, depth: 0, prefix: "" });
+			if (this.#collapsedFolders.has(folderId)) continue;
+
+			visibleLanes.forEach((entry, laneIdx) => {
+				const lane = entry.lane;
+				const lastLane = laneIdx === visibleLanes.length - 1;
+				rows.push({ ref: lane, depth: 1, prefix: `${lastLane ? theme.tree.last : theme.tree.branch} ` });
+				if (!this.#expandedLanes.has(lane.id)) return;
+				const basePrefix = treeContinuation(lastLane);
+				if (entry.isCurrent) {
+					rows.push(...this.#buildTree(registryRefs, basePrefix, 2));
+				} else {
+					const laneSubs = this.#backgroundSubagents.get(lane.id) ?? [];
+					const visibleSubs = rawQuery ? laneSubs.filter(matches) : laneSubs;
+					visibleSubs.forEach((sub, i) => {
+						const last = i === visibleSubs.length - 1;
+						rows.push({
+							ref: sub,
+							depth: 2,
+							prefix: `${basePrefix}${last ? theme.tree.last : theme.tree.branch} `,
+						});
+					});
+				}
 			});
 		}
 
@@ -542,13 +653,14 @@ export class AgentHubOverlayComponent extends Container {
 	}
 
 	/**
-	 * Flatten the agent forest into Main→children tree order. Every non-Main ref
-	 * is parented to its `parentId` when that agent is also present, else hoisted
-	 * directly under Main; siblings keep the frozen {@link #rowOrder}. Each row
-	 * carries its depth (top-level children = 1) and a pre-built connector prefix
-	 * (`├─`/`└─` for the branch, `│`/spaces for each ancestor column).
+	 * Flatten a session's subagent forest into tree order, rooted at Main. Every
+	 * ref is parented to its `parentId` when that agent is present, else hoisted
+	 * directly under the root; siblings keep the frozen {@link #rowOrder}. Each row
+	 * carries a connector prefix (`├─`/`└─` for the branch, `│`/spaces for ancestor
+	 * columns). `basePrefix`/`baseDepth` nest the whole forest under an outer
+	 * session lane (folder → session → subagents).
 	 */
-	#buildTree(refs: HubAgentRef[]): HubRow[] {
+	#buildTree(refs: HubAgentRef[], basePrefix = "", baseDepth = 1): HubRow[] {
 		const known = new Set(refs.map(ref => ref.id));
 		const childrenOf = new Map<string, HubAgentRef[]>();
 		for (const ref of refs) {
@@ -562,13 +674,6 @@ export class AgentHubOverlayComponent extends Container {
 		const order = this.#rowOrder;
 		const bySibling = (a: HubAgentRef, b: HubAgentRef): number =>
 			(order?.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (order?.get(b.id) ?? Number.MAX_SAFE_INTEGER);
-		// One indentation column is as wide as a connector ("├─ "); the ancestor
-		// continuation columns must match so branches line up at every depth.
-		const indent = theme.tree.branch.length + 1;
-		const continuation = (last: boolean): string =>
-			last
-				? " ".repeat(indent)
-				: `${theme.tree.vertical}${" ".repeat(Math.max(1, indent - theme.tree.vertical.length))}`;
 
 		const rows: HubRow[] = [];
 		const visited = new Set<string>();
@@ -581,10 +686,10 @@ export class AgentHubOverlayComponent extends Container {
 				visited.add(ref.id);
 				const last = i === kids.length - 1;
 				rows.push({ ref, depth, prefix: `${ancestorPrefix}${last ? theme.tree.last : theme.tree.branch} ` });
-				walk(ref.id, depth + 1, `${ancestorPrefix}${continuation(last)}`);
+				walk(ref.id, depth + 1, `${ancestorPrefix}${treeContinuation(last)}`);
 			});
 		};
-		walk(MAIN_AGENT_ID, 1, "");
+		walk(MAIN_AGENT_ID, baseDepth, basePrefix);
 
 		// Safety net: a ref whose parent chain never reaches Main (detached/cyclic)
 		// would otherwise vanish — surface it as a top-level row so it stays selectable.
@@ -593,8 +698,8 @@ export class AgentHubOverlayComponent extends Container {
 			if (visited.has(ref.id)) return;
 			visited.add(ref.id);
 			const last = i === orphans.length - 1;
-			rows.push({ ref, depth: 1, prefix: `${last ? theme.tree.last : theme.tree.branch} ` });
-			walk(ref.id, 2, continuation(last));
+			rows.push({ ref, depth: baseDepth, prefix: `${basePrefix}${last ? theme.tree.last : theme.tree.branch} ` });
+			walk(ref.id, baseDepth + 1, `${basePrefix}${treeContinuation(last)}`);
 		});
 		return rows;
 	}
@@ -675,7 +780,7 @@ export class AgentHubOverlayComponent extends Container {
 	#statusSummary(): string {
 		const counts: Record<AgentStatus, number> = { running: 0, idle: 0, parked: 0, aborted: 0 };
 		let backgroundCount = 0;
-		const subagentRows = this.#rows.filter(row => !isLane(row.ref));
+		const subagentRows = this.#rows.filter(row => !isLane(row.ref) && !isFolder(row.ref));
 		for (const row of subagentRows) {
 			counts[row.ref.status]++;
 			if (row.ref.kind === "background") backgroundCount++;
@@ -691,6 +796,10 @@ export class AgentHubOverlayComponent extends Container {
 
 	#getAdaptiveHints(ref: HubAgentRef): string {
 		const base = "j/k:select  ";
+		if (isFolder(ref)) {
+			const verb = this.#collapsedFolders.has(ref.id) ? "expand" : "collapse";
+			return `${base}Space:${verb}  /:filter  q:close`;
+		}
 		if (ref.id === MAIN_AGENT_ID) {
 			const verb = this.#expandedLanes.has(ref.id) ? "collapse" : "expand";
 			return `${base}Space:${verb}  Enter:focus  /:filter  q:close`;
@@ -721,16 +830,25 @@ export class AgentHubOverlayComponent extends Container {
 		const cursor = selected ? theme.fg("accent", theme.nav.cursor) : " ";
 		const color = rosterColor(ref.color);
 		const lane = isLane(ref);
-		const caret = lane ? `${this.#expandedLanes.has(ref.id) ? "▾" : "▸"} ` : "";
+		const folder = isFolder(ref);
+		const expanded = folder ? !this.#collapsedFolders.has(ref.id) : this.#expandedLanes.has(ref.id);
+		const caret = lane || folder ? `${expanded ? "▾" : "▸"} ` : "";
 		const label =
 			ref.id === MAIN_AGENT_ID
 				? `${caret}current session`
-				: ref.kind === "background"
+				: folder || ref.kind === "background"
 					? `${caret}${ref.displayName}`
 					: ref.id;
 		const idText = color ? theme.bold(theme.fg(color, replaceTabs(label))) : theme.bold(replaceTabs(label));
-		const parts: string[] = lane ? [idText] : [statusBadge(ref.status), idText];
-		if (ref.id === MAIN_AGENT_ID) {
+		const parts: string[] = lane || folder ? [idText] : [statusBadge(ref.status), idText];
+		if (folder) {
+			const count = ref.laneCount ?? 0;
+			const bits: string[] = [];
+			if (ref.isCurrentFolder) bits.push("current");
+			bits.push(`${count} ${count === 1 ? "session" : "sessions"}`);
+			if (ref.cwd) bits.push(shortenPath(ref.cwd));
+			parts.push(theme.fg("muted", bits.join(theme.sep.dot)));
+		} else if (ref.id === MAIN_AGENT_ID) {
 			const subCount = this.#registry.list().filter(r => r.id !== MAIN_AGENT_ID).length;
 			const bits = [subCount > 0 ? `${subCount} ${subCount === 1 ? "agent" : "agents"}` : "0 agents"];
 			parts.push(theme.fg("muted", bits.join(theme.sep.dot)));
@@ -753,7 +871,7 @@ export class AgentHubOverlayComponent extends Container {
 		}
 		// Surface the cwd only when it diverges from the parent's (CWD-aware spawns).
 		const parentCwd = this.#registry.get(ref.parentId ?? MAIN_AGENT_ID)?.cwd;
-		if (ref.cwd && ref.cwd !== parentCwd) {
+		if (!folder && ref.cwd && ref.cwd !== parentCwd) {
 			parts.push(theme.fg("dim", `cwd ${replaceTabs(shortenPath(ref.cwd))}`));
 		}
 		const observed = this.#observableFor(ref.id);
@@ -824,6 +942,15 @@ export class AgentHubOverlayComponent extends Container {
 		this.#requestRender();
 	}
 
+	#toggleFolder(id: string): void {
+		this.#clearPendingRemove();
+		this.#notice = undefined;
+		if (this.#collapsedFolders.has(id)) this.#collapsedFolders.delete(id);
+		else this.#collapsedFolders.add(id);
+		this.#refreshRows();
+		this.#requestRender();
+	}
+
 	#handleTableInput(keyData: string): void {
 		// Filter mode takes priority when active
 		if (this.#filterInput !== undefined) {
@@ -890,11 +1017,11 @@ export class AgentHubOverlayComponent extends Container {
 			if (selected) this.#activateAgent(selected);
 			return;
 		}
-		// Space expands/collapses the selected background session lane to reveal its subagents.
-		// Space expands/collapses the selected session lane to reveal its subagents.
+		// Space expands/collapses the selected folder or session lane.
 		if (keyData === " ") {
 			const selected = this.#selectedRef();
-			if (selected && isLane(selected)) this.#toggleLane(selected.id);
+			if (selected && isFolder(selected)) this.#toggleFolder(selected.id);
+			else if (selected && isLane(selected)) this.#toggleLane(selected.id);
 			return;
 		}
 		if (keyData === "c") {
@@ -949,6 +1076,10 @@ export class AgentHubOverlayComponent extends Container {
 	#activateAgent(ref: HubAgentRef): void {
 		this.#clearPendingRemove();
 		this.#notice = undefined;
+		if (isFolder(ref)) {
+			this.#toggleFolder(ref.id);
+			return;
+		}
 		if (ref.id === MAIN_AGENT_ID) {
 			this.#onDone();
 			return;
@@ -1001,6 +1132,11 @@ export class AgentHubOverlayComponent extends Container {
 		this.#clearPendingRemove();
 		const ref = this.#selectedRef();
 		if (!ref) return;
+		if (isFolder(ref)) {
+			this.#notice = "Folders group sessions — select a session or agent to revive.";
+			this.#requestRender();
+			return;
+		}
 		if (ref.id === MAIN_AGENT_ID) {
 			this.#notice = "The current session is already active.";
 			this.#requestRender();
@@ -1037,6 +1173,11 @@ export class AgentHubOverlayComponent extends Container {
 	#startRename(): void {
 		const ref = this.#selectedRef();
 		if (!ref) return;
+		if (isFolder(ref)) {
+			this.#notice = "Folders group sessions and cannot be renamed.";
+			this.#requestRender();
+			return;
+		}
 		if (ref.id === MAIN_AGENT_ID) {
 			this.#notice = "The current session can be renamed with /background <name>.";
 			this.#requestRender();
@@ -1127,6 +1268,11 @@ export class AgentHubOverlayComponent extends Container {
 			this.#requestRender();
 			return;
 		}
+		if (isFolder(ref)) {
+			this.#notice = "Folders group sessions — select an agent to sync to Kanban.";
+			this.#requestRender();
+			return;
+		}
 		if (!isRegistryAgentRef(ref)) {
 			this.#notice = `Background sessions are resumed from the hub, not synced to Kanban.`;
 			this.#requestRender();
@@ -1186,6 +1332,12 @@ export class AgentHubOverlayComponent extends Container {
 		const ref = this.#selectedRef();
 		if (!ref) {
 			this.#clearPendingRemove();
+			return;
+		}
+		if (isFolder(ref)) {
+			this.#clearPendingRemove();
+			this.#notice = "Folders group sessions and cannot be removed.";
+			this.#requestRender();
 			return;
 		}
 

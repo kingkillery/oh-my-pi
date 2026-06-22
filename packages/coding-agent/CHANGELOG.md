@@ -10,7 +10,7 @@
 ### Changed
 
 - Clarified the Agent Hub roster's remove/kill shortcut as a double-tap: the footer hint now reads `x×2:kill`/`x×2:remove` and the first-tap confirmation reads `Press x again (or Ctrl+X) to remove agent "<id>"`. Both `x` and `Ctrl+X` (Claude Code parity) still trigger the same per-agent double-tap confirmation.
-- The Agent Hub now lists persistent background sessions as top-level collapsible lanes (collapsed by default; Space expands a lane to reveal its nested subagents; Enter resumes the session), unifying the former separate background-session switcher into the one hub surface.
+- The Agent Hub is now a single folder → session → subagent tree instead of two separate lists. Session lanes (the current session plus persistent background instances) are grouped under collapsible folder headers keyed by working directory (folders are expanded by default, current folder first); each session lane expands to reveal its subagents (current session expanded by default, background lanes collapsed until `Space`), and `Enter` resumes a background session. `/backgrounds`, `Ctrl+Shift+B`, the `omp bg` CLI subcommand, and double-tap `←` all open this one surface.
 
 ## [16.1.9] - 2026-06-20
 

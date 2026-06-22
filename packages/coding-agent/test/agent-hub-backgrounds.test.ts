@@ -97,7 +97,8 @@ describe("Agent hub background lanes", () => {
 				// Collapsed by default: the nested subagent stays hidden.
 				expect(collapsed).not.toContain("Sub-1");
 
-				// Move cursor down from current session (row 0) to background session lane (row 1).
+				// Rows: folder (0) → current session (1) → background lane (2). Select the lane.
+				hub.handleInput("j");
 				hub.handleInput("j");
 				// Space expands the selected lane to reveal its subagent.
 				hub.handleInput(" ");
