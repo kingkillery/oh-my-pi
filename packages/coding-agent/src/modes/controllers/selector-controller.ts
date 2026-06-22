@@ -1231,6 +1231,7 @@ export class SelectorController {
 		const hubKeys = [
 			...this.ctx.keybindings.getKeys("app.agents.hub"),
 			...this.ctx.keybindings.getKeys("app.session.observe"),
+			...this.ctx.keybindings.getKeys("app.session.backgrounds"),
 		];
 		let hub: AgentHubOverlayComponent | undefined;
 
@@ -1266,6 +1267,8 @@ export class SelectorController {
 			hideThinkingBlock: () => this.ctx.hideThinkingBlock,
 			focusAgent: id => this.ctx.focusAgentSession(id),
 			sessionFile: this.ctx.sessionManager.getSessionFile() ?? null,
+			sessionDir: this.ctx.sessionManager.getSessionDir(),
+			resumeSession: (sessionPath: string) => this.handleResumeSession(sessionPath),
 		});
 
 		// The double-← gesture passes requireContent so it stays inert when there

@@ -51,7 +51,7 @@ export function buildHotkeysMarkdown(bindings: HotkeysMarkdownBindings): string 
 		`| \`${appKey(bindings, "app.retry")}\` | Retry last failed assistant turn |`,
 		`| \`${appKey(bindings, "app.clipboard.pasteImage")}\` | Paste image or text from clipboard |`,
 		"| Hold `Space` | Speech-to-text (push-to-talk): hold to record, release to transcribe |",
-		`| \`${appKey(bindings, "app.agents.hub")}\` / \`${appKey(bindings, "app.session.observe")}\` / double-tap \`←\` (empty editor) | Open the agent hub |`,
+		`| \`${appKey(bindings, "app.agents.hub")}\` / \`${appKey(bindings, "app.session.observe")}\` / \`${appKey(bindings, "app.session.backgrounds")}\` / double-tap \`←\` (empty editor) | Open the agent hub |`,
 		"| `#` | Open prompt actions |",
 		"| `/` | Slash commands |",
 		"| `!` | Run bash command |",

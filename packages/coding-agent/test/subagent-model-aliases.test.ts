@@ -2,7 +2,10 @@ import { describe, expect, test } from "bun:test";
 import type { Api, Model } from "@pk-nerdsaver-ai/pi-ai";
 import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import type { ModelRegistry } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-registry";
-import { resolveSubagentModelAlias } from "@pk-nerdsaver-ai/pi-coding-agent/config/subagent-model-aliases";
+import {
+	mergeSubagentModelAliases,
+	resolveSubagentModelAlias,
+} from "@pk-nerdsaver-ai/pi-coding-agent/config/subagent-model-aliases";
 
 function makeModel(provider: string, id: string, name: string): Model<Api> {
 	return buildModel({
@@ -73,5 +76,12 @@ describe("resolveSubagentModelAlias", () => {
 			registry,
 		);
 		expect(resolved).toBeNull();
+	});
+
+	test("resolves browser-fast from built-in aliases when gemini-2.5-flash-lite is available", () => {
+		const customRegistry = makeRegistry([makeModel("google", "gemini-2.5-flash-lite", "Gemini 2.5 Flash Lite")]);
+		const aliases = mergeSubagentModelAliases({});
+		const resolved = resolveSubagentModelAlias("browser-fast", aliases, customRegistry);
+		expect(resolved).toBe("google/gemini-2.5-flash-lite");
 	});
 });

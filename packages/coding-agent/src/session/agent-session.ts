@@ -6789,6 +6789,17 @@ export class AgentSession {
 		return this.sessionManager.setSessionName(name, source);
 	}
 
+	/** Promote the current session into a persistent named background agent (resumable from the Agent Hub). */
+	async backgroundCurrentSession(name: string): Promise<boolean> {
+		const model = this.model ? `${this.model.provider}/${this.model.id}` : undefined;
+		return await this.sessionManager.backgroundCurrentSession({ name, model, role: "default" });
+	}
+
+	/** Drop the current session out of the background roster (the session itself is preserved). */
+	archiveBackgroundCurrentSession(): boolean {
+		return this.sessionManager.archiveBackgroundInstance() !== undefined;
+	}
+
 	/**
 	 * Fork the current session, creating a new session file with the exact same state.
 	 * Copies all entries and artifacts to the new session.

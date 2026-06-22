@@ -25,7 +25,9 @@ Redesign the Agent Hub keybindings to follow standard TUI conventions, add missi
 | `ctrl+x` | Remove | Double-tap confirmation to remove agent |
 | `Esc` | Close | Exit the hub overlay |
 | `←←` | Close | Double-tap left arrow (within 500ms) |
-| Hub key | Toggle | `alt+a` or `ctrl+s` toggles hub open/closed |
+| Hub key | Toggle | `alt+a`, `ctrl+s`, or `ctrl+shift+b` toggles hub open/closed |
+
+> **Background sessions (post-consolidation):** The hub also opens via `ctrl+shift+b` (`app.session.backgrounds`) and the `/backgrounds` slash command; `/background [name]` promotes the current session into a persistent named background agent and then opens the hub. Persistent background sessions render as top-level collapsible lanes — collapsed by default, `Space` expands the selected lane to reveal its nested subagents, and `Enter` on a lane resumes that session.
 
 ### Current Hint Bar
 ```

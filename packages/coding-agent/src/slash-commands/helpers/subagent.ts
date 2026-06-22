@@ -24,17 +24,29 @@ import { generateTaskName } from "../../task/name-generator";
 import { AgentOutputManager } from "../../task/output-manager";
 import { getThinkingLevelMetadata } from "../../thinking";
 
-interface ParsedUsingForm {
+export interface ParsedUsingForm {
 	modelInput: string;
 	task: string;
 }
 
-interface SubagentModelSelection {
+export interface SubagentModelSelection {
 	model: Model<Api>;
 	selector: string;
 }
 
-interface SubagentWizardState {
+export async function resolveSlashSubagentModel(
+	ctx: InteractiveModeContext,
+	input: string,
+): Promise<{ model: Model<Api>; selector: string } | null> {
+	const aliases = mergeSubagentModelAliases(ctx.settings.get("subagent.modelAliases"));
+	const resolved = resolveSubagentModelAlias(input, aliases, ctx.session.modelRegistry);
+	if (!resolved) return null;
+	const model = parseResolvedModel(resolved, ctx.session.modelRegistry);
+	if (!model) return null;
+	return { model, selector: resolved };
+}
+
+export interface SubagentWizardState {
 	modelOverride: string;
 	thinkingLevel: ThinkingLevel;
 	name?: string;
@@ -54,7 +66,7 @@ const SUBAGENT_COLOR_OPTIONS: readonly ThemeColor[] = [
 	"statusLineSubagents",
 ];
 
-function parseUsingForm(args: string): ParsedUsingForm | null {
+export function parseUsingForm(args: string): ParsedUsingForm | null {
 	const trimmed = args.trim();
 	if (!/^using(?:\s|$)/i.test(trimmed)) return null;
 	let rest = trimmed.slice("using".length).trimStart();
@@ -96,7 +108,7 @@ function renderSubagentUserPrompt(assignment: string): string {
 	return prompt.render(subagentUserPromptTemplate, { assignment });
 }
 
-function parseResolvedModel(selector: string, registry: ModelRegistry): Model<Api> | undefined {
+export function parseResolvedModel(selector: string, registry: ModelRegistry): Model<Api> | undefined {
 	return parseModelPattern(selector, registry.getAvailable() as Model<Api>[], undefined, { modelRegistry: registry })
 		.model;
 }
@@ -165,10 +177,10 @@ function createLocalProtocolOptions(ctx: InteractiveModeContext, fallbackArtifac
 	};
 }
 
-async function loadTaskAgent(ctx: InteractiveModeContext) {
+async function loadTaskAgent(ctx: InteractiveModeContext, agentName = "task") {
 	const cwd = ctx.sessionManager.getCwd();
 	const { agents } = await discoverAgents(cwd);
-	return getAgent(agents, "task");
+	return getAgent(agents, agentName);
 }
 
 /**
@@ -209,11 +221,15 @@ function allocateSpawnIndex(parent: AgentSession): number {
 	return index;
 }
 
-async function spawnSubagent(ctx: InteractiveModeContext, state: SubagentWizardState): Promise<void> {
-	const agent = await loadTaskAgent(ctx);
+export async function spawnSubagent(
+	ctx: InteractiveModeContext,
+	state: SubagentWizardState,
+	agentName = "task",
+): Promise<string> {
+	const agent = await loadTaskAgent(ctx, agentName);
 	if (!agent) {
-		ctx.showError("Cannot spawn subagent: bundled task agent is unavailable.");
-		return;
+		ctx.showError(`Cannot spawn subagent: bundled ${agentName} agent is unavailable.`);
+		return "";
 	}
 
 	await ctx.sessionManager.ensureOnDisk();
@@ -224,7 +240,7 @@ async function spawnSubagent(ctx: InteractiveModeContext, state: SubagentWizardS
 	const artifactsDir = persistedArtifactsDir ?? tempArtifactsDir;
 	if (!artifactsDir) {
 		ctx.showError("Cannot spawn subagent: no artifact directory is available.");
-		return;
+		return "";
 	}
 	await fs.mkdir(artifactsDir, { recursive: true });
 
@@ -288,6 +304,8 @@ async function spawnSubagent(ctx: InteractiveModeContext, state: SubagentWizardS
 			ctx.showError(`Subagent ${id} failed: ${message}`);
 			ctx.ui.requestRender();
 		});
+
+	return id;
 }
 
 async function completeWizard(
@@ -326,18 +344,12 @@ async function handleUsingForm(ctx: InteractiveModeContext, usingForm: ParsedUsi
 		ctx.showError("Usage: /subagent using <alias-or-model> <task>");
 		return;
 	}
-	const aliases = mergeSubagentModelAliases(ctx.settings.get("subagent.modelAliases"));
-	const resolved = resolveSubagentModelAlias(usingForm.modelInput, aliases, ctx.session.modelRegistry);
-	if (!resolved) {
+	const result = await resolveSlashSubagentModel(ctx, usingForm.modelInput);
+	if (!result) {
 		ctx.showError(`No available model matched "${usingForm.modelInput}".`);
 		return;
 	}
-	const model = parseResolvedModel(resolved, ctx.session.modelRegistry);
-	if (!model) {
-		ctx.showError(`Resolved model "${resolved}" is not available.`);
-		return;
-	}
-	await completeWizard(ctx, model, resolved, usingForm.task, true);
+	await completeWizard(ctx, result.model, result.selector, usingForm.task, true);
 }
 
 export async function handleSubagentSlashCommand(args: string, ctx: InteractiveModeContext): Promise<void> {

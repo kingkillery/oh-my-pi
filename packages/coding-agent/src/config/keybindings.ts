@@ -38,6 +38,7 @@ interface AppKeybindings {
 	"app.clipboard.copyLine": true;
 	"app.clipboard.copyPrompt": true;
 	"app.agents.hub": true;
+	"app.session.backgrounds": true;
 	"app.session.new": true;
 	"app.session.tree": true;
 	"app.session.fork": true;
@@ -179,6 +180,10 @@ export const KEYBINDINGS = {
 	"app.session.observe": {
 		defaultKeys: "ctrl+s",
 		description: "Open the agent hub",
+	},
+	"app.session.backgrounds": {
+		defaultKeys: "ctrl+shift+b",
+		description: "Open the agent hub (background sessions)",
 	},
 	"app.session.togglePath": {
 		defaultKeys: "ctrl+p",

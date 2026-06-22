@@ -43,15 +43,16 @@ describe("Agent hub removal confirmation", () => {
 			cwd: "repo",
 		});
 
-		// Flattened parent tree: row 0 is already the first child (A) — there is no
-		// cwd-group header to step past, so the first Ctrl+X targets A directly.
+		// Current session lane is row 0. Move selection down to subagent A (row 1).
+		hub.handleInput("j");
 		hub.handleInput("\x18");
-		expect(Bun.stripANSI(hub.render(120).join("\n"))).toContain('Press Ctrl+X again to remove agent "A"');
+		expect(Bun.stripANSI(hub.render(120).join("\n"))).toContain('Press x again (or Ctrl+X) to remove agent "A"');
 
+		// Move selection down to subagent B (row 2).
 		hub.handleInput("j");
 		hub.handleInput("\x18");
 		expect(release).not.toHaveBeenCalled();
-		expect(Bun.stripANSI(hub.render(120).join("\n"))).toContain('Press Ctrl+X again to remove agent "B"');
+		expect(Bun.stripANSI(hub.render(120).join("\n"))).toContain('Press x again (or Ctrl+X) to remove agent "B"');
 
 		hub.handleInput("\x18");
 		await released.promise;

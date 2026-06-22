@@ -71,6 +71,14 @@ export interface CustomEntry<T = unknown> extends SessionEntryBase {
 	data?: T;
 }
 
+export interface BackgroundInstanceEntry extends SessionEntryBase {
+	type: "background_instance";
+	name: string;
+	status: "active" | "archived";
+	model?: string;
+	role?: string;
+}
+
 export interface LabelEntry extends SessionEntryBase {
 	type: "label";
 	targetId: string;
@@ -119,6 +127,7 @@ export type SessionEntry =
 	| CompactionEntry
 	| BranchSummaryEntry
 	| CustomEntry
+	| BackgroundInstanceEntry
 	| CustomMessageEntry
 	| LabelEntry
 	| TtsrInjectionEntry

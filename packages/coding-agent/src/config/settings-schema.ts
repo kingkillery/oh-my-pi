@@ -3859,6 +3859,47 @@ export const SETTINGS_SCHEMA = {
 		default: {} as Record<string, string>,
 	},
 
+	/**
+	 * Delegate slash-command configuration.
+	 * `delegate.mode` selects the implementation: "subagents" (native) or
+	 * "legacy-endpoint" (external dispatch-endpoint.mjs script).
+	 */
+	"delegate.enabled": {
+		type: "boolean",
+		default: true,
+	},
+
+	"delegate.promptModel": {
+		type: "string",
+		default: "pi/smol",
+	},
+
+	"delegate.lanes": {
+		type: "record",
+		default: {} as Record<string, string>,
+	},
+
+	"delegate.verifierModel": {
+		type: "string",
+		default: "pi/task",
+	},
+
+	"delegate.synthesizerModel": {
+		type: "string",
+		default: "pi/slow",
+	},
+
+	"delegate.mode": {
+		type: "enum",
+		values: ["subagents", "legacy-endpoint"] as const,
+		default: "subagents",
+	},
+
+	"delegate.legacyEndpointConfigPath": {
+		type: "string",
+		default: "~/.claude/custom-endpoint.json",
+	},
+
 	// Skills
 	"skills.enabled": { type: "boolean", default: true },
 
@@ -4700,6 +4741,16 @@ export interface ThinkingBudgetsSettings {
 	xhigh: number;
 }
 
+export interface DelegateSettings {
+	enabled: boolean;
+	promptModel: string;
+	lanes: Record<string, string>;
+	verifierModel: string;
+	synthesizerModel: string;
+	mode: "subagents" | "legacy-endpoint";
+	legacyEndpointConfigPath: string;
+}
+
 export interface SttSettings {
 	enabled: boolean;
 	language: string | undefined;
@@ -4714,7 +4765,6 @@ export interface BashInterceptorRule {
 	message: string;
 	allowSubcommands?: string[];
 }
-
 export interface ShellMinimizerSettings {
 	enabled: boolean;
 	settingsPath: string | undefined;
@@ -4724,6 +4774,7 @@ export interface ShellMinimizerSettings {
 	sourceOutlineLevel: "default" | "aggressive";
 	legacyFilters: boolean | undefined;
 }
+
 export type CodexAutoRedeemMode = "unset" | "yes" | "no";
 
 export interface CodexResetsSettings {
@@ -4756,6 +4807,7 @@ export interface GroupTypeMap {
 	shellMinimizer: ShellMinimizerSettings;
 	codexResets: CodexResetsSettings;
 	subagent: SubagentSettings;
+	delegate: DelegateSettings;
 }
 
 export type GroupPrefix = keyof GroupTypeMap;

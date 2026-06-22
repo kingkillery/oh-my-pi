@@ -400,6 +400,7 @@ export class InputController {
 		const hubKeys = new Set([
 			...this.ctx.keybindings.getKeys("app.agents.hub"),
 			...this.ctx.keybindings.getKeys("app.session.observe"),
+			...this.ctx.keybindings.getKeys("app.session.backgrounds"),
 		]);
 		for (const key of hubKeys) {
 			this.ctx.editor.setCustomKeyHandler(key, () => this.ctx.showAgentHub());

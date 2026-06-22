@@ -5,6 +5,12 @@
 ### Added
 
 - Added explicit `/loop --spiral` and `/loop --wall-climb` activation flags for one-off verifier-reflection loop sessions without changing the saved `loop.mode` setting.
+- Added persistent background agent sessions: `/background [name]` promotes the current session into a named, resumable background agent and opens the Agent Hub, while `/backgrounds`, the `Ctrl+Shift+B` keybinding (`app.session.backgrounds`), and the `omp bg` CLI subcommand all open the Agent Hub.
+
+### Changed
+
+- Clarified the Agent Hub roster's remove/kill shortcut as a double-tap: the footer hint now reads `x×2:kill`/`x×2:remove` and the first-tap confirmation reads `Press x again (or Ctrl+X) to remove agent "<id>"`. Both `x` and `Ctrl+X` (Claude Code parity) still trigger the same per-agent double-tap confirmation.
+- The Agent Hub now lists persistent background sessions as top-level collapsible lanes (collapsed by default; Space expands a lane to reveal its nested subagents; Enter resumes the session), unifying the former separate background-session switcher into the one hub surface.
 
 ## [16.1.9] - 2026-06-20
 

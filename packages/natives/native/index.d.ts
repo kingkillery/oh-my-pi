@@ -75,6 +75,8 @@ export declare class Process {
   waitForExit(options?: ProcessWaitOptions | undefined | null): Promise<boolean>
   /** Process group id for this process, when supported by the platform. */
   groupId(): number | null
+  /** Process group id for this process, when supported by the platform. */
+  groupId(): number | null
   /** Direct children of this process as stable process references. */
   children(): Array<Process>
   /** Current status of this process reference. */

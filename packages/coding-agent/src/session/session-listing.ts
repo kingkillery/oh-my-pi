@@ -29,6 +29,12 @@ export interface SessionInfo {
 	title?: string;
 	/** Path to the parent session (if this session was forked). */
 	parentSessionPath?: string;
+	backgroundInstance?: {
+		name: string;
+		status: "active" | "archived";
+		model?: string;
+		role?: string;
+	};
 	created: Date;
 	modified: Date;
 	messageCount: number;
@@ -140,6 +146,29 @@ function deriveSessionStatus(suffix: string): SessionStatus {
 		}
 	}
 	return "unknown";
+}
+
+function extractBackgroundInstanceFromContent(content: string): SessionInfo["backgroundInstance"] | undefined {
+	const entries = parseJsonlLenient<Record<string, unknown>>(content);
+	for (let i = entries.length - 1; i >= 0; i--) {
+		const entry = entries[i];
+		if (entry?.type !== "background_instance") continue;
+		return normalizeBackgroundInstance(entry);
+	}
+	return undefined;
+}
+
+function normalizeBackgroundInstance(value: unknown): SessionInfo["backgroundInstance"] | undefined {
+	if (!value || typeof value !== "object") return undefined;
+	const candidate = value as { name?: unknown; status?: unknown; model?: unknown; role?: unknown };
+	if (candidate.status === "archived") return undefined;
+	if (candidate.status !== "active" || typeof candidate.name !== "string") return undefined;
+	return {
+		name: candidate.name,
+		status: candidate.status,
+		model: typeof candidate.model === "string" ? candidate.model : undefined,
+		role: typeof candidate.role === "string" ? candidate.role : undefined,
+	};
 }
 
 interface TailMessage {
@@ -268,6 +297,7 @@ interface SessionListHeader {
 	title?: string;
 	parentSession?: string;
 	timestamp?: string;
+	backgroundInstance?: unknown;
 }
 
 function parseSessionListHeader(
@@ -283,6 +313,7 @@ function parseSessionListHeader(
 			title: typeof parsedHeader.title === "string" ? parsedHeader.title : undefined,
 			parentSession: typeof parsedHeader.parentSession === "string" ? parsedHeader.parentSession : undefined,
 			timestamp: typeof parsedHeader.timestamp === "string" ? parsedHeader.timestamp : undefined,
+			backgroundInstance: parsedHeader.backgroundInstance,
 		};
 	}
 
@@ -366,12 +397,17 @@ async function scanSessionFile(
 
 		firstMessage ||= extractFirstUserMessageFromPrefix(content) ?? "";
 		const messageCount = Math.max(parsedMessageCount, countMessageMarkers(content));
+		const backgroundInstance =
+			header.backgroundInstance === undefined
+				? extractBackgroundInstanceFromContent(`${content}\n${suffix}`)
+				: normalizeBackgroundInstance(header.backgroundInstance);
 		return {
 			path: file,
 			id: header.id,
 			cwd: header.cwd ?? "",
 			title: header.title ?? shortSummary,
 			parentSessionPath: header.parentSession,
+			backgroundInstance,
 			created: new Date(header.timestamp ?? ""),
 			modified: mtime,
 			messageCount,
@@ -538,6 +574,14 @@ export async function getRecentSessions(
 		recent.push({ path: info.path, name: sessionDisplayName(info), timeAgo: formatTimeAgo(info.modified) });
 	}
 	return recent;
+}
+
+export function isBackgroundInstanceSession(session: SessionInfo): boolean {
+	return session.backgroundInstance?.status === "active";
+}
+
+export function backgroundInstanceDisplayName(session: SessionInfo): string {
+	return session.backgroundInstance?.name ?? session.title ?? session.firstMessage ?? session.id;
 }
 
 function sessionMatchesResumeArg(session: SessionInfo, sessionArg: string): boolean {
