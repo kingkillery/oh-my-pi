@@ -20,6 +20,16 @@ function git(args: readonly string[]) {
 	return $`git -c core.fsmonitor=false -c core.untrackedCache=false -c fetch.pruneTags=false ${args}`;
 }
 
+/**
+ * Whether GitHub Actions will run on the pushed tag. This fork disables every
+ * workflow (renamed to `*.disabled`, commit f9a213a93 "no Actions billing"), so
+ * the release tag triggers no CI and publishing is local. Detect that to skip
+ * the CI watch instead of hanging forever on a run that never starts.
+ */
+async function actionsEnabled(): Promise<boolean> {
+	return await Bun.file(".github/workflows/ci.yml").exists();
+}
+
 // =============================================================================
 // Shared functions
 // =============================================================================
@@ -364,7 +374,19 @@ async function cmdRelease(version: string): Promise<void> {
 	]);
 	console.log();
 
-	// 9. Watch CI
+	// 9. Publish. With Actions enabled, CI builds binaries + publishes npm on the
+	// pushed tag, so we watch it. With Actions disabled (this fork) nothing runs;
+	// publishing is local — hand off to release-local.ts instead of hanging.
+	if (!(await actionsEnabled())) {
+		console.log("GitHub Actions are disabled (.github/workflows/ci.yml.disabled) — skipping CI watch.\n");
+		console.log("Tagged and pushed. Finish the release locally with:");
+		console.log(`  bun scripts/release-local.ts ${version} --publish`);
+		console.log("(builds host-platform binaries → Hugging Face + npm publish; darwin binaries need a Mac).\n");
+		console.log(`=== Tagged v${version} (local publish pending) ===`);
+		return;
+	}
+
+	// 9b. Watch CI
 	console.log("Watching CI...");
 	const success = await watchCI();
 
