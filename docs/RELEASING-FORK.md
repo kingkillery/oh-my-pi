@@ -55,37 +55,57 @@ bun scripts/release-local.ts 16.1.10 --dry-run
 version that is already bumped+tagged skips the bump and goes straight to
 publishing (use `--skip-tag` to force that).
 
-## The cross-platform gotcha (the important part)
+## The cross-platform reality (two hosts cover all five)
 
-**A single host can only build its own platform's binary.** The compiled binary
-embeds a native Rust/N-API addon (`@pk-nerdsaver-ai/pi-natives`); building for
-another OS needs that OS's toolchain:
+The compiled binary embeds a native Rust/N-API addon (`@pk-nerdsaver-ai/pi-natives`),
+so each target needs that target's std plus a way to link it. In practice **two
+hosts build all five platforms**:
 
-- **linux** can be cross-built from non-linux hosts via `cargo-zigbuild`
-  (CI does this with a glibc 2.17 floor) if `zig` + the rust targets are set up.
-- **darwin** needs a **Mac** (the macOS SDK / codesign). It cannot be built on
-  Windows or Linux without `osxcross`.
+- **Windows host** — builds `win32-x64` natively.
+- **Apple-Silicon Mac** — builds `darwin-arm64` natively and cross-builds
+  `darwin-x64`, `linux-x64`, `linux-arm64` via `cargo-zigbuild`. (CI used an
+  Intel runner for `darwin-x64`; on Apple Silicon, cross-build it with zigbuild.)
 
-Because of this, `publish-binaries-hf.ts` **only flips the `VERSION` pointer when
-every required platform binary exists for the tag** (just-built ∪ already in the
-repo). After a host-only run it uploads that host's binary under `<tag>/` and
-leaves `VERSION` on the last complete tag, telling you what is still missing.
+`publish-binaries-hf.ts` **only flips the `VERSION` pointer when every required
+platform binary exists for the tag** (just-built ∪ already in the repo), so a
+host-only run uploads its binary under `<tag>/` and leaves `VERSION` on the last
+complete tag.
 
-### Multi-host finish
-
-Run the binary step on each platform's host (or any host that can cross-build
-that target), then `VERSION` flips automatically once the set is complete:
+### Mesh recipe (tested for v16.1.10 — Windows + an Apple-Silicon Mac over Tailscale)
 
 ```sh
-# On Windows (host = windows-x64): bump + tag + push + upload win binary
+# --- Windows host: bump/tag/push + win binary (VERSION stays put, 1/5) ---
 bun scripts/release-local.ts 16.1.10
 
-# On a Mac: fill in darwin (no re-bump)
-bun scripts/release-local.ts 16.1.10 --skip-tag --targets darwin-arm64,darwin-x64
+# --- Apple-Silicon Mac, reached over Tailscale SSH (e.g. ssh k@mac2) ---
+# One-time: bun + repo on MAIN (not the tag, see PITFALL) + deps
+curl -fsSL https://bun.sh/install | bash
+git clone --branch main https://github.com/kingkillery/oh-my-pi.git ompbuild && cd ompbuild && bun install
+# Cross toolchain — rust targets MUST be added from INSIDE the repo so they land
+# on the pinned rust-toolchain.toml channel, not the default:
+rustup target add x86_64-apple-darwin x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
+brew install zig cargo-zigbuild
+export PATH="$HOME/.cargo/bin:$HOME/.bun/bin:$PATH" SDKROOT="$(xcrun --show-sdk-path)" HF_TOKEN=hf_xxx
 
-# On linux (or anywhere with cargo-zigbuild): fill in linux
-bun scripts/release-local.ts 16.1.10 --skip-tag --targets linux-x64,linux-arm64
+# Build each native FIRST (ci-release-build-binaries only EMBEDS a prebuilt addon):
+bun run build:native                                                                                        # darwin-arm64 (host)
+CROSS_TARGET=x86_64-apple-darwin       TARGET_PLATFORM=darwin TARGET_ARCH=x64   TARGET_VARIANT=baseline bun --cwd=packages/natives run build
+CROSS_TARGET=x86_64-unknown-linux-gnu.2.17  TARGET_PLATFORM=linux TARGET_ARCH=x64   TARGET_VARIANT=baseline bun --cwd=packages/natives run build
+CROSS_TARGET=aarch64-unknown-linux-gnu.2.17 TARGET_PLATFORM=linux TARGET_ARCH=arm64                       bun --cwd=packages/natives run build
+
+# Then the binaries + upload (darwin is ad-hoc codesigned automatically on macOS):
+bun scripts/publish-binaries-hf.ts --tag v16.1.10 --targets darwin-arm64,darwin-x64
+bun scripts/publish-binaries-hf.ts --tag v16.1.10 --targets linux-x64,linux-arm64   # completes 5/5 -> VERSION auto-flips
 ```
+
+> **PITFALL (this caused a brief broken-linux window once):** build hosts MUST use
+> the **guarded** `publish-binaries-hf.ts` from `main`. The VERSION-flip
+> completeness guard was committed to `main` *after* the release tag, so a host
+> that clones the *tag* gets the old script that flips `VERSION` unconditionally —
+> publishing a partial set (e.g. 3/5) then silently 404s the missing platforms.
+> Clone `main`, or `scp` / `git checkout` the guarded
+> `scripts/publish-binaries-hf.ts` onto the host before publishing. The `.2.17`
+> suffix on the linux `CROSS_TARGET`s is the glibc floor (zigbuild).
 
 Escape hatches on `publish-binaries-hf.ts`: `--force-version` flips `VERSION`
 even if platforms are missing (only when you intend a partial release);
