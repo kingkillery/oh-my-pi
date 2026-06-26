@@ -9,6 +9,7 @@ import * as path from "node:path";
 import { getPluginsLockfile, getPluginsNodeModules, getPluginsPackageJson, isEnoent } from "@pk-nerdsaver-ai/pi-utils";
 import { getConfigDirPaths } from "../../config";
 import { installLegacyPiSpecifierShim } from "./legacy-pi-compat";
+import { readSupportedPluginManifest } from "./manifest";
 import { normalizePluginRuntimeConfig } from "./runtime-config";
 import type { InstalledPlugin, PluginManifest, PluginRuntimeConfig, ProjectPluginOverrides } from "./types";
 
@@ -94,7 +95,8 @@ export async function getEnabledPlugins(cwd: string, opts: { home?: string } = {
 
 	const plugins: InstalledPlugin[] = [];
 	for (const name of names) {
-		const pluginPkgPath = path.join(nodeModulesPath, name, "package.json");
+		const pluginPath = path.join(nodeModulesPath, name);
+		const pluginPkgPath = path.join(pluginPath, "package.json");
 		let pluginPkg: { version: string; omp?: PluginManifest; pi?: PluginManifest };
 		try {
 			pluginPkg = await Bun.file(pluginPkgPath).json();
@@ -105,12 +107,12 @@ export async function getEnabledPlugins(cwd: string, opts: { home?: string } = {
 			throw err;
 		}
 
-		const manifest: PluginManifest | undefined = pluginPkg.omp || pluginPkg.pi;
+		const manifest = await readSupportedPluginManifest(pluginPath, pluginPkg);
 		if (!manifest) {
-			// Not an omp plugin, skip
+			// Not an OMP/Pi-compatible plugin, skip. Codex plugins with
+			// `.codex-plugin/plugin.json` are accepted for sub-discovery parity.
 			continue;
 		}
-		manifest.version = pluginPkg.version;
 
 		const runtimeState = runtimeConfig.plugins[name];
 
@@ -129,7 +131,7 @@ export async function getEnabledPlugins(cwd: string, opts: { home?: string } = {
 		plugins.push({
 			name,
 			version: pluginPkg.version,
-			path: path.join(nodeModulesPath, name),
+			path: pluginPath,
 			manifest,
 			enabledFeatures,
 			enabled: true,

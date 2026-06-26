@@ -19,6 +19,7 @@ import { isGitLabDuoModel, streamGitLabDuo } from "./providers/gitlab-duo";
 import type { GoogleOptions } from "./providers/google";
 import { getVertexAccessToken } from "./providers/google-auth";
 import type { GoogleGeminiCliOptions } from "./providers/google-gemini-cli";
+import type { GoogleInteractionsOptions } from "./providers/google-interactions";
 import type { GoogleVertexOptions } from "./providers/google-vertex";
 import { isKimiModel, streamKimi } from "./providers/kimi";
 import type { OllamaChatOptions } from "./providers/ollama";
@@ -1069,6 +1070,15 @@ function mapOptionsForApi<TApi extends Api>(
 				},
 				toolChoice: mapGoogleToolChoice(options?.toolChoice),
 			});
+		}
+
+		case "google-interactions": {
+			return castApi<"google-interactions">({
+				...base,
+				apiKey,
+				environment: "browser",
+				enablePromptInjectionDetection: true,
+			} satisfies GoogleInteractionsOptions);
 		}
 
 		case "ollama-chat":

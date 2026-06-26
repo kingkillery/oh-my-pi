@@ -14,6 +14,7 @@ import {
 import { type GitSource, parseGitUrl } from "./git-url";
 import { installLegacyPiSpecifierShim, loadLegacyPiModule } from "./legacy-pi-compat";
 import { resolvePluginManifestEntries } from "./loader";
+import { type PluginPackageJson, readPluginManifestOrFallback, readSupportedPluginManifest } from "./manifest";
 import { extractPackageName, parsePluginSpec } from "./parser";
 import { normalizePluginRuntimeConfig } from "./runtime-config";
 import type {
@@ -21,7 +22,6 @@ import type {
 	DoctorOptions,
 	InstalledPlugin,
 	InstallOptions,
-	PluginManifest,
 	PluginRuntimeConfig,
 	PluginSettingSchema,
 	ProjectPluginOverrides,
@@ -452,7 +452,7 @@ export class PluginManager {
 			}
 
 			const pkgPath = path.join(getPluginsNodeModules(), actualName, "package.json");
-			let pkg: { name: string; version: string; omp?: PluginManifest; pi?: PluginManifest };
+			let pkg: PluginPackageJson & { name: string };
 			try {
 				pkg = await Bun.file(pkgPath).json();
 			} catch (err) {
@@ -461,8 +461,8 @@ export class PluginManager {
 				}
 				throw err;
 			}
-			const manifest: PluginManifest = pkg.omp || pkg.pi || { version: pkg.version };
-			manifest.version = pkg.version;
+			const pluginPath = path.join(getPluginsNodeModules(), actualName);
+			const manifest = await readPluginManifestOrFallback(pluginPath, pkg);
 
 			// Resolve enabled features
 			let enabledFeatures: string[] | null = null;
@@ -492,7 +492,7 @@ export class PluginManager {
 			const installedPlugin: InstalledPlugin = {
 				name: pkg.name,
 				version: pkg.version,
-				path: path.join(getPluginsNodeModules(), actualName),
+				path: pluginPath,
 				manifest,
 				enabledFeatures,
 				enabled: true,
@@ -577,15 +577,14 @@ export class PluginManager {
 		for (const name of installedNames) {
 			const pluginPath = path.join(getPluginsNodeModules(), name);
 			const pluginPkgPath = path.join(pluginPath, "package.json");
-			let pluginPkg: { version: string; omp?: PluginManifest; pi?: PluginManifest };
+			let pluginPkg: PluginPackageJson;
 			try {
 				pluginPkg = await Bun.file(pluginPkgPath).json();
 			} catch (err) {
 				if (isEnoent(err)) continue;
 				throw err;
 			}
-			const manifest: PluginManifest = pluginPkg.omp || pluginPkg.pi || { version: pluginPkg.version };
-			manifest.version = pluginPkg.version;
+			const manifest = await readPluginManifestOrFallback(pluginPath, pluginPkg);
 
 			const runtimeState = config.plugins[name] || {
 				version: pluginPkg.version,
@@ -616,7 +615,7 @@ export class PluginManager {
 		const absolutePath = path.resolve(this.#cwd, localPath);
 
 		const pkgFilePath = path.join(absolutePath, "package.json");
-		let pkg: { name?: string; version: string; omp?: PluginManifest; pi?: PluginManifest };
+		let pkg: PluginPackageJson;
 		try {
 			pkg = await Bun.file(pkgFilePath).json();
 		} catch (err) {
@@ -649,8 +648,7 @@ export class PluginManager {
 
 		await fs.promises.symlink(absolutePath, linkPath);
 
-		const manifest: PluginManifest = pkg.omp || pkg.pi || { version: pkg.version };
-		manifest.version = pkg.version;
+		const manifest = await readPluginManifestOrFallback(absolutePath, pkg);
 
 		// Add to runtime config
 		const config = await this.#ensureConfigLoaded();
@@ -824,7 +822,7 @@ export class PluginManager {
 			const pluginPkgPath = path.join(pluginPath, "package.json");
 			const fromDependencies = name in deps;
 
-			let pluginPkg: { version: string; description?: string; omp?: PluginManifest; pi?: PluginManifest };
+			let pluginPkg: PluginPackageJson;
 			try {
 				pluginPkg = await Bun.file(pluginPkgPath).json();
 			} catch (err) {
@@ -858,15 +856,15 @@ export class PluginManager {
 				}
 				throw err;
 			}
-			const hasManifest = !!(pluginPkg.omp || pluginPkg.pi);
-			const manifest: PluginManifest | undefined = pluginPkg.omp || pluginPkg.pi;
+			const manifest = await readSupportedPluginManifest(pluginPath, pluginPkg);
+			const hasManifest = manifest !== null;
 
 			checks.push({
 				name: `plugin:${name}`,
 				status: hasManifest ? "ok" : "warning",
 				message: hasManifest
 					? `v${pluginPkg.version}${pluginPkg.description ? ` - ${pluginPkg.description}` : ""}`
-					: `v${pluginPkg.version} - No omp/pi manifest (not an omp plugin)`,
+					: `v${pluginPkg.version} - No OMP/Pi/Codex plugin manifest (not an OMP plugin)`,
 			});
 
 			// Check tools path exists if specified

@@ -38,6 +38,7 @@ import type { AzureOpenAIResponsesOptions } from "./providers/azure-openai-respo
 import type { CursorOptions } from "./providers/cursor";
 import type { GoogleOptions } from "./providers/google";
 import type { GoogleGeminiCliOptions } from "./providers/google-gemini-cli";
+import type { GoogleInteractionsOptions } from "./providers/google-interactions";
 import type { GoogleVertexOptions } from "./providers/google-vertex";
 import type { OllamaChatOptions } from "./providers/ollama";
 import type { OpenAICodexResponsesOptions } from "./providers/openai-codex-responses";
@@ -72,6 +73,7 @@ export interface ApiOptionsMap {
 	"google-generative-ai": GoogleOptions;
 	"google-gemini-cli": GoogleGeminiCliOptions;
 	"google-vertex": GoogleVertexOptions;
+	"google-interactions": GoogleInteractionsOptions;
 	"ollama-chat": OllamaChatOptions;
 	"cursor-agent": CursorOptions;
 }

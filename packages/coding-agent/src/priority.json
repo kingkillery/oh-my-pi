@@ -41,5 +41,9 @@
 		"google-gemini-cli/gemini-3.5-flash",
 		"gemini-3.5-flash",
 		"gemini-3-5-flash"
+	],
+	"fast-context": [
+		"openrouter/cohere/north-mini-code:free",
+		"openrouter/nvidia/nemotron-3-super-120b-a12b:free"
 	]
 }

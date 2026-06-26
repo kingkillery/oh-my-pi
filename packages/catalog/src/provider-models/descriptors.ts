@@ -156,6 +156,11 @@ export const CATALOG_PROVIDERS = [
 		allowUnauthenticated: true,
 	},
 	{
+		id: "google-interactions",
+		defaultModel: "gemini-3.5-flash",
+		envVars: ["GEMINI_API_KEY"],
+	},
+	{
 		id: "groq",
 		defaultModel: "openai/gpt-oss-120b",
 		envVars: ["GROQ_API_KEY"],

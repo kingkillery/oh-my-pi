@@ -89503,5 +89503,37 @@
 				]
 			}
 		}
+	},
+	"google-interactions": {
+		"gemini-3.5-flash": {
+			"id": "gemini-3.5-flash",
+			"name": "Gemini 3.5 Flash (Computer Use)",
+			"api": "google-interactions",
+			"provider": "google-interactions",
+			"baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+			"reasoning": true,
+			"input": [
+				"text",
+				"image"
+			],
+			"cost": {
+				"input": 1.5,
+				"output": 9,
+				"cacheRead": 0.15,
+				"cacheWrite": 0
+			},
+			"contextWindow": 1048576,
+			"maxTokens": 65536,
+			"thinking": {
+				"mode": "google-level",
+				"efforts": [
+					"minimal",
+					"low",
+					"medium",
+					"high"
+				],
+				"requiresEffort": true
+			}
+		}
 	}
 }

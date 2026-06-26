@@ -24,6 +24,7 @@ import { resolveAgentModelPatterns } from "../config/model-resolver";
 import { MCPManager } from "../mcp/manager";
 import type { Theme } from "../modes/theme/theme";
 import planModeSubagentPrompt from "../prompts/system/plan-mode-subagent.md" with { type: "text" };
+import subagentPrefetchEvidenceTemplate from "../prompts/system/subagent-prefetch-evidence.md" with { type: "text" };
 import subagentUserPromptTemplate from "../prompts/system/subagent-user-prompt.md" with { type: "text" };
 import taskDescriptionTemplate from "../prompts/tools/task.md" with { type: "text" };
 import taskSummaryTemplate from "../prompts/tools/task-summary.md" with { type: "text" };
@@ -56,6 +57,7 @@ import { AgentOutputManager } from "./output-manager";
 import { mapWithConcurrencyLimit, Semaphore } from "./parallel";
 import { renderResult, renderCall as renderTaskCall } from "./render";
 import { repairTaskParams } from "./repair-args";
+import { buildRepoEvidence, formatRepoEvidence } from "./repo-evidence";
 import {
 	applyNestedPatches,
 	captureBaseline,
@@ -71,10 +73,55 @@ import {
 	type WorktreeBaseline,
 } from "./worktree";
 
-function renderSubagentUserPrompt(assignment: string): string {
+interface RenderSubagentPromptOptions {
+	readonly assignment: string;
+	readonly prefetchEvidence?: string;
+}
+
+interface PrefetchEvidenceResult {
+	readonly evidence?: string;
+	readonly warning?: string;
+}
+
+interface ResolvePrefetchEvidenceOptions {
+	readonly agent: AgentDefinition;
+	readonly cwd: string;
+	readonly assignment: string;
+	readonly context?: string;
+	readonly signal?: AbortSignal;
+	readonly enabled: boolean;
+}
+
+function renderSubagentUserPrompt(options: RenderSubagentPromptOptions): string {
+	const evidence = options.prefetchEvidence
+		? prompt.render(subagentPrefetchEvidenceTemplate, { evidence: options.prefetchEvidence })
+		: "";
 	return prompt.render(subagentUserPromptTemplate, {
-		assignment: assignment.trim(),
+		assignment: options.assignment.trim(),
+		prefetchEvidence: evidence,
 	});
+}
+
+async function resolvePrefetchEvidence(options: ResolvePrefetchEvidenceOptions): Promise<PrefetchEvidenceResult> {
+	if (!options.enabled || options.agent.prefetch !== "repo-evidence") return {};
+	try {
+		const candidates = await buildRepoEvidence({
+			cwd: options.cwd,
+			query: [options.context, options.assignment].filter(Boolean).join("\n\n"),
+			signal: options.signal,
+		});
+		return { evidence: candidates.length > 0 ? formatRepoEvidence(candidates) : undefined };
+	} catch (error) {
+		const warning =
+			"Repo evidence prefetch failed; continuing normally. Disable with `task.prefetch.enabled=false` if this keeps happening.";
+		logger.warn("Task prefetch failed; continuing without prefetched evidence", {
+			agent: options.agent.name,
+			prefetch: options.agent.prefetch,
+			error: error instanceof Error ? error.message : String(error),
+			disableWith: "task.prefetch.enabled=false",
+		});
+		return { warning };
+	}
 }
 
 function createUsageTotals(): Usage {
@@ -647,7 +694,7 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
 					agent: agentLabel,
 					agentSource,
 					status: "pending",
-					task: renderSubagentUserPrompt(assignment),
+					task: renderSubagentUserPrompt({ assignment }),
 					assignment,
 					description: item.description,
 					recentTools: [],
@@ -1232,7 +1279,7 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
 				agent: agentName,
 				agentSource: agent.source,
 				status: "pending",
-				task: renderSubagentUserPrompt(assignment),
+				task: renderSubagentUserPrompt({ assignment }),
 				assignment,
 				recentTools: [],
 				recentOutput: [],
@@ -1277,10 +1324,24 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
 					: path.resolve(this.session.cwd, params.cwd)
 				: this.session.cwd;
 
+			const prefetch = await resolvePrefetchEvidence({
+				agent: effectiveAgent,
+				cwd: spawnCwd,
+				assignment,
+				context: sharedContext,
+				signal,
+				enabled: this.session.settings.get("task.prefetch.enabled"),
+			});
+			if (prefetch.warning) {
+				latestProgress = { ...latestProgress, recentOutput: [prefetch.warning, ...latestProgress.recentOutput] };
+				emitProgress();
+			}
+			const renderedTask = renderSubagentUserPrompt({ assignment, prefetchEvidence: prefetch.evidence });
+
 			const sharedRunOptions = {
 				cwd: spawnCwd,
 				agent: effectiveAgent,
-				task: renderSubagentUserPrompt(assignment),
+				task: renderedTask,
 				assignment,
 				context: sharedContext,
 				planReference,
@@ -1400,7 +1461,7 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
 						id: agentId,
 						agent: agent.name,
 						agentSource: agent.source,
-						task: renderSubagentUserPrompt(assignment),
+						task: renderSubagentUserPrompt({ assignment }),
 						assignment,
 						description: params.description,
 						exitCode: 1,

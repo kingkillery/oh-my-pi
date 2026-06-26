@@ -220,6 +220,8 @@ export function parseModelList(value: unknown): string[] | undefined {
 	return normalized.length > 0 ? normalized : undefined;
 }
 
+export type AgentPrefetch = "repo-evidence";
+
 /** Parsed agent fields from frontmatter (excludes source/filePath/systemPrompt) */
 export interface ParsedAgentFields {
 	name: string;
@@ -231,6 +233,7 @@ export interface ParsedAgentFields {
 	thinkingLevel?: ThinkingLevel;
 	autoloadSkills?: string[];
 	readSummarize?: boolean;
+	prefetch?: AgentPrefetch;
 	blocking?: boolean;
 }
 
@@ -285,10 +288,23 @@ export function parseAgentFields(frontmatter: Record<string, unknown>): ParsedAg
 	const model = parseModelList(frontmatter.model);
 	const blocking = parseBoolean(frontmatter.blocking);
 	const readSummarize = parseBoolean(frontmatter.readSummarize);
+	const prefetch: AgentPrefetch | undefined = frontmatter.prefetch === "repo-evidence" ? "repo-evidence" : undefined;
 	const autoloadSkills = parseArrayOrCSV(frontmatter.autoloadSkills)
 		?.map(s => s.trim())
 		.filter(Boolean);
-	return { name, description, tools, spawns, model, output, thinkingLevel, blocking, autoloadSkills, readSummarize };
+	return {
+		name,
+		description,
+		tools,
+		spawns,
+		model,
+		output,
+		thinkingLevel,
+		blocking,
+		autoloadSkills,
+		readSummarize,
+		prefetch,
+	};
 }
 
 async function globIf(

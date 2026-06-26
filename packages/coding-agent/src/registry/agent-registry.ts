@@ -46,6 +46,10 @@ export interface AgentRef {
 	activity?: string;
 	/** Working directory for this agent. Enables CWD-aware spawning where agents can operate in different directories. */
 	cwd?: string;
+	/** When true, the agent is blocked waiting for user input (e.g. ask tool pending). Surfaces in the Agent Hub. */
+	needsAttention?: boolean;
+	/** Human-readable reason for the attention flag (e.g. "ask: Which auth method?"). */
+	attentionReason?: string;
 }
 
 export type RegistryEvent =
@@ -139,6 +143,24 @@ export class AgentRegistry {
 		ref.lastActivity = Date.now();
 		if (ref.activity === gist) return;
 		ref.activity = gist;
+	}
+
+	setAttention(id: string, reason?: string): void {
+		const ref = this.#refs.get(id);
+		if (!ref) return;
+		if (ref.needsAttention && ref.attentionReason === reason) return;
+		ref.needsAttention = true;
+		ref.attentionReason = reason;
+		ref.lastActivity = Date.now();
+		this.#emit({ type: "status_changed", ref });
+	}
+
+	clearAttention(id: string): void {
+		const ref = this.#refs.get(id);
+		if (!ref?.needsAttention) return;
+		ref.needsAttention = false;
+		ref.attentionReason = undefined;
+		this.#emit({ type: "status_changed", ref });
 	}
 
 	attachSession(id: string, session: AgentSession, sessionFile?: string | null): void {

@@ -534,6 +534,14 @@ export class AskTool implements AgentTool<typeof askSchema, AskToolDetails> {
 		// Send notification if waiting and not suppressed
 		this.#sendAskNotification();
 
+		// Flag this agent as needing user attention in the Agent Hub
+		const agentId = this.session.getAgentId?.();
+		const registry = this.session.agentRegistry;
+		if (agentId && registry) {
+			const preview = params.questions[0]?.question;
+			registry.setAttention(agentId, preview ? `ask: ${preview}` : "ask: waiting for input");
+		}
+
 		if (params.questions.length === 0) {
 			return {
 				content: [{ type: "text" as const, text: "Error: questions must not be empty" }],
@@ -580,104 +588,110 @@ export class AskTool implements AgentTool<typeof askSchema, AskToolDetails> {
 			}
 		};
 
-		if (params.questions.length === 1) {
-			const [q] = params.questions;
-			const { optionLabels, selectedOptions, customInput, cancelled, timedOut } = await askQuestion(q);
+		try {
+			if (params.questions.length === 1) {
+				const [q] = params.questions;
+				const { optionLabels, selectedOptions, customInput, cancelled, timedOut } = await askQuestion(q);
 
-			if (!timedOut && (cancelled || (selectedOptions.length === 0 && customInput === undefined))) {
-				context.abort();
-				throw new ToolAbortError("Ask tool was cancelled by the user");
-			}
-			const details: AskToolDetails = {
-				question: q.question,
-				options: optionLabels,
-				multi: q.multi ?? false,
-				selectedOptions,
-				customInput,
-				timedOut: timedOut || undefined,
-			};
+				if (!timedOut && (cancelled || (selectedOptions.length === 0 && customInput === undefined))) {
+					context.abort();
+					throw new ToolAbortError("Ask tool was cancelled by the user");
+				}
+				const details: AskToolDetails = {
+					question: q.question,
+					options: optionLabels,
+					multi: q.multi ?? false,
+					selectedOptions,
+					customInput,
+					timedOut: timedOut || undefined,
+				};
 
-			const responseParts: string[] = [];
-			if (selectedOptions.length > 0) {
-				const selectedText = q.multi
-					? `User selected: ${selectedOptions.join(", ")}`
-					: `User selected: ${selectedOptions[0]}`;
-				responseParts.push(timedOut ? `${selectedText} (auto-selected after timeout)` : selectedText);
+				const responseParts: string[] = [];
+				if (selectedOptions.length > 0) {
+					const selectedText = q.multi
+						? `User selected: ${selectedOptions.join(", ")}`
+						: `User selected: ${selectedOptions[0]}`;
+					responseParts.push(timedOut ? `${selectedText} (auto-selected after timeout)` : selectedText);
+				}
+				if (customInput !== undefined) {
+					responseParts.push(
+						customInput.includes("\n")
+							? `User provided custom input:\n${customInput
+									.split("\n")
+									.map(line => `  ${line}`)
+									.join("\n")}`
+							: `User provided custom input: ${customInput}`,
+					);
+				}
+				const responseText = responseParts.length > 0 ? responseParts.join("\n") : "User cancelled the selection";
+
+				return { content: [{ type: "text" as const, text: responseText }], details };
 			}
-			if (customInput !== undefined) {
-				responseParts.push(
-					customInput.includes("\n")
-						? `User provided custom input:\n${customInput
-								.split("\n")
-								.map(line => `  ${line}`)
-								.join("\n")}`
-						: `User provided custom input: ${customInput}`,
-				);
+
+			const resultsByIndex: Array<QuestionResult | undefined> = Array.from({ length: params.questions.length });
+			let questionIndex = 0;
+			while (questionIndex < params.questions.length) {
+				const q = params.questions[questionIndex]!;
+				const previous = resultsByIndex[questionIndex];
+				const navigation: NavigationControls = {
+					allowBack: questionIndex > 0,
+					allowForward: true,
+					progressText: `${questionIndex + 1}/${params.questions.length}`,
+				};
+				const {
+					optionLabels,
+					selectedOptions,
+					customInput,
+					navigation: navAction,
+					cancelled,
+					timedOut,
+				} = await askQuestion(q, { previous, navigation });
+
+				if (cancelled && !timedOut) {
+					context.abort();
+					throw new ToolAbortError("Ask tool was cancelled by the user");
+				}
+
+				resultsByIndex[questionIndex] = {
+					id: q.id,
+					question: q.question,
+					options: optionLabels,
+					multi: q.multi ?? false,
+					selectedOptions,
+					customInput,
+					timedOut: timedOut || undefined,
+				};
+
+				if (navAction === "back") {
+					questionIndex = Math.max(0, questionIndex - 1);
+					continue;
+				}
+
+				questionIndex += 1;
 			}
-			const responseText = responseParts.length > 0 ? responseParts.join("\n") : "User cancelled the selection";
+
+			const results = resultsByIndex.map((result, index) => {
+				if (result) return result;
+				const q = params.questions[index]!;
+				return {
+					id: q.id,
+					question: q.question,
+					options: q.options.map(o => o.label),
+					multi: q.multi ?? false,
+					selectedOptions: [],
+				};
+			});
+
+			const details: AskToolDetails = { results };
+			const responseLines = results.map(formatQuestionResult);
+			const responseText = `User answers:\n${responseLines.join("\n")}`;
 
 			return { content: [{ type: "text" as const, text: responseText }], details };
-		}
-
-		const resultsByIndex: Array<QuestionResult | undefined> = Array.from({ length: params.questions.length });
-		let questionIndex = 0;
-		while (questionIndex < params.questions.length) {
-			const q = params.questions[questionIndex]!;
-			const previous = resultsByIndex[questionIndex];
-			const navigation: NavigationControls = {
-				allowBack: questionIndex > 0,
-				allowForward: true,
-				progressText: `${questionIndex + 1}/${params.questions.length}`,
-			};
-			const {
-				optionLabels,
-				selectedOptions,
-				customInput,
-				navigation: navAction,
-				cancelled,
-				timedOut,
-			} = await askQuestion(q, { previous, navigation });
-
-			if (cancelled && !timedOut) {
-				context.abort();
-				throw new ToolAbortError("Ask tool was cancelled by the user");
+		} finally {
+			if (agentId && registry) {
+				registry.clearAttention(agentId);
 			}
-
-			resultsByIndex[questionIndex] = {
-				id: q.id,
-				question: q.question,
-				options: optionLabels,
-				multi: q.multi ?? false,
-				selectedOptions,
-				customInput,
-				timedOut: timedOut || undefined,
-			};
-
-			if (navAction === "back") {
-				questionIndex = Math.max(0, questionIndex - 1);
-				continue;
-			}
-
-			questionIndex += 1;
 		}
-
-		const results = resultsByIndex.map((result, index) => {
-			if (result) return result;
-			const q = params.questions[index]!;
-			return {
-				id: q.id,
-				question: q.question,
-				options: q.options.map(o => o.label),
-				multi: q.multi ?? false,
-				selectedOptions: [],
-			};
-		});
-
-		const details: AskToolDetails = { results };
-		const responseLines = results.map(formatQuestionResult);
-		const responseText = `User answers:\n${responseLines.join("\n")}`;
-
-		return { content: [{ type: "text" as const, text: responseText }], details };
 	}
 }
 

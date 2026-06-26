@@ -5,6 +5,7 @@ tools: read, search, find, web_search
 model: pi/smol
 thinking-level: medium
 read-summarize: false
+prefetch: repo-evidence
 output:
   properties:
     summary:

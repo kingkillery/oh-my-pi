@@ -13,6 +13,7 @@ export type KnownApi =
 	| "google-generative-ai"
 	| "google-gemini-cli"
 	| "google-vertex"
+	| "google-interactions"
 	| "ollama-chat"
 	| "cursor-agent";
 export type Api = KnownApi | (string & {});

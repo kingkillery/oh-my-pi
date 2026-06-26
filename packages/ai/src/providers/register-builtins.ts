@@ -34,6 +34,7 @@ import type { AzureOpenAIResponsesOptions } from "./azure-openai-responses";
 import type { CursorOptions } from "./cursor";
 import type { GoogleOptions } from "./google";
 import type { GoogleGeminiCliOptions } from "./google-gemini-cli";
+import type { GoogleInteractionsOptions } from "./google-interactions";
 import type { GoogleVertexOptions } from "./google-vertex";
 import type { OllamaChatOptions } from "./ollama";
 import type { OpenAICodexResponsesOptions } from "./openai-codex-responses";
@@ -85,6 +86,14 @@ interface GoogleVertexProviderModule {
 		model: Model<"google-vertex">,
 		context: Context,
 		options: GoogleVertexOptions,
+	) => AssistantMessageEventStream;
+}
+
+interface GoogleInteractionsProviderModule {
+	streamGoogleInteractions: (
+		model: Model<"google-interactions">,
+		context: Context,
+		options: GoogleInteractionsOptions,
 	) => AssistantMessageEventStream;
 }
 
@@ -145,6 +154,7 @@ let azureOpenAIResponsesProviderModulePromise: Promise<LazyProviderModule<"azure
 let googleProviderModulePromise: Promise<LazyProviderModule<"google-generative-ai">> | undefined;
 let googleGeminiCliProviderModulePromise: Promise<LazyProviderModule<"google-gemini-cli">> | undefined;
 let googleVertexProviderModulePromise: Promise<LazyProviderModule<"google-vertex">> | undefined;
+let googleInteractionsProviderModulePromise: Promise<LazyProviderModule<"google-interactions">> | undefined;
 let openAICodexResponsesProviderModulePromise: Promise<LazyProviderModule<"openai-codex-responses">> | undefined;
 let openAICompletionsProviderModulePromise: Promise<LazyProviderModule<"openai-completions">> | undefined;
 let openAIResponsesProviderModulePromise: Promise<LazyProviderModule<"openai-responses">> | undefined;
@@ -369,6 +379,14 @@ function loadGoogleVertexProviderModule(): Promise<LazyProviderModule<"google-ve
 	return googleVertexProviderModulePromise;
 }
 
+function loadGoogleInteractionsProviderModule(): Promise<LazyProviderModule<"google-interactions">> {
+	googleInteractionsProviderModulePromise ||= import("./google-interactions").then(module => {
+		const provider = module as GoogleInteractionsProviderModule;
+		return { stream: provider.streamGoogleInteractions };
+	});
+	return googleInteractionsProviderModulePromise;
+}
+
 function loadOpenAICodexResponsesProviderModule(): Promise<LazyProviderModule<"openai-codex-responses">> {
 	openAICodexResponsesProviderModulePromise ||= import("./openai-codex-responses").then(module => {
 		const provider = module as OpenAICodexResponsesProviderModule;
@@ -439,6 +457,7 @@ export const streamGoogleGeminiCli = createLazyStream(
 	GOOGLE_GEMINI_CLI_LAZY_STREAM_LIMITS,
 );
 export const streamGoogleVertex = createLazyStream(loadGoogleVertexProviderModule);
+export const streamGoogleInteractions = createLazyStream(loadGoogleInteractionsProviderModule);
 export const streamOpenAICodexResponses = createLazyStream(
 	loadOpenAICodexResponsesProviderModule,
 	PROVIDER_HANDLED_STREAM_TIMEOUTS,

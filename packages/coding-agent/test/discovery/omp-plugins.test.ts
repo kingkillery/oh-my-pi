@@ -85,6 +85,33 @@ function buildExtensionPackage(packageDir: string): void {
 	);
 }
 
+function buildCodexPluginPackage(packageDir: string): void {
+	writeFile(
+		path.join(packageDir, "package.json"),
+		JSON.stringify({ name: path.basename(packageDir), version: "4.12.1" }),
+	);
+	writeFile(
+		path.join(packageDir, ".codex-plugin", "plugin.json"),
+		JSON.stringify({ name: "omo", version: "4.12.1", description: "Codex plugin manifest" }),
+	);
+	writeFile(
+		path.join(packageDir, "skills", "start-work", "SKILL.md"),
+		"---\nname: start-work\ndescription: OMO start work\n---\nbody\n",
+	);
+	writeFile(
+		path.join(packageDir, ".mcp.json"),
+		JSON.stringify({
+			mcpServers: {
+				codegraph: {
+					command: "node",
+					args: ["components/codegraph/dist/serve.js"],
+					cwd: ".",
+				},
+			},
+		}),
+	);
+}
+
 beforeEach(() => {
 	clearCache();
 	clearOmpExtensionCliRoots();
@@ -207,6 +234,28 @@ test("installed plugins under `<plugins>/node_modules/` are surfaced (e.g. via `
 	const skills = await loadFromPlugin<{ name: string; path: string }>(skillCapability.id, ctx());
 	const found = skills.find(s => s.name === "my-skill" && s.path.includes("my-installed-ext"));
 	expect(found).toBeDefined();
+});
+
+test("installed Codex plugin packages with `.codex-plugin/plugin.json` are surfaced", async () => {
+	const pluginsDir = path.join(home, ".omp", "plugins");
+	const nodeModules = path.join(pluginsDir, "node_modules");
+	const installed = path.join(nodeModules, "@sisyphuslabs", "omo-codex-plugin");
+	fs.mkdirSync(installed, { recursive: true });
+	buildCodexPluginPackage(installed);
+	writeFile(
+		path.join(pluginsDir, "package.json"),
+		JSON.stringify({ name: "omp-plugins", dependencies: { "@sisyphuslabs/omo-codex-plugin": "4.12.1" } }),
+	);
+
+	const [skills, mcps] = await Promise.all([
+		loadFromPlugin<{ name: string; path: string }>(skillCapability.id, ctx()),
+		loadFromPlugin<{ name: string; cwd?: string; args?: string[] }>(mcpCapability.id, ctx()),
+	]);
+
+	expect(skills.find(s => s.name === "start-work" && s.path.includes("omo-codex-plugin"))).toBeDefined();
+	const codegraph = mcps.find(mcp => mcp.name === "codegraph");
+	expect(codegraph?.cwd).toBe(installed);
+	expect(codegraph?.args).toEqual(["components/codegraph/dist/serve.js"]);
 });
 
 test("disabled installed plugins do not contribute sub-discovery", async () => {

@@ -45,6 +45,27 @@ async function createLocalPlugin(root: string): Promise<string> {
 	return localPlugin;
 }
 
+async function createLocalCodexPlugin(root: string): Promise<string> {
+	const localPlugin = path.join(root, "omo-codex-plugin");
+	await fs.mkdir(path.join(localPlugin, ".codex-plugin"), { recursive: true });
+	await Bun.write(
+		path.join(localPlugin, "package.json"),
+		JSON.stringify({
+			name: "@sisyphuslabs/omo-codex-plugin",
+			version: "4.12.1",
+		}),
+	);
+	await Bun.write(
+		path.join(localPlugin, ".codex-plugin", "plugin.json"),
+		JSON.stringify({
+			name: "omo",
+			version: "4.12.1",
+			description: "Codex plugin manifest",
+		}),
+	);
+	return localPlugin;
+}
+
 describe("runPluginCommand({ action: 'install', args: [<local>] })", () => {
 	let tmpRoot: string;
 
@@ -142,6 +163,23 @@ describe("runPluginCommand({ action: 'install', args: [<local>] })", () => {
 			enabledFeatures: null,
 			enabled: true,
 		});
+	});
+
+	test("real local Codex plugin directory: install links and lists it as an OMP plugin", async () => {
+		const localPlugin = await createLocalCodexPlugin(tmpRoot);
+
+		await runPluginCommand({ action: "install", args: [localPlugin], flags: { json: true } });
+
+		const linkTarget = path.join(tmpRoot, "plugins", "node_modules", "@sisyphuslabs", "omo-codex-plugin");
+		const stat = await fs.lstat(linkTarget);
+		expect(stat.isSymbolicLink()).toBe(true);
+		expect(await fs.readlink(linkTarget)).toBe(localPlugin);
+
+		const manager = new PluginManager(tmpRoot);
+		const listed = await manager.list();
+		const found = listed.find(plugin => plugin.name === "@sisyphuslabs/omo-codex-plugin");
+		expect(found?.manifest.name).toBe("omo");
+		expect(found?.manifest.description).toBe("Codex plugin manifest");
 	});
 	test("list --json includes linked local plugin without package dependencies", async () => {
 		const localPlugin = await createLocalPlugin(tmpRoot);

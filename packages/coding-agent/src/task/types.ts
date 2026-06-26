@@ -2,6 +2,7 @@ import type { ThinkingLevel } from "@pk-nerdsaver-ai/pi-agent-core";
 import type { Usage } from "@pk-nerdsaver-ai/pi-ai";
 import { $env } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
+import type { AgentPrefetch } from "../discovery/helpers";
 import type { AgentSessionEvent } from "../session/agent-session";
 import type { NestedRepoPatch } from "./worktree";
 
@@ -261,6 +262,8 @@ export interface AgentDefinition {
 	autoloadSkills?: string[];
 	/** When `false`, the agent's `read` tool returns verbatim file content instead of structural summaries. */
 	readSummarize?: boolean;
+	/** Optional pre-run context prefetcher for read-only repo scouting. */
+	prefetch?: AgentPrefetch;
 	source: AgentSource;
 	filePath?: string;
 }

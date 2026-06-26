@@ -30,6 +30,7 @@ import { type CustomTool, toolCapability } from "../capability/tool";
 import type { LoadContext, LoadResult } from "../capability/types";
 import { buildRuleFromMarkdown, createSourceMeta, loadFilesFromDir, scanSkillsFromDir } from "./helpers";
 import { listOmpExtensionRoots, type OmpExtensionRoot } from "./omp-extension-roots";
+import { substitutePluginRoot } from "./substitute-plugin-root";
 
 const PROVIDER_ID = "omp-plugins";
 const DISPLAY_NAME = "OMP Extension Packages";
@@ -267,6 +268,12 @@ interface RawMcpServer {
 	type?: MCPServer["transport"];
 }
 
+function pluginRelativeCwd(rawCwd: string | undefined, rootPath: string): string | undefined {
+	if (rawCwd === undefined) return undefined;
+	const cwd = substitutePluginRoot(rawCwd, rootPath);
+	return path.isAbsolute(cwd) ? cwd : path.resolve(rootPath, cwd);
+}
+
 async function loadMCPServers(ctx: LoadContext): Promise<LoadResult<MCPServer>> {
 	const roots = await listOmpExtensionRoots(ctx);
 	const items: MCPServer[] = [];
@@ -305,10 +312,10 @@ async function loadMCPServers(ctx: LoadContext): Promise<LoadResult<MCPServer>> 
 				name: serverName,
 				...(cfg.enabled !== undefined && { enabled: cfg.enabled }),
 				...(cfg.timeout !== undefined && { timeout: cfg.timeout }),
-				...(cfg.command !== undefined && { command: cfg.command }),
-				...(cfg.args !== undefined && { args: cfg.args }),
-				...(cfg.env !== undefined && { env: cfg.env }),
-				...(cfg.cwd !== undefined && { cwd: cfg.cwd }),
+				...(cfg.command !== undefined && { command: substitutePluginRoot(cfg.command, root.path) }),
+				...(cfg.args !== undefined && { args: substitutePluginRoot(cfg.args, root.path) }),
+				...(cfg.env !== undefined && { env: substitutePluginRoot(cfg.env, root.path) }),
+				...(cfg.cwd !== undefined && { cwd: pluginRelativeCwd(cfg.cwd, root.path) }),
 				...(cfg.url !== undefined && { url: cfg.url }),
 				...(cfg.headers !== undefined && { headers: cfg.headers }),
 				...(cfg.auth !== undefined && { auth: cfg.auth }),

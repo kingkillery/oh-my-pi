@@ -286,6 +286,7 @@ export class AgentHubOverlayComponent extends Container {
 	#ageTimer: NodeJS.Timeout | undefined;
 	#remote: AgentHubRemote | undefined;
 	#sessionDir: string | undefined;
+	#currentSessionFile: string | null;
 	#resumeSession: ((sessionPath: string) => Promise<void>) | undefined;
 	#backgroundRefs: HubAgentRef[] = [];
 	#backgroundSessionPaths = new Map<string, string>();
@@ -351,6 +352,7 @@ export class AgentHubOverlayComponent extends Container {
 		this.#expandKeys = deps.expandKeys ?? ["ctrl+o"];
 		this.#focusAgent = deps.focusAgent;
 		this.#sessionDir = deps.sessionDir;
+		this.#currentSessionFile = deps.sessionFile ?? null;
 		this.#resumeSession = deps.resumeSession;
 		this.#kanbanSync =
 			deps.kanbanSync === null ? undefined : (deps.kanbanSync ?? new AgentHubKanbanSync({ projectPath: this.#cwd }));
@@ -464,7 +466,9 @@ export class AgentHubOverlayComponent extends Container {
 			const refs: HubAgentRef[] = [];
 			const sessionPaths = new Map<string, string>();
 			const subagentsByLane = new Map<string, HubAgentRef[]>();
+			const currentFile = this.#currentSessionFile;
 			for (const session of sessions) {
+				if (currentFile && path.resolve(session.path) === path.resolve(currentFile)) continue;
 				const id = `background:${session.id}`;
 				const name = backgroundInstanceDisplayName(session);
 				const createdAt = session.created.getTime();
@@ -882,6 +886,12 @@ export class AgentHubOverlayComponent extends Container {
 		const unread = this.#irc.unreadCount(ref.id);
 		if (unread > 0) {
 			parts.push(theme.fg("warning", `⧉ ${unread}`));
+		}
+		if (isRegistryAgentRef(ref) && ref.needsAttention) {
+			const reason = ref.attentionReason
+				? truncateToWidth(ref.attentionReason, TRUNCATE_LENGTHS.TITLE)
+				: "needs response";
+			parts.push(theme.fg("warning", `⚠ ${reason}`));
 		}
 		if (this.#kanbanSyncMode) {
 			const syncStatus = this.#kanbanSyncStatusByAgent.get(ref.id) ?? "not synced";

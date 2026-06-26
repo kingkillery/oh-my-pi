@@ -15,7 +15,8 @@ export type ModelRole =
 	| "commit"
 	| "title"
 	| "task"
-	| "advisor";
+	| "advisor"
+	| "fast-context";
 
 export interface ModelRoleInfo {
 	tag?: string;
@@ -36,6 +37,7 @@ export const MODEL_ROLES: Record<ModelRole, ModelRoleInfo> = {
 	title: { tag: "TITLE", name: "Title", color: "dim", hidden: true },
 	task: { tag: "TASK", name: "Subtask", color: "muted" },
 	advisor: { tag: "ADVISOR", name: "Advisor", color: "accent" },
+	"fast-context": { tag: "FASTCTX", name: "Fast Context", color: "warning" },
 };
 
 export const MODEL_ROLE_IDS: ModelRole[] = [
@@ -49,6 +51,7 @@ export const MODEL_ROLE_IDS: ModelRole[] = [
 	"title",
 	"task",
 	"advisor",
+	"fast-context",
 ];
 
 export type RoleInfo = ModelRoleInfo;

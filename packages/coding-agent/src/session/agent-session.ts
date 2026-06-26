@@ -231,6 +231,8 @@ import planModeToolDecisionReminderPrompt from "../prompts/system/plan-mode-tool
 import ttsrInterruptTemplate from "../prompts/system/ttsr-interrupt.md" with { type: "text" };
 import ttsrToolReminderTemplate from "../prompts/system/ttsr-tool-reminder.md" with { type: "text" };
 import unexpectedStopRetryTemplate from "../prompts/system/unexpected-stop-retry.md" with { type: "text" };
+import { AgentLifecycleManager } from "../registry/agent-lifecycle";
+import { AgentRegistry } from "../registry/agent-registry";
 import {
 	deobfuscateSessionContext,
 	obfuscateProviderContext,
@@ -6717,10 +6719,15 @@ export class AgentSession {
 			}
 		}
 
-		this.#disconnectFromAgent();
-		await this.abort();
-		this.#cancelOwnAsyncJobs();
-		this.#closeAllProviderSessions("new session");
+		const bgInstance = this.sessionManager.getBackgroundInstance();
+		if (bgInstance && this.isStreaming && previousSessionFile) {
+			this.#detachAsBackgroundAgent(bgInstance.name, previousSessionFile);
+		} else {
+			this.#disconnectFromAgent();
+			await this.abort();
+			this.#cancelOwnAsyncJobs();
+			this.#closeAllProviderSessions("new session");
+		}
 		this.agent.reset();
 		if (options?.drop && previousSessionFile) {
 			// Detach the advisor recorder feed and drain its writer BEFORE deleting the
@@ -6798,6 +6805,51 @@ export class AgentSession {
 	/** Drop the current session out of the background roster (the session itself is preserved). */
 	archiveBackgroundCurrentSession(): boolean {
 		return this.sessionManager.archiveBackgroundInstance() !== undefined;
+	}
+
+	/**
+	 * Detach the current running agent from the foreground and register it as a
+	 * live background agent in the global registry. The agent continues running
+	 * autonomously; the foreground session is free to switch to a new one.
+	 */
+	#detachAsBackgroundAgent(name: string, sessionFile: string): void {
+		const agentId = `background:${name.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+		const registry = AgentRegistry.global();
+
+		if (!registry.get(agentId)) {
+			registry.register({
+				id: agentId,
+				displayName: name,
+				kind: "sub",
+				session: this as unknown as AgentSession,
+				sessionFile,
+				status: "running",
+				cwd: this.sessionManager.getCwd(),
+			});
+		}
+
+		const lifecycle = AgentLifecycleManager.global();
+		const onEnd = () => {
+			registry.setStatus(agentId, "idle");
+			lifecycle.adopt(agentId, {
+				idleTtlMs: 0,
+				revive: async () => this as unknown as AgentSession,
+			});
+		};
+
+		const agent = this.agent;
+		if (!agent.state.isStreaming) {
+			onEnd();
+		} else {
+			const unsub = agent.subscribe(event => {
+				if (event.type !== "agent_end") return;
+				unsub();
+				onEnd();
+			});
+		}
+
+		this.#disconnectFromAgent();
+		logger.info("Detached background agent", { agentId, name, sessionFile });
 	}
 
 	/**
@@ -11247,8 +11299,13 @@ export class AgentSession {
 			}
 		}
 
-		this.#disconnectFromAgent();
-		await this.abort({ goalReason: "internal" });
+		const bgInstance = this.sessionManager.getBackgroundInstance();
+		if (bgInstance && this.isStreaming && previousSessionFile) {
+			this.#detachAsBackgroundAgent(bgInstance.name, previousSessionFile);
+		} else {
+			this.#disconnectFromAgent();
+			await this.abort({ goalReason: "internal" });
+		}
 
 		// Flush pending writes before switching so restore snapshots reflect committed state.
 		await this.sessionManager.flush();

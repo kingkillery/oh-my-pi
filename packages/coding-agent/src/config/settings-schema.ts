@@ -3741,6 +3741,18 @@ export const SETTINGS_SCHEMA = {
 		},
 	},
 
+	"task.prefetch.enabled": {
+		type: "boolean",
+		default: true,
+		ui: {
+			tab: "tasks",
+			group: "Subagents",
+			label: "Subagent Evidence Prefetch",
+			description:
+				"Inject deterministic local file:line candidates into opted-in subagents before their first turn. Disable to fall back to the normal model-only subagent prompt.",
+		},
+	},
+
 	"task.maxRecursionDepth": {
 		type: "number",
 		default: 2,

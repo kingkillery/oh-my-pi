@@ -46,6 +46,14 @@ describe("task agent capability descriptions", () => {
 		}
 	});
 
+	it("routes bundled explore through smol with repo evidence prefetch", () => {
+		const agents = loadBundledAgents();
+		const explore = agentByName(agents, "explore");
+
+		expect(explore.model).toEqual(["pi/smol"]);
+		expect(explore.prefetch).toBe("repo-evidence");
+	});
+
 	it("marks read-only agents in the task description and keeps full agents unmarked", async () => {
 		vi.spyOn(discoveryModule, "discoverAgents").mockResolvedValue({
 			agents: [

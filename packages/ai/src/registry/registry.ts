@@ -15,6 +15,7 @@ import { gitlabDuoProvider } from "./gitlab-duo";
 import { googleProvider } from "./google";
 import { googleAntigravityProvider } from "./google-antigravity";
 import { googleGeminiCliProvider } from "./google-gemini-cli";
+import { googleInteractionsProvider } from "./google-interactions";
 import { googleVertexProvider } from "./google-vertex";
 import { groqProvider } from "./groq";
 import { huggingfaceProvider } from "./huggingface";
@@ -126,6 +127,7 @@ const ALL = [
 	openaiProvider,
 	googleProvider,
 	googleVertexProvider,
+	googleInteractionsProvider,
 	xaiProvider,
 	groqProvider,
 	mistralProvider,
