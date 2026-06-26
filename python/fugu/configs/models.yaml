@@ -1,0 +1,76 @@
+models:
+  mock:
+    backend: mock
+    model: mock
+  codex_cli:
+    backend: codex_cli
+    model: default
+    enabled: false
+  claude_code:
+    backend: claude_code
+    model: sonnet
+    enabled: false
+  anthropic_api:
+    backend: anthropic_api
+    model: claude-opus-4-8
+    enabled: false
+    requires_env:
+      - ANTHROPIC_API_KEY
+  openai_api:
+    backend: openai_api
+    model: gpt-5.5
+    enabled: false
+    requires_env:
+      - OPENAI_API_KEY
+  local:
+    backend: local
+    model: default
+    enabled: false
+  # Budget candidate backends.
+  # Verified live against the Kimi Code docs: Anthropic-compatible Messages API at
+  # api.kimi.com/coding (x-api-key auth). kimi-for-coding is the stable model alias
+  # (auto-maps to the latest model). OpenAI-compatible base is api.kimi.com/coding/v1.
+  kimi:
+    backend: kimi
+    api: anthropic_compatible
+    base_url: https://api.kimi.com/coding
+    model: kimi-for-coding
+    enabled: false
+    requires_env:
+      - KIMI_API_KEY
+  # Verified live against api.minimax.io: MiniMax-M3 is a real model id.
+  minimax:
+    backend: minimax
+    api: openai_compatible
+    base_url: https://api.minimax.io/v1
+    model: MiniMax-M3
+    enabled: false
+    requires_env:
+      - MINIMAX_API_KEY
+  # Qwen Coder Plus via Alibaba Cloud DashScope. OpenAI-compatible endpoint.
+  qwen:
+    backend: qwen
+    api: openai_compatible
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    model: qwen-coder-plus
+    enabled: false
+    requires_env:
+      - DASHSCOPE_API_KEY
+  # 9Router local gateway: routes to 60+ providers via OpenAI-compatible proxy.
+  # Install: npm install -g 9router; run: 9router (starts localhost:20128/v1)
+  9router:
+    backend: 9router
+    api: openai_compatible
+    base_url: http://localhost:20128/v1
+    model: default
+    enabled: false
+    requires_env: []
+
+# Synthesizer / verifier fusion model. Runs Codex / ChatGPT 5.5+ to fuse candidate
+# answers. Enable with FMH_SYNTHESIZER=openai; configure via FMH_SYNTHESIZER_MODEL.
+synthesizer:
+  enabled_env: FMH_SYNTHESIZER
+  backend: openai_api
+  model: gpt-5.5
+  requires_env:
+    - OPENAI_API_KEY

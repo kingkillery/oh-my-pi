@@ -1,0 +1,4 @@
+suites:
+  search: evals/search/tasks.jsonl
+  validation: evals/validation/tasks.jsonl
+  holdout: evals/holdout/tasks.jsonl

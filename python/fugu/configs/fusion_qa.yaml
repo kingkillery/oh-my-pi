@@ -1,0 +1,135 @@
+# Fusion targeting Q&A — pick the regime, the right weaver, and concrete models for a run.
+#
+# Single source of truth for BOTH:
+#   - the CLI:        python -m harness.cli.fusion_qa            (interactive)
+#                     python -m harness.cli.fusion_qa --answers regime=agentic,signal=ground_truth,diversity=high
+#   - agents/skills:  python -m harness.cli.fusion_qa --json     (read `questions`, ask the user, apply
+#                     `recommendations` — first matching rule wins).
+#
+# Grounded in this repo's law (evals/thesis + evals/agentic): fusion beats the best single lane ONLY when
+# (a) oracle headroom exists AND (b) an OUTCOME-AWARE verifier SELECTS it. On single-answer / correlated-
+# strong-lane tasks fusion merely ties -> route the best lane. Re-derivation (synthesis on a solved item,
+# critique-revise) and debate HURT; selection wins.
+version: 1
+
+questions:
+  - id: regime
+    prompt: "What shape is the task and its answer?"
+    options:
+      - {key: mc,      label: "Single answer / multiple-choice / one fact"}
+      - {key: open,    label: "Open-ended, many required points (checklist-style)"}
+      - {key: agentic, label: "Long-horizon / multi-step / tool-use (takes actions, has an outcome)"}
+      - {key: code,    label: "Code with executable tests"}
+  - id: signal
+    prompt: "Is there an objective correctness signal?"
+    options:
+      - {key: ground_truth, label: "Yes - exact answer, unit tests, or final environment state"}
+      - {key: checklist,    label: "Partial - a rubric/checklist of required points"}
+      - {key: subjective,   label: "No - only subjective quality (would need an LLM judge)"}
+  - id: diversity
+    prompt: "How decorrelated can the lanes be?"
+    options:
+      - {key: high, label: "Several genuinely different model families"}
+      - {key: low,  label: "Only minor variants of one or two families"}
+  - id: priority
+    prompt: "Cost vs quality?"
+    options:
+      - {key: cost,     label: "Cheapest acceptable"}
+      - {key: balanced, label: "Balanced"}
+      - {key: quality,  label: "Max quality, cost secondary"}
+
+# Models verified in the tau-bench tool loop (2026-06). cx/gpt-5.5 is strong but BREAKS multi-turn tool
+# loops via litellm -> use it as synthesizer / verifier, NEVER as an agentic lane. The default agentic pool
+# spans SIX distinct families to widen oracle headroom: Moonshot (kimi), MiniMax, Zhipu GLM + DeepSeek (via
+# OpenRouter — needs OPENROUTER_API_KEY), Anthropic (cc/) and Google Gemini-Pro (ag/) via 9router-native
+# routes. The 9router qwen-team / siliconflow plans (their GLM/DeepSeek/Qwen) are auth-expired — use the
+# OpenRouter ids instead.
+models:
+  agent_lanes: ["kimi/kimi-k2.6", "minimax/MiniMax-M3", "openrouter/z-ai/glm-5.1", "openrouter/deepseek/deepseek-v4-pro", "cc/claude-sonnet-4-6", "ag/gemini-3.1-pro-low"]
+  code_lanes:  ["kimi/kimi-for-coding", "openrouter/deepseek/deepseek-v4-pro", "openrouter/z-ai/glm-4.7", "cc/claude-sonnet-4-6"]
+  text_lanes:  ["cx/gpt-5.5", "kimi/kimi-k2.6", "openrouter/z-ai/glm-5.1", "openrouter/deepseek/deepseek-v4-pro", "cc/claude-sonnet-4-6"]
+  synthesizer: "cx/gpt-5.5"     # strong; pair with a different-family verifier
+  verifier:    "cx/gpt-5.5"     # independent family from the synthesizer/lanes; also the agentic selector
+  best_single: "cx/gpt-5.5"
+
+# Cost controls merged into any FUSE recommendation, keyed by the `priority` answer. These map straight to
+# tau_fusion.py knobs: --n-lanes (pool size; 0 = all), --workers, --budget (USD cap; 0 = no cap). Dialing
+# `priority` is how you trade cost vs the oracle headroom (fewer lanes = cheaper but narrower headroom).
+cost_profiles:
+  cost:     {n_lanes: 2, workers: 4, budget_usd: 2}    # cheapest — 2 lanes, hard $2 cap
+  balanced: {n_lanes: 3, workers: 3, budget_usd: 10}   # 3 of the diverse pool, $10 cap
+  quality:  {n_lanes: 0, workers: 3, budget_usd: 0}    # all lanes, no cap (0 = unlimited)
+
+# First matching rule wins; most-specific / highest-priority first. `when` keys must all match; omitted = any.
+recommendations:
+  - id: subjective-caution
+    when: {signal: subjective}
+    decision: "CAUTION — don't trust a fusion 'win'; use a single strong model"
+    config: {mode: single, model: best_single}
+    rationale: >
+      With no objective signal, fused outputs win mostly on LLM-judge length/style bias, not real quality
+      (the judge-bias gap). Prefer one strong model, or route. Treat any LLM-judge 'win' skeptically.
+    command: "use cx/gpt-5.5 directly"
+
+  - id: low-diversity-note
+    when: {diversity: low}
+    decision: "DON'T fuse — headroom too small"
+    config: {mode: single, model: best_single}
+    rationale: >
+      Correlated lanes -> the oracle (any-lane-correct) is ~ the best lane -> no headroom for fusion to
+      capture, regardless of regime. Use the best single lane (or per-query routing for cost).
+    command: "use cx/gpt-5.5 directly"
+
+  - id: agentic-outcome-select
+    when: {regime: agentic}
+    decision: "FUSE — outcome-aware verifier SELECTION (the regime where fusion beats the best lane)"
+    config:
+      mode: fuse-select
+      lanes: agent_lanes
+      verifier: verifier
+      strategy: diff_primary          # outcome/state-diff primary, LLM tie-break
+      gate: 0.60                       # require >=0.60 verifier discrimination before overruling the best lane
+      failover: true                   # crash-failover to backup models (LANE_BACKUPS)
+      avoid: ["critique-revise", "debate / mixture-of-agents", "swap-aggregate position fixes"]
+    rationale: >
+      Long-horizon + objective outcome is where real oracle headroom exists. Run diverse lanes, then SELECT
+      by what each trajectory DID (final state/outcome) — not its transcript. Gate on >=0.60 discrimination.
+      Do not re-derive, critique-revise, or debate (all measured to hurt). cx/gpt-5.5 = verifier only.
+    command: "python evals/agentic/tau_fusion.py --domain <env> --env-aware --strategy diff_primary --gate --verifier cx/gpt-5.5 --n-lanes <cost_controls.n_lanes> --workers <cost_controls.workers> --budget <cost_controls.budget_usd>"
+
+  - id: code-test-select
+    when: {regime: code}
+    decision: "FUSE — best-of-N, select by tests (outcome)"
+    config: {mode: fuse-select, lanes: code_lanes, verifier: verifier, strategy: outcome}
+    rationale: >
+      Executable tests ARE the outcome signal. Generate from diverse coders, run the tests, select the
+      passing candidate (verifier only as a tie-break among passers). Selection > re-derivation.
+    command: "<code harness>: run code_lanes -> run tests -> keep the passing one"
+
+  - id: open-complementary-synth
+    when: {regime: open}
+    decision: "FUSE — synthesize complementary lanes (only if lanes are genuinely partial)"
+    config: {mode: fuse-synthesize, lanes: text_lanes, synthesizer: synthesizer, verifier: verifier}
+    rationale: >
+      Componential answers + diverse partial lanes can be unioned by a strong synthesizer (the adopted
+      majority_resistance prompt). CAVEAT: with strong COMPREHENSIVE lanes each is already near-complete ->
+      lift ~0 (the +0.5 lift only appeared with artificially-partial candidates). Fuse only if the lanes are
+      actually partial; otherwise route.
+    command: "fmh run-task <task.json> --profile explore --explore-models kimi/kimi-k2.6,minimax/MiniMax-M3,ag/gemini-3.5-flash-low,cx/gpt-5.5"
+
+  - id: mc-route
+    when: {regime: mc}
+    decision: "DON'T fuse — route / select the best lane"
+    config: {mode: route, model: best_single, verifier: verifier}
+    rationale: >
+      On single-answer tasks with strong correlated lanes the oracle is ~ the best lane, so fusion only
+      TIES (bootstrap-confirmed) and re-derivation can hurt. Use the best single lane, or a per-query
+      router; if you already have candidate answers, the swap-and-aggregate verifier can PICK among them.
+    command: "use cx/gpt-5.5 directly; OR fmh verifier fusion --candidate-json '[...]' --model cx/gpt-5.5  (to select)"
+
+  - id: fallback
+    when: {}
+    decision: "Default — best single model; revisit with more task detail"
+    config: {mode: single, model: best_single}
+    rationale: "Not enough signal to justify fusion; start with the best single model."
+    command: "use cx/gpt-5.5 directly"

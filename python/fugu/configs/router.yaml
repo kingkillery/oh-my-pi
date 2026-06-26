@@ -1,0 +1,18 @@
+profiles:
+  standard_coding:
+    candidates:
+      - backend: mock
+        model: mock
+        role: planner
+        prompt_variant: careful_patch
+        budget_usd: 0.25
+      - backend: mock
+        model: mock
+        role: executor
+        prompt_variant: tests_first
+        budget_usd: 0.25
+      - backend: mock
+        model: mock
+        role: critic
+        prompt_variant: independent_review
+        budget_usd: 0.25

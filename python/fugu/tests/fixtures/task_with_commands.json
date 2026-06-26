@@ -1,0 +1,41 @@
+{
+  "task_id": "task_with_commands_001",
+  "task_type": "analysis",
+  "title": "Task with one passing and one failing command",
+  "user_request": "Run success_commands and verify pass/fail behavior.",
+  "repo": {"url": null, "branch": null, "commit": null, "local_path": null},
+  "workspace": {
+    "mode": "readonly",
+    "allowed_paths": ["."],
+    "forbidden_paths": [".env"],
+    "network": "none",
+    "egress_allowlist": []
+  },
+  "acceptance_criteria": ["success_commands pass with output captured"],
+  "success_commands": [
+    "python -m pytest --version",
+    "python -m pytest definitely_missing_test_file_for_verifier_check.py"
+  ],
+  "failure_commands": [],
+  "rubric_profile": "analysis",
+  "budget": {
+    "max_total_usd": 1.0,
+    "max_candidate_usd": 0.25,
+    "max_wall_clock_seconds": 60,
+    "max_agent_turns": 5,
+    "max_repair_attempts": 1
+  },
+  "fusion": {
+    "candidate_count": 1,
+    "required_roles": ["executor"],
+    "diversity_mode": "models_and_prompts",
+    "synthesis_mode": "evidence_weighted"
+  },
+  "safety": {
+    "requires_human_review": true,
+    "destructive_actions_allowed": false,
+    "production_access_allowed": false,
+    "secret_access_allowed": false
+  },
+  "output": {"expected_type": "answer", "schema_ref": null}
+}

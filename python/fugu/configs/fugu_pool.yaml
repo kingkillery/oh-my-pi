@@ -1,0 +1,114 @@
+workers:
+  - id: qwen-team/kimi-k2.7-code
+    tags: [coding, planning]
+    cost_tier: budget
+    latency_tier: balanced
+    provider: qwen-team
+    family: kimi
+    reliability_tier: stable
+  - id: qwen-team/MiniMax-M2.5
+    tags: [coding, planning, synthesis]
+    cost_tier: budget
+    latency_tier: balanced
+    provider: qwen-team
+    family: minimax
+    reliability_tier: stable
+  - id: cx/gpt-5.5
+    tags: [coding, reasoning, math, verifier, synthesis]
+    cost_tier: premium
+    latency_tier: balanced
+    provider: cx
+    family: gpt
+    reliability_tier: stable
+  - id: qwen-team/kimi-k2.6
+    tags: [reasoning, math, planning]
+    cost_tier: budget
+    latency_tier: balanced
+    provider: qwen-team
+    family: kimi
+    reliability_tier: stable
+  - id: qwen-team/glm-5.1
+    tags: [reasoning, math]
+    cost_tier: budget
+    latency_tier: balanced
+    provider: qwen-team
+    family: glm
+    reliability_tier: stable
+  - id: ag/gemini-3.5-flash-medium
+    tags: [science, factual, verifier]
+    cost_tier: budget
+    latency_tier: fast
+    provider: ag
+    family: gemini
+    reliability_tier: stable
+  - id: gc/gemini-2.5-flash
+    tags: [science, factual, verifier]
+    cost_tier: budget
+    latency_tier: fast
+    provider: gc
+    family: gemini
+    reliability_tier: stable
+  - id: minimax/MiniMax-M3
+    tags: [long-context, coding, synthesis]
+    cost_tier: budget
+    latency_tier: balanced
+    provider: minimax
+    family: minimax
+    context_tier: long
+    reliability_tier: stable
+  - id: qwen-team/deepseek-v4-flash
+    tags: [cheap, fast, coding, reasoning]
+    cost_tier: free
+    latency_tier: fast
+    provider: qwen-team
+    family: deepseek
+    reliability_tier: variable
+  - id: ag/gemini-3.5-flash-low
+    tags: [cheap, fast, factual]
+    cost_tier: free
+    latency_tier: fast
+    provider: ag
+    family: gemini
+    reliability_tier: stable
+  - id: cc/claude-opus-4-8
+    tags: [debug, cyber, coding, reasoning]
+    cost_tier: premium
+    latency_tier: slow
+    provider: cc
+    family: claude
+    reliability_tier: stable
+  - id: cc/claude-sonnet-4-6
+    tags: [debug, cyber, coding]
+    cost_tier: premium
+    latency_tier: balanced
+    provider: cc
+    family: claude
+    reliability_tier: stable
+  - id: openrouter-free-fallback
+    tags: [free-fallback, cheap, fast]
+    cost_tier: free
+    latency_tier: fast
+    provider: openrouter-free-fallback
+    family: openrouter
+    reliability_tier: stable
+  - id: Nvidia_Super
+    tags: [free-fallback, reasoning, science]
+    cost_tier: free
+    latency_tier: balanced
+    provider: Nvidia_Super
+    family: nvidia
+    reliability_tier: variable
+  - id: GPT-OSS
+    tags: [free-fallback, coding, reasoning]
+    cost_tier: free
+    latency_tier: balanced
+    provider: GPT-OSS
+    family: gpt
+    reliability_tier: stable
+  - id: nvidia/nemotron-3-ultra-550b-a55b
+    tags: [free-fallback, reasoning, science]
+    cost_tier: free
+    latency_tier: slow
+    provider: nvidia
+    family: nemotron
+    reliability_tier: variable

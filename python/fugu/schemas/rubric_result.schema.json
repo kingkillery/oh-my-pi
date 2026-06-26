@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"RubricResult","type":"object","required":["rubric_id","pass","score","dimension_scores","failure_type"]}

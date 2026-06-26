@@ -72,8 +72,18 @@ python/robomp/src/robomp/static/
 python/robomp/web/dist/
 python/robomp/.env
 
+# Fugu runtime state
+python/fugu/runs/
+python/fugu/distill/adapter*
+python/fugu/distill/eval_*.json
+python/fugu/**/__pycache__/
+
 # Local, machine-specific boot perf baseline (see packages/coding-agent/scripts/bench-guard.ts)
 packages/coding-agent/bench/boot-baseline.json
+
+# Local bun standalone-build artifacts and OMC orchestration state
+*.bun-build
+.omc/
 
 # Local CodeGraph index (per-machine, not source)
 .codegraph/

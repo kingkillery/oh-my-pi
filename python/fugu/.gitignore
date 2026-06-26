@@ -1,0 +1,27 @@
+__pycache__/
+*.pyc
+*.pyo
+*.json.tmp
+runs/*
+!runs/.gitkeep
+harness_candidates/
+.pytest_cache/
+.omc/
+# Per-model benchmark run outputs (reproducible via `fmh evaluate-verifier --model ...`)
+evals/verifier/labeled/reports/
+evals/synthesizer/reports/
+# Synthesizer prompt-optimizer working files (winning instruction is adopted into code)
+evals/synthesizer/opt/
+# Thesis experiment run outputs + fetched external benchmark data (reproducible)
+evals/thesis/*.json
+evals/thesis/*.jsonl
+evals/verifier/external/
+# Verifier-distillation artifacts (reproducible from distill/*.py + the Colab notebook)
+distill/data/
+distill/adapter/
+distill/eval_*.json
+distill/_env_*.py
+distill/*.zip
+
+# Agentic probe run outputs (reproducible via evals/agentic/tau_headroom.py)
+evals/agentic/*.json

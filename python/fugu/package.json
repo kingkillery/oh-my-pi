@@ -1,0 +1,49 @@
+{
+  "name": "pi-llm-as-verifier",
+  "version": "0.2.2",
+  "description": "Pi skill + extension for llm-as-verifier style pairwise, repeated, criteria-decomposed candidate selection.",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "verifier",
+    "llm-as-a-verifier",
+    "evaluation",
+    "ranking"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-ai": "*",
+    "@mariozechner/pi-coding-agent": "*",
+    "@mariozechner/pi-tui": "*",
+    "@sinclair/typebox": "*"
+  },
+  "files": [
+    ".pi/extensions/llm-as-verifier/index.ts",
+    ".agents/skills/llm-as-verifier/**/*",
+    "!.agents/skills/llm-as-verifier/scripts/__pycache__/**",
+    "!.agents/skills/llm-as-verifier/scripts/**/*.pyc",
+    "harness/**/*",
+    "configs/**/*",
+    "schemas/**/*",
+    "evals/**/*",
+    "docker/**/*",
+    "tests/fixtures/**/*",
+    "pyproject.toml",
+    "prompts/*.md",
+    "README.md"
+  ],
+  "pi": {
+    "extensions": [
+      "./.pi/extensions"
+    ],
+    "skills": [
+      "./.agents/skills"
+    ],
+    "prompts": [
+      "./prompts"
+    ]
+  }
+}

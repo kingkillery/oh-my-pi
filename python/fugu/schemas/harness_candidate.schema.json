@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"HarnessCandidate","type":"object","required":["candidate_id","search_score","validation_score"]}

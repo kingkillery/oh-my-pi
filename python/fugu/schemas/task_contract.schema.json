@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TaskContract",
+  "type": "object",
+  "required": ["task_id", "task_type", "title", "user_request", "acceptance_criteria", "budget"],
+  "properties": {
+    "task_id": {"type": "string"},
+    "task_type": {"enum": ["coding", "research", "business", "analysis", "custom"]},
+    "title": {"type": "string"},
+    "user_request": {"type": "string"},
+    "acceptance_criteria": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "budget": {"type": "object"}
+  }
+}

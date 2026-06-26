@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fusion-meta-harness"
+version = "0.1.0"
+description = "Traceable Fusion Meta-Harness for bounded multi-agent evaluation and synthesis."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.7",
+  "typer>=0.12",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+# Real model-backed backends. anthropic for the Claude backend; openai for the
+# OpenAI-compatible backends (OpenAI/Codex, Kimi, MiniMax) and the synthesizer.
+anthropic = ["anthropic>=0.40"]
+openai = ["openai>=1.40"]
+llm = ["anthropic>=0.40", "openai>=1.40"]
+mcp = ["mcp>=1.0"]
+serve = ["fastapi>=0.110", "uvicorn>=0.29"]
+
+[project.scripts]
+fmh = "harness.cli.main:app"
+fmh-mcp = "mcp_server:mcp.run"
+fugu = "harness.cli.fugu_app:app"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "slow: marks tests as slow (e.g. full-repo overlay + subprocess eval)",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["harness"]
+# Ship the loose top-level mcp_server.py module too, so the fmh-mcp console script
+# (mcp_server:mcp.run) resolves after a non-editable `pip install .`. Hatchling uses
+# include/force-include for loose modules (NOT setuptools' py-modules); force-include
+# maps the file to its wheel destination explicitly so it lands at the wheel root.
+force-include = { "mcp_server.py" = "mcp_server.py" }

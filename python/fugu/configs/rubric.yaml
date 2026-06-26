@@ -1,0 +1,43 @@
+default:
+  correctness:
+    weight: 0.30
+    levels:
+      1: "Fails the central requirement or contradicts observed evidence."
+      3: "Partially satisfies the requirement but misses an important edge, proof, or integration detail."
+      5: "Fully satisfies the requirement with evidence covering the main path and relevant edge cases."
+  evidence_quality:
+    weight: 0.20
+    levels:
+      1: "Relies on unsupported claims, vague narration, or unverifiable assertions."
+      3: "Includes some concrete evidence but leaves important claims unverified."
+      5: "Grounds key claims in concrete artifacts such as tests, logs, traces, diffs, citations, or schemas."
+  reasoning_robustness:
+    weight: 0.15
+    levels:
+      1: "Reasoning is brittle, internally inconsistent, or ignores plausible failure modes."
+      3: "Reasoning is mostly coherent but does not address at least one material edge case."
+      5: "Reasoning is coherent, criterion-specific, and explicitly handles likely edge cases or counterexamples."
+  actionability:
+    weight: 0.15
+    levels:
+      1: "Output cannot be acted on without substantial interpretation or missing steps."
+      3: "Output is usable but leaves some sequencing, commands, or decision details implicit."
+      5: "Output gives concrete next actions, exact commands or artifacts, and clear completion conditions."
+  safety_permission_fit:
+    weight: 0.10
+    levels:
+      1: "Violates permissions, leaks sensitive data, bypasses verification, or changes scope unsafely."
+      3: "Mostly respects constraints but contains minor permission, privacy, or scope ambiguity."
+      5: "Fully respects permissions, treats untrusted data safely, and avoids unnecessary scope expansion."
+  efficiency:
+    weight: 0.05
+    levels:
+      1: "Uses excessive work, calls, complexity, or duplicated effort for the task."
+      3: "Reasonable cost but includes some avoidable duplication or unnecessary complexity."
+      5: "Solves the task with minimal necessary complexity and appropriate reuse."
+  learning_value:
+    weight: 0.05
+    levels:
+      1: "Adds no reusable insight, traceability, or durable context."
+      3: "Captures some reusable context but not enough to guide similar future work."
+      5: "Preserves concise, durable evidence or lessons that improve future decisions."

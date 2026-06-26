@@ -1,0 +1,38 @@
+{
+  "task_id": "mock_task_001",
+  "task_type": "coding",
+  "title": "Mock coding task",
+  "user_request": "Produce a schema-valid mock answer.",
+  "repo": {"url": null, "branch": null, "commit": null, "local_path": null},
+  "workspace": {
+    "mode": "workspace_write",
+    "allowed_paths": ["."],
+    "forbidden_paths": [".env"],
+    "network": "none",
+    "egress_allowlist": []
+  },
+  "acceptance_criteria": ["Return a non-empty answer", "Persist traces"],
+  "success_commands": [],
+  "failure_commands": [],
+  "rubric_profile": "coding",
+  "budget": {
+    "max_total_usd": 1.0,
+    "max_candidate_usd": 0.25,
+    "max_wall_clock_seconds": 60,
+    "max_agent_turns": 5,
+    "max_repair_attempts": 1
+  },
+  "fusion": {
+    "candidate_count": 3,
+    "required_roles": ["planner", "executor", "critic"],
+    "diversity_mode": "models_and_prompts",
+    "synthesis_mode": "evidence_weighted"
+  },
+  "safety": {
+    "requires_human_review": true,
+    "destructive_actions_allowed": false,
+    "production_access_allowed": false,
+    "secret_access_allowed": false
+  },
+  "output": {"expected_type": "answer", "schema_ref": null}
+}

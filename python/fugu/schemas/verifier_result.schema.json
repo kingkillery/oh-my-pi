@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"VerifierResult","type":"object","required":["verifier_id","run_id","synthesis_id","pass","checks","final_score"]}
