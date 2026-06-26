@@ -74,8 +74,8 @@ frontier from the proposers entirely** and tries to match/beat it with cheap lan
 (`minimax/MiniMax-M3`, `kimi/kimi-k2.6`, `ag/gemini-3.5-flash-low`) plus a difficulty-aware
 harness. Policy (`evals/thesis/router_harness.py`):
 
-1. **AutoMix consensus gate** — poll the 3 cheap lanes; if ≥`k` agree, the row is "Simple" → return the agreed letter with **zero frontier calls**.
-2. **Difficulty escalation** on disagreement ("Complex"), two modes:
+1. **Reliability-weighted AutoMix consensus gate** — poll the 3 cheap lanes; if ≥`k` agree *and* their summed historical reliability meets `--min-consensus-weight` (default `1.40`), the row is "Simple" → return the agreed letter with **zero frontier calls**. Weak two-lane agreements now escalate instead of cheaply locking in a likely correlated miss.
+2. **Difficulty escalation** on disagreement or weak agreement ("Complex"), two modes:
    - `strong` — FrugalGPT cascade: re-derive on the frontier, optionally with self-consistency (`--escalation-samples`, Snell compute-optimal scaling). Frontier is called on only the hard rows.
    - `cheap_ensemble` — Weaver/BoN-MAV reliability-weighted verifier vote among the cheap lanes (**still zero frontier calls**).
 
@@ -87,9 +87,9 @@ harness. Policy (`evals/thesis/router_harness.py`):
 | consensus k=3 → `strong` re-derive | ~50% of rows | **0.8994–0.902 (+0.5 to +0.8pp)** offline; **live GPQA n=48 = 0.9375 vs 0.8958** (**+4.17pp**) at **52% frontier-call reduction** |
 | cheap consensus alone (k=3 unanimous) | 0% | 0.959 *on the rows it fires* |
 
-Cheap consensus is the engine: when the cheap lanes agree they are right **0.931 (k=2) /
+Cheap consensus is the engine: when strong enough cheap lanes agree they are right **0.931 (k=2) /
 0.959 (k=3 unanimous)** — far above any cheap lane alone (0.58–0.77). The frontier is spent
-only on genuine disagreement.
+only on genuine disagreement or weak agreement.
 
 **Live confirmation.**
 

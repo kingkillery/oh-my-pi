@@ -22,6 +22,7 @@ Run:
     python evals/thesis/router_harness.py --dataset gpqa --n 80 --escalation strong --workers 6
     python evals/thesis/router_harness.py --dataset mmlu-pro --n 80 --escalation cheap_ensemble
 """
+# allow: SIZE_OK — self-contained research/eval script; splitting would obscure the runnable thesis harness.
 
 from __future__ import annotations
 
@@ -49,6 +50,8 @@ LANE_RELIABILITY = {
     "kimi/kimi-k2.6": 0.66,
     "ag/gemini-3.5-flash-low": 0.58,
 }
+DEFAULT_MIN_CONSENSUS_WEIGHT = 1.40
+
 
 _VERIFIER_SYS = (
     "You are a reputation-blind verifier for a multiple-choice question. You are given the "
@@ -58,13 +61,31 @@ _VERIFIER_SYS = (
 )
 
 
-def _consensus(letters: dict[str, str | None], k: int) -> str | None:
-    """Return the agreed option when at least `k` lanes select it (the AutoMix 'Simple' gate)."""
-    counts = collections.Counter(v for v in letters.values() if v)
-    if not counts:
+def _consensus(
+    letters: dict[str, str | None],
+    k: int,
+    min_weight: float = DEFAULT_MIN_CONSENSUS_WEIGHT,
+) -> str | None:
+    """Return the agreed option when enough reliable lanes select it."""
+    buckets: dict[str, list[str]] = collections.defaultdict(list)
+    for lane, letter in letters.items():
+        if letter:
+            buckets[letter].append(lane)
+    if not buckets:
         return None
-    top, n = counts.most_common(1)[0]
-    return top if n >= k else None
+    ranked = sorted(
+        buckets.items(),
+        key=lambda item: (
+            len(item[1]),
+            sum(LANE_RELIABILITY.get(lane, 0.6) for lane in item[1]),
+        ),
+        reverse=True,
+    )
+    top, lanes = ranked[0]
+    if len(lanes) < k:
+        return None
+    weight = sum(LANE_RELIABILITY.get(lane, 0.6) for lane in lanes)
+    return top if weight >= min_weight else None
 
 
 def _verifier_score(vmodel: str, q: dict, letter: str, reasoning: str) -> float:
@@ -115,7 +136,11 @@ def _cheap_ensemble_pick(
 
 
 def harness_answer(
-    q: dict, escalation: str, k: int, escalation_samples: int = 1
+    q: dict,
+    escalation: str,
+    k: int,
+    escalation_samples: int = 1,
+    min_consensus_weight: float = DEFAULT_MIN_CONSENSUS_WEIGHT,
 ) -> dict:
     """Run the difficulty-aware cheap harness on one question. Real calls via 9router."""
     with ThreadPoolExecutor(max_workers=len(CHEAP_LANES)) as ex:
@@ -125,7 +150,7 @@ def harness_answer(
     letters = {m: lane_res[m][0] for m in CHEAP_LANES}
     cheap_calls = len(CHEAP_LANES)
 
-    routed = _consensus(letters, k)
+    routed = _consensus(letters, k, min_consensus_weight)
     if routed is not None:
         return {
             "answer": routed,
@@ -179,6 +204,12 @@ def main() -> None:
         help="lanes that must agree to skip escalation",
     )
     ap.add_argument(
+        "--min-consensus-weight",
+        type=float,
+        default=DEFAULT_MIN_CONSENSUS_WEIGHT,
+        help="minimum summed historical reliability required before cheap consensus skips escalation",
+    )
+    ap.add_argument(
         "--escalation-samples",
         type=int,
         default=1,
@@ -203,7 +234,11 @@ def main() -> None:
         gold = q["gold"]
         try:
             h = harness_answer(
-                q, args.escalation, args.consensus_k, args.escalation_samples
+                q,
+                args.escalation,
+                args.consensus_k,
+                args.escalation_samples,
+                args.min_consensus_weight,
             )
             frontier_letter = fz._ask(FRONTIER, fz._LANE_SYS, fz._format_q(q))[0]
         except Exception as exc:  # one flaky row must not abort a long real run

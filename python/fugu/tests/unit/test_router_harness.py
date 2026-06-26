@@ -15,7 +15,7 @@ def _load_harness():
 
 def test_consensus_gate_fires_at_threshold():
     h = _load_harness()
-    assert h._consensus({"a": "B", "b": "B", "c": "C"}, k=2) == "B"
+    assert h._consensus({"a": "B", "b": "B", "c": "C"}, k=2, min_weight=0) == "B"
 
 
 def test_consensus_gate_declines_below_threshold():
@@ -26,8 +26,42 @@ def test_consensus_gate_declines_below_threshold():
 
 def test_consensus_gate_ignores_missing_lanes():
     h = _load_harness()
-    assert h._consensus({"a": None, "b": "D", "c": None}, k=1) == "D"
+    assert h._consensus({"a": None, "b": "D", "c": None}, k=1, min_weight=0) == "D"
 
+
+
+def test_consensus_gate_requires_reliable_agreement():
+    h = _load_harness()
+    # Two weaker lanes agreeing should not skip escalation when their combined reliability
+    # stays below the configured floor.
+    assert (
+        h._consensus(
+            {
+                "minimax/MiniMax-M3": "B",
+                "ag/gemini-3.5-flash-low": "B",
+                "kimi/kimi-k2.6": "C",
+            },
+            k=2,
+            min_weight=1.40,
+        )
+        is None
+    )
+
+
+def test_consensus_gate_accepts_reliable_agreement():
+    h = _load_harness()
+    assert (
+        h._consensus(
+            {
+                "kimi/kimi-k2.6": "B",
+                "minimax/MiniMax-M3": "B",
+                "ag/gemini-3.5-flash-low": "C",
+            },
+            k=2,
+            min_weight=1.40,
+        )
+        == "B"
+    )
 
 def test_cheap_ensemble_picks_highest_weighted_verifier_score(monkeypatch):
     h = _load_harness()
