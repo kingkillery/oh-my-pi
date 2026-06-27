@@ -238,7 +238,7 @@ def inspect(
         raise typer.Exit(1)
     typer.echo(summary.read_text(encoding="utf-8"))
 
-_AGENTIC_BACKENDS = frozenset({"codex_cli", "claude_code", "subprocess_cli"})
+_REAL_WORLD_BACKENDS = frozenset({"auto", "codex_cli", "claude_code", "subprocess_cli"})
 
 
 @app.command("evolve")
@@ -246,7 +246,7 @@ def evolve(
     budget: int = typer.Option(24, "--budget", help="number of evaluations"),
     suite: str = typer.Option("rqgm_code", "--suite", help="executable search suite under evals/"),
     holdout: str = typer.Option("holdout/rqgm_code", "--holdout", help="frozen executable holdout anchor"),
-    backend: str = typer.Option("9router", "--backend", help="FMH backend; agentic (codex_cli/claude_code) for real gain"),
+    backend: str = typer.Option("auto", "--backend", help="agentic backend for real workspace edits: auto | codex_cli | claude_code | subprocess_cli"),
     model: str = typer.Option("route-9", "--model", help="strong model id (Stage 3)"),
     canary_backend: str = typer.Option("", "--canary-backend", help="cheap canary backend (default: --backend)"),
     canary_model: str = typer.Option("", "--canary-model", help="cheap canary model (default: --model)"),
@@ -266,13 +266,13 @@ def evolve(
         typer.echo(_INSTALL_HINT, err=True)
         raise typer.Exit(1) from None
 
-    if backend not in _AGENTIC_BACKENDS:
+    if backend not in _REAL_WORLD_BACKENDS:
         typer.echo(
-            f"note: backend {backend!r} does not edit the workspace; coding pytest outcomes reflect the "
-            "shipped fixtures only (plumbing). Use an agentic backend (codex_cli/claude_code) for real "
-            "self-improvement.",
+            f"rqgm evolve requires an agentic editing backend, got {backend!r}; "
+            f"choose one of {sorted(_REAL_WORLD_BACKENDS)}.",
             err=True,
         )
+        raise typer.Exit(2)
 
     evolver = RqgmEvolver(
         suite=suite,
@@ -285,13 +285,6 @@ def evolve(
         seed=seed,
         root=root,
     )
-    if backend != "mock" and type(evolver.proposer).__name__ == "MockProposer":
-        typer.echo(
-            "note: the `claude` proposer CLI was not found on PATH, so scaffold edits fall back to the "
-            "deterministic no-op MockProposer; holdout_delta will be 0 even with a working backend. Install "
-            "the proposer CLI for real scaffold evolution.",
-            err=True,
-        )
     try:
         result = evolver.run()
     except EvalInfraError as exc:

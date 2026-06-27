@@ -203,35 +203,36 @@ master-key rejection + subterfuge firewall + selective erasure on the frozen
 `holdout/rqgm_code` anchor).
 
 ```bash
-# Real self-improvement needs TWO CLIs (separate roles):
-#   1. an agentic editing *backend* that solves coding tasks in the workspace
-#      (cwd=workspace) — set its launch command, and
-#   2. the *proposer* CLI (`claude` on PATH) that makes the scaffold edits.
-# Using --backend claude_code lets one tool (claude) serve both roles:
-FMH_CLAUDE_CODE_CMD="claude -p --permission-mode dontAsk" \
-  fmh rqgm evolve --backend claude_code --suite rqgm_code --holdout holdout/rqgm_code --budget 24
+# Default: pick a real local agentic backend. If `codex` is on PATH, FMH auto-sets
+# FMH_CODEX_CLI_CMD="codex exec --sandbox workspace-write --skip-git-repo-check --ephemeral".
+# If not, it tries `claude` with FMH_CLAUDE_CODE_CMD="claude -p --permission-mode dontAsk".
+fmh rqgm evolve --suite rqgm_code --holdout holdout/rqgm_code --budget 24 --json
 
-# Offline plumbing only (no creds, no edits -> holdout_delta is 0; not a gain claim):
-fmh rqgm evolve --backend mock --suite rqgm_code --holdout holdout/rqgm_code --budget 24 --json
+# Explicit backend command when you want to pin the coding agent used for task solves:
+FMH_CODEX_CLI_CMD="codex exec --sandbox workspace-write --skip-git-repo-check --ephemeral" \
+  fmh rqgm evolve --backend codex_cli --suite rqgm_code --holdout holdout/rqgm_code --budget 24 --json
+
+# Claude Code backend; `claude` also serves as the proposer CLI that edits scaffolding:
+FMH_CLAUDE_CODE_CMD="claude -p --permission-mode dontAsk" \
+  fmh rqgm evolve --backend claude_code --suite rqgm_code --holdout holdout/rqgm_code --budget 24 --json
 
 # Promote the best scaffold into the repo iff it beats the seed on the held-out suite:
-FMH_CLAUDE_CODE_CMD="claude -p --permission-mode dontAsk" fmh rqgm evolve --backend claude_code --apply
+fmh rqgm evolve --backend auto --apply
 ```
 
-- **Backend matters.** `mock` / `9router` (and other single-shot backends) do **not**
-  edit the workspace, so coding pytest outcomes reflect only the shipped fixtures —
-  these exercise the loop *plumbing* (the CLI prints a note). Only an agentic backend
-  (`codex_cli` / `claude_code`) produces a meaningful `holdout_delta`.
-- **Two CLIs, two roles.** The `--backend` solves coding tasks (must be agentic to
-  edit the workspace: `codex_cli` / `claude_code`); the *proposer* (`claude` on PATH)
-  edits the scaffolding. If `claude` is missing the proposer falls back to a no-op
-  MockProposer (the CLI prints a note) and `holdout_delta` stays 0 even with a working
-  backend.
+- **Backend matters.** `rqgm evolve` now rejects `mock`, `9router`, and other
+  single-shot backends. They cannot edit the task workspace, so they cannot test the
+  paper's real self-improvement claim. Use `codex_cli`, `claude_code`,
+  `subprocess_cli`, or the default `auto` resolver.
+- **Two CLIs, two roles.** The `--backend` solves coding tasks and must be agentic
+  (workspace-editing). The *proposer* (`claude` on PATH) edits the scaffolding. If
+  `claude` is missing, `rqgm evolve` aborts instead of falling back to no-op evolution.
 - **Cascade affordability** is task-count + reduced per-task budget (turns/wall-clock),
   not model tier — agentic CLIs bake the model into their launch command and ignore
   `--model`, so the cheap canary subset (not a cheaper model) is the real lever.
-- **Fail-fast preflight:** a real backend with no launch command set aborts before the
-  loop, so a misconfigured run can't pass vacuously with `holdout_delta == 0`.
+- **Fail-fast preflight:** non-agentic backends, missing launch commands, or missing
+  proposer tooling abort before the loop, so a run cannot report a vacuous zero-delta
+  "success."
 - **Safety:** candidates physically cannot edit `FORBIDDEN_PATHS` (incl. the held-out
   anchor) via `check_paths`; the subterfuge firewall invalidates any episode that
   mutates a forbidden/holdout file; `--apply` is human-initiated and gated on a strict

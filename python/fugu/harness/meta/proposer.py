@@ -102,10 +102,14 @@ class MockProposer:
         )
 
 
+class ProposerError(RuntimeError):
+    """A real proposer failed before producing a usable scaffold edit."""
+
+
 class ClaudeProposer:
     """Real proposer adapter using the Claude Code CLI, same interface as
-    MockProposer. Fails closed: if `claude` is not on PATH it returns a no-op
-    proposal rather than raising, so the optimizer continues."""
+    MockProposer. Real failures raise so production RQGM runs cannot silently
+    degrade to no-op evolution."""
 
     def __init__(self, executable: str = "claude") -> None:
         self.executable = executable
@@ -131,13 +135,15 @@ class ClaudeProposer:
         ]
 
     def propose(self, candidate_id: str, candidate_dir: Path | None = None, instruction: str | None = None) -> HarnessProposal:
-        if not self.available() or candidate_dir is None:
+        if candidate_dir is None:
             return HarnessProposal(
                 candidate_id=candidate_id,
                 changed_paths=[],
-                summary="claude CLI unavailable; no proposal generated.",
+                summary="No candidate directory was provided; no proposal generated.",
                 expected_impact="Optimizer records a no-op candidate and continues.",
             )
+        if not self.available():
+            raise ProposerError(f"{self.executable!r} proposer CLI is not on PATH")
         # The editable-surface restriction is the safety-critical core of the prompt
         # and is always present; an optional `instruction` (e.g. the RQGM DE-anchored
         # mutation recipe) is layered on top to steer the edit strategy.
@@ -154,21 +160,20 @@ class ClaudeProposer:
         # gate effective — the prompt restriction alone is not enforcement.
         before = _snapshot_tree(candidate_dir)
         try:
-            subprocess.run(
+            result = subprocess.run(
                 self.build_command(),
                 input=prompt,
                 cwd=str(candidate_dir),
                 capture_output=True,
                 text=True,
                 timeout=900,
+                check=False,
             )
-        except Exception as exc:  # noqa: BLE001 - never crash the optimizer
-            return HarnessProposal(
-                candidate_id=candidate_id,
-                changed_paths=[],
-                summary=f"claude proposer error: {exc}",
-                expected_impact="Optimizer records a no-op candidate and continues.",
-            )
+        except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+            raise ProposerError(f"claude proposer invocation failed: {exc}") from exc
+        if result.returncode != 0:
+            stderr = result.stderr.strip() or result.stdout.strip() or "no output"
+            raise ProposerError(f"claude proposer exited {result.returncode}: {stderr}")
         changed = _changed_paths(before, _snapshot_tree(candidate_dir))
         return HarnessProposal(
             candidate_id=candidate_id,

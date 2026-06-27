@@ -16,10 +16,10 @@ FMH editable surface (``_COPY_SURFACE``) with three real-world gates:
   subterfuge firewall + selective erasure, gated on the frozen holdout anchor.
 
 Safety: the loop never edits ``FORBIDDEN_PATHS`` (``CandidateManager.check_paths``
-guarantees it) and never weakens ``command_policy``. The executable coding reward is
-only *meaningful* under an agentic editing backend (``codex_cli`` / ``claude_code``,
-run with ``cwd=workspace``); ``mock`` / ``9router`` single-shot backends do not edit
-the workspace, so they exercise the loop plumbing only (``holdout_delta`` ~ 0).
+guarantees it) and never weakens ``command_policy``. The executable coding reward
+requires an agentic editing backend (``codex_cli`` / ``claude_code`` /
+``subprocess_cli``, run with ``cwd=workspace``). Single-shot or mock backends are
+rejected for ``rqgm evolve`` because they cannot test real self-improvement.
 """
 
 from __future__ import annotations
@@ -40,7 +40,6 @@ from rqgm.beta import best_belief, posterior_mean
 from rqgm.providers import EvaluatorCandidate, RoleSpec
 from rqgm.search import exponential_checkpoints
 
-from harness.core.lifecycle import BACKENDS
 from harness.meta.candidate_manager import CandidateManager
 from harness.meta.evaluator import (
     EvalInfraError,
@@ -51,7 +50,7 @@ from harness.meta.evaluator import (
 )
 from harness.meta.forbidden_paths import FORBIDDEN_PATHS
 from harness.meta.promotion import promotion_allowed
-from harness.meta.proposer import ClaudeProposer, MockProposer, _snapshot_tree
+from harness.meta.proposer import ClaudeProposer, MockProposer, ProposerError, _snapshot_tree
 
 # -- tunables (plan defaults; each is a code-level constant with a documented value).
 BB_EPSILON = 0.05          # best-belief quantile (matches RQGMConfig default)
@@ -65,13 +64,18 @@ EST_TAU = 0.5              # max verdict-flip rate under semantic-preserving per
 R_DISC_MIN = 0.1          # drop a saturated/non-discriminating verifier below this verdict std
 MIN_ANCHOR_OUTCOMES = 4    # minimum anchor items scored for a verifier challenger to qualify
 
-# 9router/single-shot backends do not edit the workspace, so coding pytest outcomes
-# reflect only the shipped fixtures (plumbing). Real self-improvement needs one of these.
-_AGENTIC_BACKENDS = frozenset({"codex_cli", "claude_code", "subprocess_cli"})
+# Real self-improvement needs an agentic CLI that edits the task workspace.
+_AUTO_BACKEND = "auto"
+_AGENTIC_BACKEND_ORDER = ("codex_cli", "claude_code", "subprocess_cli")
+_AGENTIC_BACKENDS = frozenset(_AGENTIC_BACKEND_ORDER)
 _AGENTIC_CMD_ENV = {
     "codex_cli": "FMH_CODEX_CLI_CMD",
     "claude_code": "FMH_CLAUDE_CODE_CMD",
     "subprocess_cli": "FMH_SUBPROCESS_CLI_CMD",
+}
+_AUTO_AGENTIC_COMMANDS = {
+    "codex_cli": ("codex", "codex exec --sandbox workspace-write --skip-git-repo-check --ephemeral"),
+    "claude_code": ("claude", "claude -p --permission-mode dontAsk"),
 }
 
 # Evaluator subset of the editable surface: a candidate editing any of these is a
@@ -126,13 +130,43 @@ def _perturb(src: str) -> str:
     return src.rstrip("\n") + "\n\n# rqgm-est: semantically-irrelevant trailing comment\n"
 
 
-def _default_proposer(backend: str):
-    """Offline (``mock``) runs use the deterministic MockProposer for reproducible
-    plumbing. Real runs prefer the agentic ClaudeProposer (which makes meaningful
-    scaffold edits driven by the DE instruction) and fall back to MockProposer when
-    the ``claude`` CLI is unavailable."""
-    if backend == "mock":
-        return MockProposer()
+def prepare_real_world_backend(backend: str) -> str:
+    """Resolve and configure a backend that can edit task workspaces.
+
+    ``auto`` picks the first locally available agentic backend. Explicit codex/claude
+    backends use operator-provided launch commands when present, or a safe local
+    non-interactive default when the CLI is on PATH. ``subprocess_cli`` is generic and
+    therefore must be configured explicitly."""
+    if backend == _AUTO_BACKEND:
+        for candidate in _AGENTIC_BACKEND_ORDER:
+            env_name = _AGENTIC_CMD_ENV[candidate]
+            auto = _AUTO_AGENTIC_COMMANDS.get(candidate)
+            if os.environ.get(env_name) or (auto is not None and shutil.which(auto[0]) is not None):
+                return prepare_real_world_backend(candidate)
+        raise EvalInfraError(
+            "rqgm evolve requires an agentic editing backend; set FMH_CODEX_CLI_CMD, "
+            "FMH_CLAUDE_CODE_CMD, or FMH_SUBPROCESS_CLI_CMD, or install codex/claude"
+        )
+    if backend not in _AGENTIC_BACKENDS:
+        raise EvalInfraError(
+            f"rqgm evolve requires an agentic editing backend, got {backend!r}; "
+            f"choose one of {sorted(_AGENTIC_BACKENDS)} or {_AUTO_BACKEND!r}"
+        )
+    env_name = _AGENTIC_CMD_ENV[backend]
+    if os.environ.get(env_name):
+        return backend
+    auto = _AUTO_AGENTIC_COMMANDS.get(backend)
+    if auto is not None and shutil.which(auto[0]) is not None:
+        os.environ[env_name] = auto[1]
+        return backend
+    raise EvalInfraError(
+        f"backend {backend!r} requires {env_name} to be set to an agentic CLI launch command"
+    )
+
+
+def _default_proposer(_backend: str):
+    """Real runs use ClaudeProposer for scaffold edits. If Claude is unavailable,
+    preflight rejects the run rather than silently falling back to no-op evolution."""
     claude = ClaudeProposer()
     return claude if claude.available() else MockProposer()
 
@@ -258,7 +292,7 @@ class RqgmEvolver:
         self,
         suite: str = "rqgm_code",
         holdout: str = "holdout/rqgm_code",
-        backend: str = "9router",
+        backend: str = _AUTO_BACKEND,
         model: str = "route-9",
         canary_backend: str | None = None,
         canary_model: str | None = None,
@@ -301,15 +335,12 @@ class RqgmEvolver:
 
     # -- preflight (fail fast so a misconfigured real backend can't pass vacuously) --
     def _preflight(self) -> None:
-        if self.backend == "mock":
-            return
-        if self.backend not in BACKENDS:
-            raise EvalInfraError(f"unknown backend {self.backend!r}; available: {sorted(BACKENDS)}")
-        cmd_env = _AGENTIC_CMD_ENV.get(self.backend)
-        if cmd_env and not os.environ.get(cmd_env):
+        self.backend = prepare_real_world_backend(self.backend)
+        self.canary_backend = prepare_real_world_backend(self.canary_backend)
+        if isinstance(self.proposer, MockProposer):
             raise EvalInfraError(
-                f"backend {self.backend!r} requires {cmd_env} to be set (the agentic CLI launch command); "
-                "without it every eval fails closed and holdout_delta would be vacuously 0"
+                "rqgm evolve requires the `claude` proposer CLI for real scaffold edits; "
+                "install claude or pass an explicit proposer in tests"
             )
 
     # -- compilation / liveness -------------------------------------------------
@@ -442,11 +473,14 @@ class RqgmEvolver:
             candidate_id, parent.workspace["candidate_id"], source_root=base_dir
         )
         instruction = self._de_instruction(base, parent, live)
-        proposal = self.proposer.propose(candidate_id, candidate_dir, instruction=instruction)
+        try:
+            proposal = self.proposer.propose(candidate_id, candidate_dir, instruction=instruction)
+        except ProposerError as exc:
+            raise EvalInfraError(f"proposer failed: {exc}") from exc
         if self.manager.check_paths(proposal.changed_paths):
             return None  # forbidden-path / off-surface edit -> no node
         if not proposal.changed_paths:
-            return None  # a no-op child only competes; drop it
+            return None  # benign empty LLM proposal; fail only if the whole run gets stuck
         signature = self._signature(candidate_dir, proposal.changed_paths)
         if signature in self._signatures:
             return None  # novelty gate: duplicate diff
@@ -484,8 +518,6 @@ class RqgmEvolver:
             return 0
         if role.kind == "evaluator_dependent":  # reviewer: verifier liveness signal
             return 1 if self._compiles(candidate_dir, list(_EVALUATOR_SURFACE)) else 0
-        if self.backend == "mock":
-            return 1  # offline collapse: Stage 1 only (mock never edits the workspace)
         # Stage 2 (cheap canary): skip the strong eval if the child is worse than its
         # parent on a fixed canary subset. The affordability lever is task-count +
         # reduced per-task budget, which works for every backend (incl. agentic CLIs).
@@ -674,6 +706,11 @@ class RqgmEvolver:
             # (3) checkpoint: maybe co-evolve the verifier + selectively erase.
             if num_eval in checkpoints:
                 self._checkpoint(frozen, epoch, replacements, num_eval)
+        if num_exp > 0 and len(self.archive.nodes) == 1:
+            raise EvalInfraError(
+                "proposer produced no accepted scaffold edits; check proposer CLI permissions and output"
+            )
+
 
         best_id = self._select_best()
         best_dir = self.archive.nodes[best_id].workspace["candidate_dir"]

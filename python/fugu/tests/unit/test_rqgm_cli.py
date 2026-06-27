@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
@@ -9,6 +10,7 @@ pytest.importorskip("rqgm")
 
 from harness.cli.main import app  # noqa: E402
 import harness.rqgm_evolve as ev  # noqa: E402
+from harness.meta.proposer import HarnessProposal  # noqa: E402
 
 
 def test_rqgm_search_mock_emits_json(tmp_path):
@@ -37,7 +39,29 @@ def test_rqgm_search_mock_emits_json(tmp_path):
 
 
 
-def test_rqgm_evolve_mock_emits_json(tmp_path, monkeypatch):
+class _ChangingProposer:
+    def propose(self, candidate_id, candidate_dir=None, instruction=None):
+        target = Path(candidate_dir) / "prompts" / "rqgm_reviewer.md"
+        target.write_text(target.read_text(encoding="utf-8") + f"\n# {candidate_id}\n", encoding="utf-8")
+        return HarnessProposal(
+            candidate_id=candidate_id,
+            changed_paths=["prompts/rqgm_reviewer.md"],
+            summary="changes reviewer prompt",
+            expected_impact="exercise real-backend evolve path",
+        )
+
+
+def test_rqgm_evolve_rejects_mock_backend():
+    runner = CliRunner()
+    result = runner.invoke(app, ["rqgm", "evolve", "--backend", "mock", "--budget", "1"])
+    assert result.exit_code == 2
+    assert "requires an agentic editing backend" in (result.stdout + result.stderr)
+
+
+def test_rqgm_evolve_real_backend_emits_json(tmp_path, monkeypatch):
+    monkeypatch.setenv("FMH_SUBPROCESS_CLI_CMD", "python fake-agent.py")
+    monkeypatch.setattr(ev, "_default_proposer", lambda backend: _ChangingProposer())
+    monkeypatch.setattr(ev, "evaluate_candidate_task", lambda *args, **kwargs: True)
     monkeypatch.setattr(ev, "evaluate_candidate_suite", lambda *args, **kwargs: 0.5)
     runner = CliRunner()
     result = runner.invoke(
@@ -46,7 +70,7 @@ def test_rqgm_evolve_mock_emits_json(tmp_path, monkeypatch):
             "rqgm",
             "evolve",
             "--backend",
-            "mock",
+            "subprocess_cli",
             "--budget",
             "8",
             "--seed",

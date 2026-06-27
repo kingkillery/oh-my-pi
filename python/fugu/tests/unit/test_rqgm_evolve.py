@@ -6,6 +6,7 @@ is asserted deterministically without a real backend or creds.
 """
 
 from __future__ import annotations
+import os
 
 from pathlib import Path
 
@@ -17,7 +18,8 @@ from rqgm.archive import ArchiveNode, UtilityRecord  # noqa: E402
 from rqgm.providers import EvaluatorCandidate, RoleSpec  # noqa: E402
 
 import harness.rqgm_evolve as ev  # noqa: E402
-from harness.meta.proposer import HarnessProposal  # noqa: E402
+import harness.meta.proposer as proposer_mod  # noqa: E402
+from harness.meta.proposer import ClaudeProposer, HarnessProposal, ProposerError  # noqa: E402
 
 SRC = Path.cwd()
 
@@ -74,9 +76,52 @@ def test_snapshot_guarded_detects_holdout_mutation(tmp_path):
     assert ev._snapshot_guarded(tmp_path) == before  # benign __pycache__ ignored
 
 
+def test_claude_proposer_nonzero_exit_raises(tmp_path, monkeypatch):
+    proposer = ClaudeProposer()
+    monkeypatch.setattr(proposer, "available", lambda: True)
+    monkeypatch.setattr(proposer, "build_command", lambda: ["claude"])
+
+    class _Result:
+        returncode = 1
+        stdout = ""
+        stderr = "auth failed"
+
+    monkeypatch.setattr(proposer_mod.subprocess, "run", lambda *args, **kwargs: _Result())
+    with pytest.raises(ProposerError, match="auth failed"):
+        proposer.propose("candidate_bad", tmp_path)
+
+
+# -- real backend preflight -------------------------------------------------------
+
+def test_prepare_real_world_backend_rejects_mock_backend():
+    with pytest.raises(ev.EvalInfraError, match="agentic editing backend"):
+        ev.prepare_real_world_backend("mock")
+
+
+def test_prepare_real_world_backend_autowires_codex(monkeypatch):
+    monkeypatch.delenv("FMH_CODEX_CLI_CMD", raising=False)
+    monkeypatch.delenv("FMH_CLAUDE_CODE_CMD", raising=False)
+    monkeypatch.delenv("FMH_SUBPROCESS_CLI_CMD", raising=False)
+    monkeypatch.setattr(ev.shutil, "which", lambda name: f"/usr/bin/{name}" if name == "codex" else None)
+    assert ev.prepare_real_world_backend("auto") == "codex_cli"
+    assert os.environ["FMH_CODEX_CLI_CMD"].startswith("codex exec ")
+
+
 # -- helpers for evolver gate tests ----------------------------------------------
 
-def _evolver(tmp_path, monkeypatch, backend="mock"):
+class _ChangingProposer:
+    def propose(self, candidate_id, candidate_dir=None, instruction=None):
+        target = Path(candidate_dir) / "prompts" / "rqgm_reviewer.md"
+        target.write_text(target.read_text(encoding="utf-8") + f"\n# {candidate_id}\n", encoding="utf-8")
+        return HarnessProposal(
+            candidate_id=candidate_id,
+            changed_paths=["prompts/rqgm_reviewer.md"],
+            summary="changes reviewer prompt",
+            expected_impact="exercise real-backend evolve path",
+        )
+
+
+def _evolver(tmp_path, monkeypatch, backend="subprocess_cli"):
     e = ev.RqgmEvolver(backend=backend, budget=8, seed=0, root=tmp_path / "hc", source_root=SRC)
     monkeypatch.setattr(e, "_anchor_items", lambda: [
         ("good", "t", True), ("bad", "t", False), ("good2", "t", True), ("bad2", "t", False),
@@ -188,7 +233,7 @@ def test_checkpoint_replaces_and_erases_reviewer_records(tmp_path, monkeypatch):
 # -- Improvement 2: cascade short-circuit ----------------------------------------
 
 def test_cascade_short_circuits_on_compile_failure(tmp_path, monkeypatch):
-    e = ev.RqgmEvolver(backend="9router", budget=8, seed=0, root=tmp_path / "hc", source_root=SRC)
+    e = ev.RqgmEvolver(backend="subprocess_cli", budget=8, seed=0, root=tmp_path / "hc", source_root=SRC)
     calls: list[int] = []
     monkeypatch.setattr(ev, "evaluate_candidate_task", lambda *a, **k: calls.append(1) or True)
     candidate_dir = e.manager.create_candidate("candidate_bad", None, source_root=SRC)
@@ -213,24 +258,67 @@ def test_de_expand_rejects_forbidden_path(tmp_path):
                 expected_impact="should be blocked by check_paths",
             )
 
-    e = ev.RqgmEvolver(backend="mock", budget=8, seed=0, root=tmp_path / "hc", source_root=SRC, proposer=_ForbiddenProposer())
+    e = ev.RqgmEvolver(backend="subprocess_cli", budget=8, seed=0, root=tmp_path / "hc", source_root=SRC, proposer=_ForbiddenProposer())
     seed_dir = e.manager.create_candidate("candidate_seed", None, source_root=SRC)
     e.archive.add_node(ArchiveNode("node_0000", None, workspace={"candidate_id": "candidate_seed", "candidate_dir": str(seed_dir), "changed_paths": []}))
     e._current_epoch = {0: "verifier_e0"}
     assert e._de_expand(e.archive.nodes["node_0000"]) is None
 
 
+def test_de_expand_skips_empty_real_proposal(tmp_path):
+    class _NoopProposer:
+        def propose(self, candidate_id, candidate_dir=None, instruction=None):
+            return HarnessProposal(
+                candidate_id=candidate_id,
+                changed_paths=[],
+                summary="no changes",
+                expected_impact="skip this attempt",
+            )
+
+    e = ev.RqgmEvolver(backend="subprocess_cli", budget=8, seed=0, root=tmp_path / "hc", source_root=SRC, proposer=_NoopProposer())
+    seed_dir = e.manager.create_candidate("candidate_seed", None, source_root=SRC)
+    e.archive.add_node(ArchiveNode("node_0000", None, workspace={"candidate_id": "candidate_seed", "candidate_dir": str(seed_dir), "changed_paths": []}))
+    e._current_epoch = {0: "verifier_e0"}
+    assert e._de_expand(e.archive.nodes["node_0000"]) is None
+
+
+def test_run_aborts_when_all_proposals_are_empty(tmp_path, monkeypatch):
+    class _NoopProposer:
+        def propose(self, candidate_id, candidate_dir=None, instruction=None):
+            return HarnessProposal(
+                candidate_id=candidate_id,
+                changed_paths=[],
+                summary="no changes",
+                expected_impact="should abort if the run never accepts a child",
+            )
+
+    monkeypatch.setenv("FMH_SUBPROCESS_CLI_CMD", "python fake-agent.py")
+    monkeypatch.setattr(ev, "evaluate_candidate_task", lambda *a, **k: True)
+    e = ev.RqgmEvolver(backend="subprocess_cli", budget=2, seed=0, root=tmp_path / "hc", source_root=SRC, proposer=_NoopProposer())
+    with pytest.raises(ev.EvalInfraError, match="no accepted scaffold edits"):
+        e.run()
+
+
 # -- Improvement 1: full loop mechanics ------------------------------------------
 
 @pytest.mark.slow
 def test_run_completes_and_samples_multiple_parents(tmp_path, monkeypatch):
-    # Stub only the two final holdout suite evals (real pytest) so the loop mechanics
-    # are exercised end-to-end without the ~35s executable holdout comparison.
+    # Stub canary/strong task evals and final holdout suite evals so the loop mechanics
+    # are exercised end-to-end on an agentic backend without spending real model calls.
+    monkeypatch.setenv("FMH_SUBPROCESS_CLI_CMD", "python fake-agent.py")
+    monkeypatch.setattr(ev, "evaluate_candidate_task", lambda *a, **k: True)
     monkeypatch.setattr(ev, "evaluate_candidate_suite", lambda *a, **k: 0.5)
-    e = ev.RqgmEvolver(backend="mock", budget=24, seed=0, root=tmp_path / "hc", source_root=SRC)
+    e = ev.RqgmEvolver(
+        backend="subprocess_cli",
+        budget=24,
+        seed=0,
+        root=tmp_path / "hc",
+        source_root=SRC,
+        proposer=_ChangingProposer(),
+    )
     result = e.run()
     assert result.num_evaluations == 24
     assert result.archive_size > 1                       # expansion grew the archive
     assert len(set(result.sampled_parents)) >= 2         # proportional, non-greedy sampling
-    assert result.records_retained == 24                 # no evaluator challengers under mock -> no erasure
-    assert result.holdout_delta == 0.0                   # mock can't edit -> honest zero delta
+    assert result.records_retained == 24                 # no evaluator challengers -> no erasure
+    assert result.holdout_delta == 0.0                   # stubbed equal holdout suites -> zero delta
