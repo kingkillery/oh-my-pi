@@ -404,6 +404,12 @@ The same prompt cards surface over ACP, so editors get the picker without writin
 
 ![omp TUI: the ask tool renders an option picker with three choices, a (Recommended) badge on the first, and 'up/down navigate · enter select · esc cancel' footer.](https://omp.sh/captures/ask.webp)
 
+### Ephemeral — isolate the whole session
+
+`omp -p "fix the failing tests" --ethereal`
+
+`--ethereal` runs the entire session against a throwaway copy of your repo, so the agent never touches your working tree. The default `auto` mode reflink-copies a Git repo (falling back to a `git worktree` overlay, or a plain copy off-Git); `.env` files and secrets stay home unless you opt in with `--copy-env`/`--copy-secret`, `--export-patch out.patch` hands back the diff, and `--preserve-workspace` keeps the sandbox for inspection. See [Ethereal Workspaces](docs/ethereal-workspaces.md).
+
 ### SDK — embed in Node
 
 `@pk-nerdsaver-ai/pi-coding-agent`

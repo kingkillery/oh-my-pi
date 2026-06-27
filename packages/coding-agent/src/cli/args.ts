@@ -66,6 +66,17 @@ export interface Args {
 	noTitle?: boolean;
 	autoApprove?: boolean;
 	approvalMode?: "always-ask" | "write" | "yolo";
+	ethereal?: boolean;
+	workspaceMode?: "auto" | "copy" | "worktree";
+	workspaceRoot?: string;
+	preserveWorkspace?: boolean;
+	cleanupWorkspace?: boolean;
+	copyEnv?: boolean;
+	envFiles?: string[];
+	secretFiles?: string[];
+	secretAllowlist?: string;
+	exportPatch?: string;
+	workspaceName?: string;
 	messages: string[];
 	fileArgs: string[];
 	/** Extension-registered flags this parse recognized — name to value. */
@@ -215,6 +226,14 @@ export function parseArgs(inputArgs: string[], extensionFlags?: Map<string, { ty
 			result.noTitle = true;
 		} else if (arg === "--auto-approve" || arg === "--yolo") {
 			result.autoApprove = true;
+		} else if (arg === "--ethereal") {
+			result.ethereal = true;
+		} else if (arg === "--preserve-workspace") {
+			result.preserveWorkspace = true;
+		} else if (arg === "--cleanup-workspace") {
+			result.cleanupWorkspace = true;
+		} else if (arg === "--copy-env") {
+			result.copyEnv = true;
 		} else if (arg.startsWith("@")) {
 			let filePath = arg.slice(1);
 			if (filePath.startsWith('"') && filePath.endsWith('"') && filePath.length > 1) {

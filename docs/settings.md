@@ -585,6 +585,23 @@ For a custom status line, set `statusLine.preset: custom` and configure `statusL
 | `ask.timeout` | number | `0` | Seconds before an `ask` prompt times out; `0` = no timeout. (Legacy ms values are migrated to seconds.) |
 | `ask.notify` | enum | `on` | `on`, `off`. |
 
+### Ethereal Workspaces
+
+| Key | Type | Default | Values |
+|---|---|---|---|
+| `workspace.enabled` | boolean | `false` | Enable Ethereal Workspaces by default. |
+| `workspace.mode` | enum | `copy` | `auto`, `copy`, `worktree`. `auto` uses reflink copy for Git repos when available, otherwise git worktree; non-Git repos use copy. |
+| `workspace.root` | string | unset | Parent directory for created workspaces; unset uses the OS temp directory under `oh-my-pi/workspaces`. |
+| `workspace.preserve` | boolean | `false` | Keep the workspace after the session exits. |
+| `workspace.copyEnv` | boolean | `false` | Copy common repo-root `.env` files. |
+| `workspace.envFiles` | array | `[]` | Explicit env files to copy. |
+| `workspace.secretFiles` | array | `[]` | Explicit secret/config files to copy. |
+| `workspace.secretAllowlist` | string | unset | Newline-delimited exact allowlist for env/secret copies. |
+| `workspace.exportPatch` | string | unset | Patch path to write when the session exits. |
+| `workspace.name` | string | unset | Human-readable sanitized workspace suffix. |
+
+When enabled, the entire top-level agent session runs from the Ethereal Workspace. This includes interactive TUI sessions, not only `omp -p` one-shot prompts. See [Ethereal Workspaces](./ethereal-workspaces.md) for lifecycle and safety details.
+
 ### Providers and services
 
 ```yaml

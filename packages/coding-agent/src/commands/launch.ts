@@ -142,6 +142,42 @@ export default class Index extends Command {
 		"max-time": Flags.string({
 			description: "Stop the session after this many seconds",
 		}),
+		ethereal: Flags.boolean({
+			description: "Run inside an Ethereal Workspace: a disposable isolated repo workspace",
+		}),
+		"workspace-mode": Flags.string({
+			description: "Workspace mode for Ethereal Workspaces",
+			options: ["auto", "copy", "worktree"],
+		}),
+		"workspace-root": Flags.string({
+			description: "Directory where Ethereal Workspaces are created",
+		}),
+		"preserve-workspace": Flags.boolean({
+			description: "Keep the Ethereal Workspace after the run and print its path",
+		}),
+		"cleanup-workspace": Flags.boolean({
+			description: "Delete the Ethereal Workspace after the run (default)",
+		}),
+		"copy-env": Flags.boolean({
+			description: "Copy common repo .env files into the Ethereal Workspace",
+		}),
+		"env-file": Flags.string({
+			description: "Copy a specific env file into the Ethereal Workspace (repeatable)",
+			multiple: true,
+		}),
+		"copy-secret": Flags.string({
+			description: "Copy an explicit secret/config file into the Ethereal Workspace (repeatable)",
+			multiple: true,
+		}),
+		"secret-allowlist": Flags.string({
+			description: "Newline-delimited exact allowlist for env/secret files copied into the workspace",
+		}),
+		"export-patch": Flags.string({
+			description: "Write a patch of Ethereal Workspace changes to this path after the run",
+		}),
+		"workspace-name": Flags.string({
+			description: "Human-readable Ethereal Workspace name (sanitized for the filesystem)",
+		}),
 		// `--auto-approve` / `--yolo`: declared here so oclif's auto-generated `--help` lists it.
 		// Runtime parsing happens in `cli/args.ts parseArgs` (line 176 in that file) — `runRootCommand`
 		// consumes the manual-parser output, not these oclif flag values. If you rename or remove
