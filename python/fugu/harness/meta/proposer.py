@@ -81,7 +81,7 @@ class MockProposer:
     edit (appends a comment to configs/router.yaml in the candidate copy);
     without one it is a no-op (preserves the original single-arg contract)."""
 
-    def propose(self, candidate_id: str, candidate_dir: Path | None = None) -> HarnessProposal:
+    def propose(self, candidate_id: str, candidate_dir: Path | None = None, instruction: str | None = None) -> HarnessProposal:
         if candidate_dir is not None:
             router_cfg = Path(candidate_dir) / "configs" / "router.yaml"
             if router_cfg.exists():
@@ -130,7 +130,7 @@ class ClaudeProposer:
             ",".join(_DENIED_TOOLS),
         ]
 
-    def propose(self, candidate_id: str, candidate_dir: Path | None = None) -> HarnessProposal:
+    def propose(self, candidate_id: str, candidate_dir: Path | None = None, instruction: str | None = None) -> HarnessProposal:
         if not self.available() or candidate_dir is None:
             return HarnessProposal(
                 candidate_id=candidate_id,
@@ -138,13 +138,17 @@ class ClaudeProposer:
                 summary="claude CLI unavailable; no proposal generated.",
                 expected_impact="Optimizer records a no-op candidate and continues.",
             )
-        prompt = (
+        # The editable-surface restriction is the safety-critical core of the prompt
+        # and is always present; an optional `instruction` (e.g. the RQGM DE-anchored
+        # mutation recipe) is layered on top to steer the edit strategy.
+        base = (
             "You are the outer-loop harness proposer. Edit ONLY files under "
             "harness/routing, harness/fusion, harness/rubric, harness/agents, "
             "prompts/, configs/router.yaml, configs/rubric.yaml, configs/models.yaml, "
             "or tests/unit. You may NOT edit evals/holdout, scoring code, secrets, "
             "permissions, or deployment. Make a small, testable change and summarize it."
         )
+        prompt = f"{instruction}\n\n{base}" if instruction else base
         # Snapshot before/after so changed_paths is populated from the actual
         # filesystem diff. This is what makes the optimizer's check_paths safety
         # gate effective — the prompt restriction alone is not enforcement.

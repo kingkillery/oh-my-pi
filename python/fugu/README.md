@@ -152,6 +152,91 @@ It bundles:
 - a Pi extension tool: `llm_as_verifier`
 - reusable prompt templates for common verifier workflows
 
+## Red Queen Gödel Machine (RQGM)
+
+This fork integrates the standalone `red-queen-godel-machine` package — a
+co-evolutionary archive search (arXiv:2606.26294) in which evaluators co-evolve
+with agents under controlled utility evolution (epoch-local frozen evaluators,
+anchor-based best-belief replacement, selective erasure of evaluator-dependent
+records). The algorithm lives in the package; FMH contributes a backend-driven
+provider plus CLI/MCP/slash-command surfaces.
+
+Install the optional dependency (not yet on PyPI), from `python/fugu`:
+
+```bash
+pip install -e ../../../red-queen-godel-machine
+pip install -e '.[rqgm]'
+```
+
+Run a search:
+
+```bash
+fmh rqgm search --provider fmh --backend 9router --model route-9 --budget 64  # real local 9router run
+fmh rqgm benchmark --backend 9router --model route-9 --budget 4               # seed-vs-RQGM self-improvement check
+fmh rqgm search --provider mock --budget 64 --seed 0                          # deterministic offline test mode
+fmh rqgm inspect <run_id>                                                     # print a persisted run summary
+```
+
+- Default search is real: `--provider fmh --backend 9router --model route-9`.
+- `--provider mock` uses the package's deterministic providers; keep it for tests/offline CI, not for self-improvement claims.
+- `--provider fmh` evolves coder/judge prompts through
+  `harness.core.lifecycle.BACKENDS`; `--backend` selects the model backend
+  (`mock`, `9router`, `claude_code`, `anthropic_api`, …). Coder tasks come from
+  `evals/<task-suite>`; evaluator anchors from `evals/<anchor-suite>` (default
+  `verifier/labeled`, mapped to Accept/Reject from each row's `expected_winner`).
+- `--provider llm --dataset <tasks.jsonl> --anchor <anchor.jsonl> --model <id>`
+  uses the package's generic OpenAI-compatible provider.
+
+The same search is exposed over MCP as the `rqgm_search` tool and as the `/rqgm`
+slash command in the coding agent.
+
+### Real-world self-improvement: `fmh rqgm evolve`
+
+`fmh rqgm evolve` runs an RQGM loop that self-improves the harness *scaffolding*
+(`_COPY_SURFACE`) against an **executable** reward — `success_commands` (`python -m
+pytest -q`) on the `rqgm_code` coding suite — instead of an LLM judge. It drives the
+`rqgm` primitives directly with three real-world gates: proportional stepping-stone
+sampling (no greedy collapse), a compile → cheap-canary → strong evaluation cascade
+with a DE-anchored mutation operator + sha256 novelty gate, and a co-evolving but
+anchored verifier (dual-split + discriminative anchor best-belief + EST invariance +
+master-key rejection + subterfuge firewall + selective erasure on the frozen
+`holdout/rqgm_code` anchor).
+
+```bash
+# Real self-improvement needs TWO CLIs (separate roles):
+#   1. an agentic editing *backend* that solves coding tasks in the workspace
+#      (cwd=workspace) — set its launch command, and
+#   2. the *proposer* CLI (`claude` on PATH) that makes the scaffold edits.
+# Using --backend claude_code lets one tool (claude) serve both roles:
+FMH_CLAUDE_CODE_CMD="claude -p --permission-mode dontAsk" \
+  fmh rqgm evolve --backend claude_code --suite rqgm_code --holdout holdout/rqgm_code --budget 24
+
+# Offline plumbing only (no creds, no edits -> holdout_delta is 0; not a gain claim):
+fmh rqgm evolve --backend mock --suite rqgm_code --holdout holdout/rqgm_code --budget 24 --json
+
+# Promote the best scaffold into the repo iff it beats the seed on the held-out suite:
+FMH_CLAUDE_CODE_CMD="claude -p --permission-mode dontAsk" fmh rqgm evolve --backend claude_code --apply
+```
+
+- **Backend matters.** `mock` / `9router` (and other single-shot backends) do **not**
+  edit the workspace, so coding pytest outcomes reflect only the shipped fixtures —
+  these exercise the loop *plumbing* (the CLI prints a note). Only an agentic backend
+  (`codex_cli` / `claude_code`) produces a meaningful `holdout_delta`.
+- **Two CLIs, two roles.** The `--backend` solves coding tasks (must be agentic to
+  edit the workspace: `codex_cli` / `claude_code`); the *proposer* (`claude` on PATH)
+  edits the scaffolding. If `claude` is missing the proposer falls back to a no-op
+  MockProposer (the CLI prints a note) and `holdout_delta` stays 0 even with a working
+  backend.
+- **Cascade affordability** is task-count + reduced per-task budget (turns/wall-clock),
+  not model tier — agentic CLIs bake the model into their launch command and ignore
+  `--model`, so the cheap canary subset (not a cheaper model) is the real lever.
+- **Fail-fast preflight:** a real backend with no launch command set aborts before the
+  loop, so a misconfigured run can't pass vacuously with `holdout_delta == 0`.
+- **Safety:** candidates physically cannot edit `FORBIDDEN_PATHS` (incl. the held-out
+  anchor) via `check_paths`; the subterfuge firewall invalidates any episode that
+  mutates a forbidden/holdout file; `--apply` is human-initiated and gated on a strict
+  holdout gain. See `evals/rqgm_code/README.md` for the reward semantics.
+
 ## MCP Server
 
 An MCP server is included for clients that prefer tool calls over the CLI (Claude Desktop, Cursor, Zed, etc.).
@@ -207,6 +292,7 @@ python mcp_server.py --transport sse --host 127.0.0.1 --port 8765
 | `run_task` | Full fusion pipeline from a TaskContract JSON file |
 | `inspect_run` | Read any stored artifact from a completed run |
 | `frontier` | List top candidates from the SQLite frontier index |
+| `rqgm_search` | Red Queen Gödel Machine co-evolutionary search (provider `mock` or `fmh`) |
 
 ## Install
 

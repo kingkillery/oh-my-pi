@@ -17,6 +17,7 @@ Tools exposed:
     run_task                 — full fusion pipeline from a TaskContract JSON file
     inspect_run              — retrieve stored run result JSON
     frontier                 — list frontier candidates from SQLite index
+    rqgm_search              — Red Queen Godel Machine co-evolutionary search
 """
 
 from __future__ import annotations
@@ -458,6 +459,48 @@ def frontier(metric: str = "validation_score", limit: int = 10) -> str:
     if not rows:
         return json.dumps({"frontier": [], "note": "no runs indexed yet"}, indent=2)
     return json.dumps({"frontier": rows}, indent=2, default=str)
+
+
+@mcp.tool()
+@_tool_safe
+def rqgm_search(
+    provider: str = "fmh",
+    budget: int = 64,
+    backend: str = "9router",
+    model: str = "route-9",
+    task_suite: str = "rqgm",
+    anchor_suite: str = "verifier/labeled",
+    epsilon: float = 0.05,
+    seed: int = 0,
+) -> str:
+    """Run the Red Queen Godel Machine co-evolutionary search.
+
+    provider: "fmh" by default (real local 9router via model "route-9") or
+    "mock" for deterministic offline test mode.
+    Returns a JSON summary: best node, best-belief, archive size, balanced
+    utility, evaluator replacements, and retained record count. Requires the
+    optional `red-queen-godel-machine` package.
+    """
+    try:
+        from rqgm.runner import build_providers, result_to_dict
+        from rqgm.search import RQGMConfig, RQGMSearch
+    except ImportError as exc:
+        raise RuntimeError(
+            "rqgm not installed; pip install -e ../../../red-queen-godel-machine"
+        ) from exc
+
+    config = RQGMConfig(budget=budget, epsilon=epsilon, seed=seed)
+    if provider == "fmh":
+        from harness.rqgm_provider import FmhEvaluatorSlotProvider, FmhWorkspaceProvider
+
+        workspace = FmhWorkspaceProvider(backend=backend, task_suite=task_suite, model=model)
+        slots = {
+            0: FmhEvaluatorSlotProvider(slot=0, backend=backend, anchor_suite=anchor_suite, model=model)
+        }
+    else:
+        workspace, slots = build_providers("mock", config)
+    result = RQGMSearch(workspace, slots, config).run()
+    return json.dumps(result_to_dict(result), indent=2)
 
 
 if __name__ == "__main__":

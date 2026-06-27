@@ -23,6 +23,10 @@ openai = ["openai>=1.40"]
 llm = ["anthropic>=0.40", "openai>=1.40"]
 mcp = ["mcp>=1.0"]
 serve = ["fastapi>=0.110", "uvicorn>=0.29"]
+# Red Queen Godel Machine co-evolutionary search (standalone package). Not yet on
+# PyPI: for local dev install editable from the sibling checkout first, e.g.
+# `pip install -e ../../../red-queen-godel-machine`, then `pip install -e .[rqgm]`.
+rqgm = ["red-queen-godel-machine>=0.1.0"]
 
 [project.scripts]
 fmh = "harness.cli.main:app"
