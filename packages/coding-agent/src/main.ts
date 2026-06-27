@@ -83,9 +83,16 @@ import {
 	writeLastChangelogVersion,
 } from "./utils/changelog";
 import { EventBus } from "./utils/event-bus";
+import {
+	type ActiveEtherealWorkspace,
+	createEtherealWorkspace,
+	formatEtherealSummary,
+	resolveWorkspaceOptions,
+} from "./workspace";
 
 type RunAcpMode = (createSession: AcpSessionFactory) => Promise<never>;
 type RunPrintMode = (session: AgentSession, options: PrintModeOptions) => Promise<void>;
+type RunInteractiveMode = typeof runInteractiveMode;
 type RunRpcMode = (
 	session: AgentSession,
 	setToolUIContext?: (uiContext: ExtensionUIContext, hasUI: boolean) => void,
@@ -945,6 +952,7 @@ interface RunRootCommandDependencies {
 	discoverAuthStorage?: typeof discoverAuthStorage;
 	runAcpMode?: RunAcpMode;
 	settings?: Settings;
+	runInteractiveMode?: RunInteractiveMode;
 	forceSetupWizard?: boolean;
 }
 
@@ -994,28 +1002,6 @@ export async function runRootCommand(
 		process.exit(1);
 	}
 
-	// Kick off plugin-root preload in parallel with the remaining startup work.
-	// Awaited later (before extension/skill discovery in createAgentSession needs it).
-	const home = os.homedir();
-	const pluginPreloadPromise =
-		parsedArgs.pluginDirs && parsedArgs.pluginDirs.length > 0
-			? logger.time("injectPluginDirRoots", injectPluginDirRoots, home, parsedArgs.pluginDirs, getProjectDir())
-			: logger.time("preloadPluginRoots", preloadPluginRoots, home, getProjectDir());
-	// Mark the promise as handled so a synchronous failure does not surface as an unhandled-rejection
-	// warning before we reach the await site below.
-	pluginPreloadPromise.catch(() => {});
-
-	// Register CLI-provided extension package paths (`--extension`, `--hook`) so
-	// the `omp-plugins` discovery provider can surface their `skills/`, `hooks/`,
-	// `tools/`, `commands/`, `rules/`, `prompts/`, and `.mcp.json` sub-trees.
-	// `--no-extensions` short-circuits both the factory load and the sub-discovery.
-	if (!parsedArgs.noExtensions) {
-		const cliExtensions = [...(parsedArgs.extensions ?? []), ...(parsedArgs.hooks ?? [])];
-		if (cliExtensions.length > 0) {
-			injectOmpExtensionCliRoots(cliExtensions, home, getProjectDir());
-		}
-	}
-
 	let cwd = getProjectDir();
 	const settingsInstance =
 		deps.settings ?? (await logger.time("settings:init", Settings.init, { cwd, configFiles: parsedArgs.config }));
@@ -1041,383 +1027,479 @@ export async function runRootCommand(
 	}
 	const mode = parsedArgs.mode || "text";
 	const isProtocolMode = mode === "rpc" || mode === "rpc-ui" || mode === "acp";
-	// Protocol modes own stdin; treating it as prompt text would consume JSON-RPC frames before their transports start.
-	const pipedInput = isProtocolMode ? undefined : await logger.time("readPipedInput", readPipedInput);
-	const autoPrint = pipedInput !== undefined && !parsedArgs.print && parsedArgs.mode === undefined;
-	const isInteractive = !parsedArgs.print && !autoPrint && parsedArgs.mode === undefined;
-
-	// Initialize discovery system with settings for provider persistence
-	logger.time("initializeWithSettings", initializeWithSettings, settingsInstance);
-
-	// Apply model role overrides from CLI args or env vars (ephemeral, not persisted)
-	const smolModel = parsedArgs.smol ?? $env.PI_SMOL_MODEL;
-	const slowModel = parsedArgs.slow ?? $env.PI_SLOW_MODEL;
-	const planModel = parsedArgs.plan ?? $env.PI_PLAN_MODEL;
-	if (smolModel || slowModel || planModel) {
-		settingsInstance.overrideModelRoles({
-			smol: smolModel,
-			slow: slowModel,
-			plan: planModel,
-		});
-	}
-
-	// --print-thoughts (single-shot print mode) must surface reasoning, so un-hide
-	// thinking before the session is built — otherwise a passive hideThinkingBlock
-	// setting makes the provider omit summaries and the flag prints nothing. An
-	// explicit --hide-thinking below still wins.
-	if (parsedArgs.printThoughts && !isProtocolMode && !isInteractive) {
-		settingsInstance.override("hideThinkingBlock", false);
-	}
-	// Apply --hide-thinking CLI flag (ephemeral, not persisted)
-	if (parsedArgs.hideThinking) {
-		settingsInstance.override("hideThinkingBlock", true);
-	}
-	// Apply --advisor CLI flag (ephemeral, not persisted)
-	if (parsedArgs.advisor) {
-		settingsInstance.override("advisor.enabled", true);
-	}
-
-	await logger.time(
-		"initTheme:final",
-		initTheme,
-		isInteractive,
-		settingsInstance.get("symbolPreset"),
-		settingsInstance.get("colorBlindMode"),
-		settingsInstance.get("theme.dark"),
-		settingsInstance.get("theme.light"),
-	);
-
-	let scopedModels: ScopedModel[] = [];
-	const modelPatterns = parsedArgs.models ?? settingsInstance.get("enabledModels");
-	const modelMatchPreferences = getModelMatchPreferences(settingsInstance);
-	if (modelPatterns && modelPatterns.length > 0) {
-		scopedModels = await logger.time(
-			"resolveModelScope",
-			resolveModelScope,
-			modelPatterns,
-			modelRegistry,
-			modelMatchPreferences,
-		);
-	}
-
-	// Create session manager based on CLI flags. SessionResolutionError signals a
-	// user-facing failure (unknown --resume/--fork id, non-interactive fork
-	// prompt, --fork with --no-session): print + exit cleanly instead of letting
-	// it surface as `[Uncaught Exception]` (see issue #2084).
-	let sessionManager: SessionManager | undefined;
-	try {
-		sessionManager = await logger.time(
-			"createSessionManager",
-			createSessionManager,
-			parsedArgs,
-			cwd,
-			settingsInstance,
-		);
-	} catch (error: unknown) {
-		if (error instanceof SessionResolutionError) {
-			process.stderr.write(`${chalk.red(`Error: ${error.message}`)}\n`);
-			if (error.hint) {
-				process.stderr.write(`${chalk.dim(error.hint)}\n`);
-			}
-			process.exit(1);
+	const sourceCwd = cwd;
+	let activeEtherealWorkspace: ActiveEtherealWorkspace | undefined;
+	let cancelEtherealCleanup: (() => void) | undefined;
+	const finishEtherealWorkspace = async (status: "completed" | "failed", announce: boolean): Promise<void> => {
+		if (!activeEtherealWorkspace) return;
+		setProjectDir(sourceCwd);
+		cwd = getProjectDir();
+		const result = await activeEtherealWorkspace.finish(status);
+		cancelEtherealCleanup?.();
+		cancelEtherealCleanup = undefined;
+		if (announce) {
+			writeStartupNotice(parsedArgs, formatEtherealSummary(result));
 		}
-		throw error;
-	}
-
-	// User declined the cross-project fork prompt — exit cleanly with a friendly
-	// message rather than letting the decline bubble up as an uncaught exception
-	// (see issue #1668).
-	if (typeof parsedArgs.resume === "string" && !sessionManager) {
-		writeStartupNotice(parsedArgs, `${chalk.dim("Resume cancelled: session is in another project.")}\n`);
-		return;
-	}
-
-	// Handle --resume (no value): show session picker
-	if (parsedArgs.resume === true && !parsedArgs.fork) {
-		const folderSessions = await logger.time("SessionManager.list", SessionManager.list, cwd, parsedArgs.sessionDir);
-		let preloadedAllSessions: SessionInfo[] | undefined;
-		let startInAllScope = false;
-		if (folderSessions.length === 0) {
-			// Nothing in the current folder — fall back to a global scan so the
-			// picker can still open in all-projects scope instead of dead-ending.
-			preloadedAllSessions = await logger.time("SessionManager.listAll", SessionManager.listAll);
-			if (preloadedAllSessions.length === 0) {
-				writeStartupNotice(parsedArgs, `${chalk.dim("No sessions found")}\n`);
+	};
+	try {
+		const workspaceOptions = resolveWorkspaceOptions(parsedArgs, settingsInstance, sourceCwd);
+		if (workspaceOptions.enabled) {
+			if (parsedArgs.continue || parsedArgs.resume || parsedArgs.fork || isProtocolMode) {
+				process.stderr.write(
+					`${chalk.red("--ethereal does not support --continue, --resume, --fork, rpc, rpc-ui, or acp modes yet")}\n`,
+				);
+				process.exit(2);
 				return;
 			}
-			startInAllScope = true;
-		}
-		pauseStartupWatchdog();
-		const selected = await logger.time("selectSession", selectSession, folderSessions, {
-			allSessions: preloadedAllSessions,
-			startInAllScope,
-		});
-		resumeStartupWatchdog();
-		if (!selected) {
-			writeStartupNotice(parsedArgs, `${chalk.dim("No session selected")}\n`);
-			return;
-		}
-		// Resuming a session from another project: switch the process into that
-		// project's directory and refresh cwd-derived caches before the session is
-		// built, so settings discovery, plugins, and capabilities all scope to it.
-		// Skip the chdir when the recorded project directory is gone: `setProjectDir`
-		// would throw on the missing path. `SessionManager.open` then falls back to
-		// the launch cwd, so the resumed session simply stays where the user is.
-		if (
-			selected.cwd &&
-			normalizePathForComparison(selected.cwd) !== normalizePathForComparison(getProjectDir()) &&
-			(await directoryExists(selected.cwd))
-		) {
-			// Let the original (launch-cwd) plugin-root preload settle first so its
-			// late resolution can't clobber the re-warm we trigger below.
-			await pluginPreloadPromise.catch(() => {});
-			setProjectDir(selected.cwd);
+			activeEtherealWorkspace = await logger.time("createEtherealWorkspace", createEtherealWorkspace, {
+				sourceCwd,
+				rawArgs,
+				options: workspaceOptions,
+			});
+			cancelEtherealCleanup = postmortem.register("ethereal-workspace", async () => {
+				await finishEtherealWorkspace("failed", false);
+			});
+			setProjectDir(activeEtherealWorkspace.runCwd);
+			parsedArgs.cwd = getProjectDir();
+			cwd = getProjectDir();
+			await settingsInstance.reloadForCwd(cwd);
 			clearPluginRootsAndCaches();
 			resetCapabilities();
-			cwd = getProjectDir();
-			// Re-scope project settings (.claude/settings.yml etc.) to the resumed
-			// project in place so the session is built with its configuration.
-			await settingsInstance.reloadForCwd(cwd);
 		}
-		sessionManager = await SessionManager.open(selected.path);
-	}
 
-	await pluginPreloadPromise;
+		// Kick off plugin-root preload in parallel with the remaining startup work.
+		// Awaited later (before extension/skill discovery in createAgentSession needs it).
+		const home = os.homedir();
+		const pluginPreloadPromise =
+			parsedArgs.pluginDirs && parsedArgs.pluginDirs.length > 0
+				? logger.time("injectPluginDirRoots", injectPluginDirRoots, home, parsedArgs.pluginDirs, getProjectDir())
+				: logger.time("preloadPluginRoots", preloadPluginRoots, home, getProjectDir());
+		// Mark the promise as handled so a synchronous failure does not surface as an unhandled-rejection
+		// warning before we reach the await site below.
+		pluginPreloadPromise.catch(() => {});
 
-	scheduleMarketplaceAutoUpdate({
-		autoUpdate: settingsInstance.get("marketplace.autoUpdate"),
-		resolveActiveProjectRegistryPath,
-		clearPluginRootsCache: clearPluginRootsAndCaches,
-	});
-
-	const { options: sessionOptions, titleSystemPrompt } = await logger.time(
-		"buildSessionOptions",
-		buildSessionOptions,
-		parsedArgs,
-		scopedModels,
-		sessionManager,
-		modelRegistry,
-		settingsInstance,
-	);
-	sessionOptions.authStorage = authStorage;
-	sessionOptions.modelRegistry = modelRegistry;
-	sessionOptions.hasUI = isInteractive || mode === "rpc-ui";
-	sessionOptions.settings = settingsInstance;
-
-	// OTEL: register the global OTLP trace exporter when an OTLP endpoint is
-	// configured via env, then switch on the agent loop's telemetry so its
-	// GenAI spans (invoke_agent / chat / execute_tool) are actually emitted.
-	// Both are no-ops when OTEL_EXPORTER_OTLP_ENDPOINT is unset. An empty config
-	// is enough to enable telemetry — content capture is governed by the
-	// standard OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT env var.
-	await logger.time("initTelemetryExport", initTelemetryExport);
-	if (isTelemetryExportEnabled()) {
-		sessionOptions.telemetry = {};
-	}
-
-	// Handle CLI --api-key as runtime override (not persisted)
-	if (parsedArgs.apiKey) {
-		if (!sessionOptions.model && !sessionOptions.modelPattern) {
-			process.stderr.write(
-				`${chalk.red("--api-key requires a model to be specified via --model, --provider/--model, or --models")}\n`,
-			);
-			process.exit(1);
+		// Register CLI-provided extension package paths (`--extension`, `--hook`) so
+		// the `omp-plugins` discovery provider can surface their `skills/`, `hooks/`,
+		// `tools/`, `commands/`, `rules`, `prompts/`, and `.mcp.json` sub-trees.
+		// `--no-extensions` short-circuits both the factory load and the sub-discovery.
+		if (!parsedArgs.noExtensions) {
+			const cliExtensions = [...(parsedArgs.extensions ?? []), ...(parsedArgs.hooks ?? [])];
+			if (cliExtensions.length > 0) {
+				injectOmpExtensionCliRoots(cliExtensions, home, getProjectDir());
+			}
 		}
-		if (sessionOptions.model) {
-			authStorage.setRuntimeApiKey(sessionOptions.model.provider, parsedArgs.apiKey);
+		// Protocol modes own stdin; treating it as prompt text would consume JSON-RPC frames before their transports start.
+		const pipedInput = isProtocolMode ? undefined : await logger.time("readPipedInput", readPipedInput);
+		const autoPrint = pipedInput !== undefined && !parsedArgs.print && parsedArgs.mode === undefined;
+		const isInteractive = !parsedArgs.print && !autoPrint && parsedArgs.mode === undefined;
+
+		// Initialize discovery system with settings for provider persistence
+		logger.time("initializeWithSettings", initializeWithSettings, settingsInstance);
+
+		// Apply model role overrides from CLI args or env vars (ephemeral, not persisted)
+		const smolModel = parsedArgs.smol ?? $env.PI_SMOL_MODEL;
+		const slowModel = parsedArgs.slow ?? $env.PI_SLOW_MODEL;
+		const planModel = parsedArgs.plan ?? $env.PI_PLAN_MODEL;
+		if (smolModel || slowModel || planModel) {
+			settingsInstance.overrideModelRoles({
+				smol: smolModel,
+				slow: slowModel,
+				plan: planModel,
+			});
 		}
-	}
 
-	const createAgentSessionImpl = deps.createAgentSession ?? createAgentSession;
-	const createSession = async (options: CreateAgentSessionOptions): Promise<CreateAgentSessionResult> => {
-		const result = await logger.time("createAgentSession", createAgentSessionImpl, options);
-		// Kick off background model discovery only after createAgentSession finishes its parallel
-		// discovery arms; running these concurrently contends for the event loop and stretches
-		// every parallel arm by ~30ms.
-		modelRegistry.refreshInBackground();
-		return result;
-	};
-
-	if (mode === "acp") {
-		const createAcpSession = createAcpSessionFactory({
-			baseOptions: sessionOptions,
-			settings: settingsInstance,
-			sessionDir: parsedArgs.sessionDir,
-			authStorage,
-			modelRegistry,
-			parsedArgs,
-			rawArgs,
-			createSession,
-		});
-		// Branch-only protocol runner: keep ACP server code out of normal interactive startup.
-		const runAcpMode = deps.runAcpMode ?? (await import("./modes/acp/acp-mode")).runAcpMode;
-		stopStartupWatchdog();
-		await runAcpMode(createAcpSession);
-	} else {
-		// Resolve extension-registered CLI flags before creating the session so a
-		// bad `@file` fails fast WITHOUT leaving a junk session/breadcrumb
-		// (createAgentSession writes the terminal breadcrumb eagerly). Loading the
-		// extensions here also makes `@file` classification extension-aware — e.g. a
-		// string-flag value such as `--target @notes.md` is the flag's value, not a
-		// file — and the same result is handed to createAgentSession via
-		// `preloadedExtensions` so the discovery work is not repeated.
-		const eventBus = new EventBus();
-		const extensionsResult = await loadSessionExtensions(sessionOptions, cwd, settingsInstance, eventBus);
-		const extensionFlagSink: ExtensionFlagSink = {
-			getFlags: () => ExtensionRunner.aggregateFlags(extensionsResult.extensions),
-			setFlagValue: (name, value) => {
-				extensionsResult.runtime.flagValues.set(name, value);
-			},
-		};
-		const initialArgs = applyExtensionFlags(extensionFlagSink, rawArgs) ?? parsedArgs;
-		// Fail fast on stale/typo flags (e.g. `omp --list-models`) now that we
-		// know the real extension flag set. Without this check the unrecognized
-		// token gets silently consumed and any following positional leaks as the
-		// initial prompt — kicking off a real LLM session, MCP connection, and
-		// tool calls (issue #2459). Exit code 2 matches the conventional
-		// "command line usage error" convention.
-		if (reportUnrecognizedFlags(initialArgs)) {
-			process.exit(2);
+		// --print-thoughts (single-shot print mode) must surface reasoning, so un-hide
+		// thinking before the session is built — otherwise a passive hideThinkingBlock
+		// setting makes the provider omit summaries and the flag prints nothing. An
+		// explicit --hide-thinking below still wins.
+		if (parsedArgs.printThoughts && !isProtocolMode && !isInteractive) {
+			settingsInstance.override("hideThinkingBlock", false);
 		}
-		const processedFiles =
-			initialArgs.fileArgs.length > 0
-				? await logger.time("processFileArguments", () =>
-						processFileArguments(initialArgs.fileArgs, {
-							autoResizeImages: settingsInstance.get("images.autoResize"),
-						}),
-					)
-				: undefined;
-		const { initialMessage, initialImages } = buildInitialMessage({
-			parsed: initialArgs,
-			fileText: processedFiles?.text,
-			fileImages: processedFiles?.images,
-			stdinContent: pipedInput,
-		});
+		// Apply --hide-thinking CLI flag (ephemeral, not persisted)
+		if (parsedArgs.hideThinking) {
+			settingsInstance.override("hideThinkingBlock", true);
+		}
+		// Apply --advisor CLI flag (ephemeral, not persisted)
+		if (parsedArgs.advisor) {
+			settingsInstance.override("advisor.enabled", true);
+		}
 
-		const showStartupSplash = shouldShowStartupSplash({
-			configured: settingsInstance.get("startup.showSplash"),
+		await logger.time(
+			"initTheme:final",
+			initTheme,
 			isInteractive,
-			resuming: Boolean(parsedArgs.continue || parsedArgs.resume || parsedArgs.fork),
-			quiet: settingsInstance.get("startup.quiet"),
-			timing: Boolean($env.PI_TIMING),
-			stdinIsTTY: process.stdin.isTTY,
-			stdoutIsTTY: process.stdout.isTTY,
+			settingsInstance.get("symbolPreset"),
+			settingsInstance.get("colorBlindMode"),
+			settingsInstance.get("theme.dark"),
+			settingsInstance.get("theme.light"),
+		);
+
+		let scopedModels: ScopedModel[] = [];
+		const modelPatterns = parsedArgs.models ?? settingsInstance.get("enabledModels");
+		const modelMatchPreferences = getModelMatchPreferences(settingsInstance);
+		if (modelPatterns && modelPatterns.length > 0) {
+			scopedModels = await logger.time(
+				"resolveModelScope",
+				resolveModelScope,
+				modelPatterns,
+				modelRegistry,
+				modelMatchPreferences,
+			);
+		}
+
+		// Create session manager based on CLI flags. SessionResolutionError signals a
+		// user-facing failure (unknown --resume/--fork id, non-interactive fork
+		// prompt, --fork with --no-session): print + exit cleanly instead of letting
+		// it surface as `[Uncaught Exception]` (see issue #2084).
+		let sessionManager: SessionManager | undefined;
+		try {
+			sessionManager = await logger.time(
+				"createSessionManager",
+				createSessionManager,
+				parsedArgs,
+				cwd,
+				settingsInstance,
+			);
+		} catch (error: unknown) {
+			if (error instanceof SessionResolutionError) {
+				process.stderr.write(`${chalk.red(`Error: ${error.message}`)}\n`);
+				if (error.hint) {
+					process.stderr.write(`${chalk.dim(error.hint)}\n`);
+				}
+				process.exit(1);
+			}
+			throw error;
+		}
+
+		// User declined the cross-project fork prompt — exit cleanly with a friendly
+		// message rather than letting the decline bubble up as an uncaught exception
+		// (see issue #1668).
+		if (typeof parsedArgs.resume === "string" && !sessionManager) {
+			writeStartupNotice(parsedArgs, `${chalk.dim("Resume cancelled: session is in another project.")}\n`);
+			return;
+		}
+
+		// Handle --resume (no value): show session picker
+		if (parsedArgs.resume === true && !parsedArgs.fork) {
+			const folderSessions = await logger.time(
+				"SessionManager.list",
+				SessionManager.list,
+				cwd,
+				parsedArgs.sessionDir,
+			);
+			let preloadedAllSessions: SessionInfo[] | undefined;
+			let startInAllScope = false;
+			if (folderSessions.length === 0) {
+				// Nothing in the current folder — fall back to a global scan so the
+				// picker can still open in all-projects scope instead of dead-ending.
+				preloadedAllSessions = await logger.time("SessionManager.listAll", SessionManager.listAll);
+				if (preloadedAllSessions.length === 0) {
+					writeStartupNotice(parsedArgs, `${chalk.dim("No sessions found")}\n`);
+					return;
+				}
+				startInAllScope = true;
+			}
+			pauseStartupWatchdog();
+			const selected = await logger.time("selectSession", selectSession, folderSessions, {
+				allSessions: preloadedAllSessions,
+				startInAllScope,
+			});
+			resumeStartupWatchdog();
+			if (!selected) {
+				writeStartupNotice(parsedArgs, `${chalk.dim("No session selected")}\n`);
+				return;
+			}
+			// Resuming a session from another project: switch the process into that
+			// project's directory and refresh cwd-derived caches before the session is
+			// built, so settings discovery, plugins, and capabilities all scope to it.
+			// Skip the chdir when the recorded project directory is gone: `setProjectDir`
+			// would throw on the missing path. `SessionManager.open` then falls back to
+			// the launch cwd, so the resumed session simply stays where the user is.
+			if (
+				selected.cwd &&
+				normalizePathForComparison(selected.cwd) !== normalizePathForComparison(getProjectDir()) &&
+				(await directoryExists(selected.cwd))
+			) {
+				// Let the original (launch-cwd) plugin-root preload settle first so its
+				// late resolution can't clobber the re-warm we trigger below.
+				await pluginPreloadPromise.catch(() => {});
+				setProjectDir(selected.cwd);
+				clearPluginRootsAndCaches();
+				resetCapabilities();
+				cwd = getProjectDir();
+				// Re-scope project settings (.claude/settings.yml etc.) to the resumed
+				// project in place so the session is built with its configuration.
+				await settingsInstance.reloadForCwd(cwd);
+			}
+			sessionManager = await SessionManager.open(selected.path);
+		}
+
+		await pluginPreloadPromise;
+
+		scheduleMarketplaceAutoUpdate({
+			autoUpdate: settingsInstance.get("marketplace.autoUpdate"),
+			resolveActiveProjectRegistryPath,
+			clearPluginRootsCache: clearPluginRootsAndCaches,
 		});
 
-		const { session, setToolUIContext, modelFallbackMessage, lspServers, mcpManager } = await createSession({
-			...sessionOptions,
-			eventBus,
-			preloadedExtensions: extensionsResult,
-		});
+		const { options: sessionOptions, titleSystemPrompt } = await logger.time(
+			"buildSessionOptions",
+			buildSessionOptions,
+			parsedArgs,
+			scopedModels,
+			sessionManager,
+			modelRegistry,
+			settingsInstance,
+		);
+		sessionOptions.authStorage = authStorage;
+		sessionOptions.modelRegistry = modelRegistry;
+		sessionOptions.hasUI = isInteractive || mode === "rpc-ui";
+		sessionOptions.settings = settingsInstance;
 
-		// Cold-revive support: a `parked` subagent ref restored from disk (Agent Hub
-		// scan, collab mirror, resumed process) has a sessionFile but no in-memory
-		// reviver, so `ensureLive` (IRC sends, hub focus) would refuse it. Install a
-		// factory — bound to THIS top-level session — that rebuilds the subagent from
-		// its persisted JSONL (see persisted-revive.ts). Scoped to the non-ACP
-		// bootstrap: ACP keeps several concurrent top-level sessions and a single
-		// process-global factory must not be clobbered by the most recent one.
-		AgentLifecycleManager.global().setPersistedSubagentReviverFactory(
-			createPersistedSubagentReviverFactory({
-				session,
+		// OTEL: register the global OTLP trace exporter when an OTLP endpoint is
+		// configured via env, then switch on the agent loop's telemetry so its
+		// GenAI spans (invoke_agent / chat / execute_tool) are actually emitted.
+		// Both are no-ops when OTEL_EXPORTER_OTLP_ENDPOINT is unset. An empty config
+		// is enough to enable telemetry — content capture is governed by the
+		// standard OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT env var.
+		await logger.time("initTelemetryExport", initTelemetryExport);
+		if (isTelemetryExportEnabled()) {
+			sessionOptions.telemetry = {};
+		}
+
+		// Handle CLI --api-key as runtime override (not persisted)
+		if (parsedArgs.apiKey) {
+			if (!sessionOptions.model && !sessionOptions.modelPattern) {
+				process.stderr.write(
+					`${chalk.red("--api-key requires a model to be specified via --model, --provider/--model, or --models")}\n`,
+				);
+				await finishEtherealWorkspace("failed", false);
+				process.exit(1);
+			}
+			if (sessionOptions.model) {
+				authStorage.setRuntimeApiKey(sessionOptions.model.provider, parsedArgs.apiKey);
+			}
+		}
+
+		const createAgentSessionImpl = deps.createAgentSession ?? createAgentSession;
+		const createSession = async (options: CreateAgentSessionOptions): Promise<CreateAgentSessionResult> => {
+			const result = await logger.time("createAgentSession", createAgentSessionImpl, options);
+			// Kick off background model discovery only after createAgentSession finishes its parallel
+			// discovery arms; running these concurrently contends for the event loop and stretches
+			// every parallel arm by ~30ms.
+			modelRegistry.refreshInBackground();
+			return result;
+		};
+
+		if (mode === "acp") {
+			const createAcpSession = createAcpSessionFactory({
+				baseOptions: sessionOptions,
+				settings: settingsInstance,
+				sessionDir: parsedArgs.sessionDir,
 				authStorage,
 				modelRegistry,
-				settings: settingsInstance,
-				enableLsp: sessionOptions.enableLsp ?? true,
-			}),
-			Math.trunc(Number(settingsInstance.get("task.agentIdleTtlMs") ?? 420_000) || 0),
-		);
-		if (parsedArgs.apiKey && !sessionOptions.model && session.model) {
-			authStorage.setRuntimeApiKey(session.model.provider, parsedArgs.apiKey);
-		}
-
-		if (modelFallbackMessage) {
-			notifs.push({ kind: "warn", message: modelFallbackMessage });
-		}
-
-		const modelRegistryError = modelRegistry.getError();
-		if (modelRegistryError) {
-			notifs.push({ kind: "error", message: modelRegistryError.message });
-		}
-
-		if (!isInteractive && !session.model) {
-			if (modelFallbackMessage) {
-				process.stderr.write(`${chalk.red(modelFallbackMessage)}\n`);
-			} else {
-				process.stderr.write(`${chalk.red("No models available.")}\n`);
-			}
-			process.stderr.write(`${chalk.yellow("\nSet an API key environment variable:")}\n`);
-			process.stderr.write("  ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, etc.\n");
-			process.stderr.write(`${chalk.yellow(`\nOr create ${ModelsConfigFile.path()}`)}\n`);
-			process.exit(1);
-		}
-
-		if (mode === "rpc" || mode === "rpc-ui") {
-			// Branch-only protocol runner: keep RPC host code out of normal interactive startup.
-			const runRpcMode: RunRpcMode = (await import("./modes/rpc/rpc-mode")).runRpcMode;
-			stopStartupWatchdog();
-			await runRpcMode(session, mode === "rpc-ui" ? setToolUIContext : undefined, eventBus);
-		} else if (isInteractive) {
-			const versionCheckPromise = checkForNewVersion(VERSION).catch(() => undefined);
-			const changelogMarkdown = await logger.time("main:getChangelogForDisplay", getChangelogForDisplay, parsedArgs);
-
-			const modelScopeNotification = buildModelScopeNotification(
-				scopedModels,
-				settingsInstance.get("startup.quiet"),
-			);
-			if (modelScopeNotification) {
-				// Routed through the TUI (not stdout): the startup capture owns the
-				// terminal in raw mode here, and the TUI's first clearScrollback paint
-				// would wipe a pre-TUI line anyway.
-				notifs.push(modelScopeNotification);
-			}
-
-			if ($env.PI_TIMING) {
-				logger.printTimings();
-				if (logger.shouldExitAfterTimings()) {
-					process.exit(0);
-				}
-			}
-
-			stopStartupWatchdog();
-			logger.endTiming();
-			await runInteractiveMode(
-				session,
-				VERSION,
-				changelogMarkdown,
-				notifs,
-				versionCheckPromise,
-				initialArgs.messages,
-				setToolUIContext,
-				lspServers,
-				mcpManager,
-				Boolean(parsedArgs.continue || parsedArgs.resume || parsedArgs.fork),
-				deps.forceSetupWizard === true,
-				showStartupSplash,
-				eventBus,
-				initialMessage,
-				initialImages,
-				titleSystemPrompt,
-				parsedArgs.join,
-				parsedArgs.openBackgrounds,
-			);
-		} else {
-			// Branch-only single-shot runner: keep print-mode code out of normal interactive startup.
-			stopStartupWatchdog();
-			const runPrintMode: RunPrintMode = (await import("./modes/print-mode")).runPrintMode;
-			await runPrintMode(session, {
-				mode,
-				messages: initialArgs.messages,
-				initialMessage,
-				initialImages,
-				printThoughts: initialArgs.printThoughts,
+				parsedArgs,
+				rawArgs,
+				createSession,
 			});
-			if ($env.PI_TIMING) {
-				logger.printTimings();
+			// Branch-only protocol runner: keep ACP server code out of normal interactive startup.
+			const runAcpMode = deps.runAcpMode ?? (await import("./modes/acp/acp-mode")).runAcpMode;
+			stopStartupWatchdog();
+			await runAcpMode(createAcpSession);
+		} else {
+			// Resolve extension-registered CLI flags before creating the session so a
+			// bad `@file` fails fast WITHOUT leaving a junk session/breadcrumb
+			// (createAgentSession writes the terminal breadcrumb eagerly). Loading the
+			// extensions here also makes `@file` classification extension-aware — e.g. a
+			// string-flag value such as `--target @notes.md` is the flag's value, not a
+			// file — and the same result is handed to createAgentSession via
+			// `preloadedExtensions` so the discovery work is not repeated.
+			const eventBus = new EventBus();
+			const extensionsResult = await loadSessionExtensions(sessionOptions, cwd, settingsInstance, eventBus);
+			const extensionFlagSink: ExtensionFlagSink = {
+				getFlags: () => ExtensionRunner.aggregateFlags(extensionsResult.extensions),
+				setFlagValue: (name, value) => {
+					extensionsResult.runtime.flagValues.set(name, value);
+				},
+			};
+			const initialArgs = applyExtensionFlags(extensionFlagSink, rawArgs) ?? parsedArgs;
+			// Fail fast on stale/typo flags (e.g. `omp --list-models`) now that we
+			// know the real extension flag set. Without this check the unrecognized
+			// token gets silently consumed and any following positional leaks as the
+			// initial prompt — kicking off a real LLM session, MCP connection, and
+			// tool calls (issue #2459). Exit code 2 matches the conventional
+			// "command line usage error" convention.
+			if (reportUnrecognizedFlags(initialArgs)) {
+				await finishEtherealWorkspace("failed", false);
+				process.exit(2);
 			}
-			await session.dispose();
-			stopThemeWatcher();
-			await postmortem.quit(0);
+			const processedFiles =
+				initialArgs.fileArgs.length > 0
+					? await logger.time("processFileArguments", () =>
+							processFileArguments(initialArgs.fileArgs, {
+								autoResizeImages: settingsInstance.get("images.autoResize"),
+							}),
+						)
+					: undefined;
+			const { initialMessage, initialImages } = buildInitialMessage({
+				parsed: initialArgs,
+				fileText: processedFiles?.text,
+				fileImages: processedFiles?.images,
+				stdinContent: pipedInput,
+			});
+
+			const showStartupSplash = shouldShowStartupSplash({
+				configured: settingsInstance.get("startup.showSplash"),
+				isInteractive,
+				resuming: Boolean(parsedArgs.continue || parsedArgs.resume || parsedArgs.fork),
+				quiet: settingsInstance.get("startup.quiet"),
+				timing: Boolean($env.PI_TIMING),
+				stdinIsTTY: process.stdin.isTTY,
+				stdoutIsTTY: process.stdout.isTTY,
+			});
+
+			const { session, setToolUIContext, modelFallbackMessage, lspServers, mcpManager } = await createSession({
+				...sessionOptions,
+				eventBus,
+				preloadedExtensions: extensionsResult,
+			});
+
+			// Cold-revive support: a `parked` subagent ref restored from disk (Agent Hub
+			// scan, collab mirror, resumed process) has a sessionFile but no in-memory
+			// reviver, so `ensureLive` (IRC sends, hub focus) would refuse it. Install a
+			// factory — bound to THIS top-level session — that rebuilds the subagent from
+			// its persisted JSONL (see persisted-revive.ts). Scoped to the non-ACP
+			// bootstrap: ACP keeps several concurrent top-level sessions and a single
+			// process-global factory must not be clobbered by the most recent one.
+			AgentLifecycleManager.global().setPersistedSubagentReviverFactory(
+				createPersistedSubagentReviverFactory({
+					session,
+					authStorage,
+					modelRegistry,
+					settings: settingsInstance,
+					enableLsp: sessionOptions.enableLsp ?? true,
+				}),
+				Math.trunc(Number(settingsInstance.get("task.agentIdleTtlMs") ?? 420_000) || 0),
+			);
+			if (parsedArgs.apiKey && !sessionOptions.model && session.model) {
+				authStorage.setRuntimeApiKey(session.model.provider, parsedArgs.apiKey);
+			}
+
+			if (modelFallbackMessage) {
+				notifs.push({ kind: "warn", message: modelFallbackMessage });
+			}
+
+			const modelRegistryError = modelRegistry.getError();
+			if (modelRegistryError) {
+				notifs.push({ kind: "error", message: modelRegistryError.message });
+			}
+
+			if (!isInteractive && !session.model) {
+				if (modelFallbackMessage) {
+					process.stderr.write(`${chalk.red(modelFallbackMessage)}\n`);
+				} else {
+					process.stderr.write(`${chalk.red("No models available.")}\n`);
+				}
+				process.stderr.write(`${chalk.yellow("\nSet an API key environment variable:")}\n`);
+				process.stderr.write("  ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, etc.\n");
+				process.stderr.write(`${chalk.yellow(`\nOr create ${ModelsConfigFile.path()}`)}\n`);
+				await finishEtherealWorkspace("failed", false);
+				process.exit(1);
+			}
+
+			if (mode === "rpc" || mode === "rpc-ui") {
+				// Branch-only protocol runner: keep RPC host code out of normal interactive startup.
+				const runRpcMode: RunRpcMode = (await import("./modes/rpc/rpc-mode")).runRpcMode;
+				stopStartupWatchdog();
+				await runRpcMode(session, mode === "rpc-ui" ? setToolUIContext : undefined, eventBus);
+			} else if (isInteractive) {
+				const versionCheckPromise = checkForNewVersion(VERSION).catch(() => undefined);
+				const changelogMarkdown = await logger.time(
+					"main:getChangelogForDisplay",
+					getChangelogForDisplay,
+					parsedArgs,
+				);
+
+				const modelScopeNotification = buildModelScopeNotification(
+					scopedModels,
+					settingsInstance.get("startup.quiet"),
+				);
+				if (modelScopeNotification) {
+					// Routed through the TUI (not stdout): the startup capture owns the
+					// terminal in raw mode here, and the TUI's first clearScrollback paint
+					// would wipe a pre-TUI line anyway.
+					notifs.push(modelScopeNotification);
+				}
+
+				if ($env.PI_TIMING) {
+					logger.printTimings();
+					if (logger.shouldExitAfterTimings()) {
+						process.exit(0);
+					}
+				}
+
+				stopStartupWatchdog();
+				logger.endTiming();
+				const runInteractiveModeImpl = deps.runInteractiveMode ?? runInteractiveMode;
+				await runInteractiveModeImpl(
+					session,
+					VERSION,
+					changelogMarkdown,
+					notifs,
+					versionCheckPromise,
+					initialArgs.messages,
+					setToolUIContext,
+					lspServers,
+					mcpManager,
+					Boolean(parsedArgs.continue || parsedArgs.resume || parsedArgs.fork),
+					deps.forceSetupWizard === true,
+					showStartupSplash,
+					eventBus,
+					initialMessage,
+					initialImages,
+					titleSystemPrompt,
+					parsedArgs.join,
+					parsedArgs.openBackgrounds,
+				);
+				await finishEtherealWorkspace("completed", true);
+			} else {
+				// Branch-only single-shot runner: keep print-mode code out of normal interactive startup.
+				stopStartupWatchdog();
+				const runPrintMode: RunPrintMode = (await import("./modes/print-mode")).runPrintMode;
+				await runPrintMode(session, {
+					mode,
+					messages: initialArgs.messages,
+					initialMessage,
+					initialImages,
+					printThoughts: initialArgs.printThoughts,
+				});
+				if ($env.PI_TIMING) {
+					logger.printTimings();
+				}
+				await session.dispose();
+				stopThemeWatcher();
+				await finishEtherealWorkspace("completed", true);
+				if (activeEtherealWorkspace) {
+					setProjectDir(sourceCwd);
+					cwd = getProjectDir();
+				}
+				await postmortem.quit(0);
+			}
+		}
+	} catch (error) {
+		if (activeEtherealWorkspace) {
+			try {
+				await finishEtherealWorkspace("failed", false);
+			} catch (finishError) {
+				const err = finishError instanceof Error ? finishError : new Error(String(finishError));
+				logger.error("Ethereal workspace finalization failed", { err });
+			}
+		}
+		throw error;
+	} finally {
+		cancelEtherealCleanup?.();
+		if (activeEtherealWorkspace) {
+			setProjectDir(sourceCwd);
 		}
 	}
 }

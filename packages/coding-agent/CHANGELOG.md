@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added Ethereal Workspaces for launching sessions inside disposable temporary repository workspaces, with `copy`, `worktree`, and `auto` modes, copy-on-write reflink detection, dirty worktree overlays, opt-in env/secret copying, redacted manifests, patch export, and cleanup/preserve controls.
+
 ## [16.1.10] - 2026-06-22
 
 ### Added
