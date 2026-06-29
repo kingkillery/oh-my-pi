@@ -118,6 +118,20 @@ const CONDITIONS: Record<string, () => boolean> = {
 			return false;
 		}
 	},
+	moaEnabled: () => {
+		try {
+			return Settings.instance.get("moa.enabled") === true;
+		} catch {
+			return false;
+		}
+	},
+	moaCustomPreset: () => {
+		try {
+			return Settings.instance.get("moa.enabled") === true && Settings.instance.get("moa.preset") === "custom";
+		} catch {
+			return false;
+		}
+	},
 };
 
 // ═══════════════════════════════════════════════════════════════════════════

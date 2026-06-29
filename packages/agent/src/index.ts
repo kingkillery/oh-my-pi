@@ -6,6 +6,8 @@ export * from "./agent-loop";
 export * from "./append-only-context";
 // Compaction
 export * from "./compaction";
+// Mixture-of-Agents stream composition
+export * from "./moa";
 // Proxy utilities
 export * from "./proxy";
 // Run-level telemetry collector + aggregators

@@ -7,6 +7,7 @@ import { type AutocompleteItem, Spacer } from "@pk-nerdsaver-ai/pi-tui";
 import { $which, APP_NAME, setProjectDir } from "@pk-nerdsaver-ai/pi-utils";
 import { COLLAB_GUEST_ALLOWED_COMMANDS, CollabGuestLink } from "../collab/guest";
 import { CollabHost } from "../collab/host";
+import { writeCollabLinkFile } from "../collab/link-file";
 import type { SettingPath, SettingValue } from "../config/settings";
 import { settings } from "../config/settings";
 import {
@@ -151,6 +152,13 @@ async function startCollabShare(
 		return;
 	}
 	ctx.collabHost = host;
+	writeCollabLinkFile({
+		webLink: host.webLink,
+		webViewLink: host.webViewLink,
+		link: host.link,
+		viewLink: host.viewLink,
+		view: input.view,
+	});
 	showCollabLink(ctx, host, input.startedHeading, input.view);
 }
 

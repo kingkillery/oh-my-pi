@@ -118,6 +118,7 @@ export const TAB_GROUPS: Record<SettingTab, readonly string[]> = {
 		"Power (macOS)",
 		"Agent",
 		"Git",
+		"Mixture of Agents",
 	],
 	context: ["General", "Compaction", "Rules (TTSR)", "Experimental"],
 	memory: ["General", "Auto-Learn", "Mnemopi", "Hindsight"],
@@ -162,7 +163,8 @@ export type StatusLineSegmentId =
 	| "cache_hit"
 	| "session_name"
 	| "usage"
-	| "collab";
+	| "collab"
+	| "moa";
 
 /** Submenu choice metadata. */
 export type SubmenuOption<V extends string = string> = {
@@ -704,6 +706,61 @@ export const SETTINGS_SCHEMA = {
 	"statusLine.rightSegments": { type: "array", default: [] as StatusLineSegmentId[] },
 
 	"statusLine.segmentOptions": { type: "record", default: {} as Record<string, unknown> },
+	// Mixture-of-Agents: read-only candidate lanes feeding the active model.
+	"moa.enabled": {
+		type: "boolean",
+		default: false,
+		ui: {
+			tab: "interaction",
+			group: "Mixture of Agents",
+			label: "Enable Mixture of Agents",
+			description: "Run read-only candidate lanes before each turn and inject private advice into the active model.",
+		},
+	},
+
+	"moa.preset": {
+		type: "enum",
+		values: ["off", "balanced", "diverse", "code", "custom"] as const,
+		default: "off",
+		ui: {
+			tab: "interaction",
+			group: "Mixture of Agents",
+			label: "MOA Preset",
+			description: "Named lane preset. `custom` uses the lane selectors you provide below.",
+			options: [
+				{ value: "off", label: "Off", description: "MOA disabled at the preset layer (overrides enabled=false)." },
+				{ value: "balanced", label: "Balanced", description: "Two lanes: smol + slow." },
+				{ value: "diverse", label: "Diverse", description: "Four lanes: smol, slow, plus Sonnet + GPT-4o." },
+				{ value: "code", label: "Code", description: "Two lanes: slow + a code model." },
+				{ value: "custom", label: "Custom", description: "Use the selectors in `moa.lanes`." },
+			],
+			condition: "moaEnabled",
+		},
+	},
+
+	"moa.lanes": {
+		type: "record",
+		default: {} as Record<string, string>,
+		ui: {
+			tab: "interaction",
+			group: "Mixture of Agents",
+			label: "Custom Lane Selectors",
+			description: "Map of lane name -> model selector (e.g. `smol: pi/smol`). Active when preset is `custom`.",
+			condition: "moaCustomPreset",
+		},
+	},
+
+	"moa.maxLanes": {
+		type: "number",
+		default: 4,
+		ui: {
+			tab: "interaction",
+			group: "Mixture of Agents",
+			label: "Maximum Lanes",
+			description: "Hard cap on resolved lanes. Excess selectors are skipped with a warning.",
+			condition: "moaEnabled",
+		},
+	},
 
 	// Images and terminal
 	"terminal.showImages": {
@@ -4888,6 +4945,18 @@ export interface SubagentSettings {
 	modelAliases: Record<string, string>;
 }
 
+export interface MoaSettings {
+	enabled: boolean;
+	preset: MoaPreset;
+	lanes: Record<string, string>;
+	maxLanes: number;
+}
+
+/** MOA preset identifier (derived from settings schema). */
+export type MoaPreset = SettingValue<"moa.preset">;
+/** MOA enabled toggle (derived from settings schema). */
+export type MoaEnabled = SettingValue<"moa.enabled">;
+
 /** Map group prefix -> typed settings interface */
 export interface GroupTypeMap {
 	compaction: CompactionSettings;
@@ -4909,6 +4978,7 @@ export interface GroupTypeMap {
 	codexResets: CodexResetsSettings;
 	subagent: SubagentSettings;
 	delegate: DelegateSettings;
+	moa: MoaSettings;
 }
 
 export type GroupPrefix = keyof GroupTypeMap;

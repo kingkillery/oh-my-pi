@@ -580,6 +580,18 @@ const usageSegment: StatusLineSegment = {
 	},
 };
 
+const moaSegment: StatusLineSegment = {
+	id: "moa",
+	render(ctx) {
+		if (!ctx.session.isMoaActive?.()) return { content: "", visible: false };
+		const labels = ctx.session.getMoaLaneLabels?.() ?? [];
+		if (labels.length === 0) return { content: "", visible: false };
+		const summary = `${labels.length}->active`;
+		const content = withIcon(theme.icon.agents, summary);
+		return { content: theme.fg("accent", content), visible: true };
+	},
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Segment Registry
 // ═══════════════════════════════════════════════════════════════════════════
@@ -609,6 +621,7 @@ export const SEGMENTS: Record<StatusLineSegmentId, StatusLineSegment> = {
 	session_name: sessionNameSegment,
 	usage: usageSegment,
 	collab: collabSegment,
+	moa: moaSegment,
 };
 
 export function renderSegment(id: StatusLineSegmentId, ctx: SegmentContext): RenderedSegment {

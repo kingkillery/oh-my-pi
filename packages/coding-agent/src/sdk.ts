@@ -40,6 +40,7 @@ import { loadCapability } from "./capability";
 import { type Rule, ruleCapability, setActiveRules } from "./capability/rule";
 import { bucketRules } from "./capability/rule-buckets";
 import { shouldEnableAppendOnlyContext } from "./config/append-only-context-mode";
+import { resolveMoaConfig } from "./config/moa-resolver";
 import { ModelRegistry } from "./config/model-registry";
 import {
 	formatModelString,
@@ -2459,6 +2460,19 @@ export async function createAgentSession(options: CreateAgentSessionOptions = {}
 
 		// One-shot launch-latency marker: fired the first time the loop dispatches
 		// a chat request to the provider transport. See onFirstChatDispatch.
+		// Resolve MOA from settings BEFORE Agent construction so `moa` can be
+		// passed into AgentOptions and become the streamFn wrapper for read-only
+		// candidate lanes. Falls back to no MOA when disabled or unresolved.
+		const moaSettings = settings.getGroup("moa");
+		const moaActive = moaSettings.enabled && moaSettings.preset !== "off";
+		const moaResolved = moaActive
+			? resolveMoaConfig({
+					presetId: moaSettings.preset,
+					overrideSelectors: moaSettings.preset === "custom" ? Object.values(moaSettings.lanes) : undefined,
+					availableModels: modelRegistry.getAvailable(),
+					maxLanes: Math.max(0, moaSettings.maxLanes | 0),
+				})
+			: { moa: undefined, skipped: [] };
 		let notifyFirstChatDispatch = options.onFirstChatDispatch;
 		agent = new Agent({
 			initialState: {
@@ -2542,6 +2556,7 @@ export async function createAgentSession(options: CreateAgentSessionOptions = {}
 					? new AppendOnlyContextManager()
 					: undefined
 				: undefined,
+			...(moaResolved.moa ? { moa: moaResolved.moa } : {}),
 		});
 
 		cursorEventEmitter = event => agent.emitExternalEvent(event);
@@ -2623,6 +2638,13 @@ export async function createAgentSession(options: CreateAgentSessionOptions = {}
 			skills,
 			skillWarnings,
 			skillsSettings: settings.getGroup("skills"),
+			moa: moaResolved.moa
+				? {
+						laneLabels: moaResolved.moa.lanes.map(
+							lane => lane.label ?? `${lane.model.provider}/${lane.model.id}`,
+						),
+					}
+				: undefined,
 			modelRegistry,
 			toolRegistry,
 			transformContext,

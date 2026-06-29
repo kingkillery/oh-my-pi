@@ -509,6 +509,7 @@ export interface AgentSessionConfig {
 	 * **MUST NOT** dispose it on their own teardown.
 	 */
 	ownedAsyncJobManager?: AsyncJobManager;
+	moa?: { laneLabels: readonly string[] };
 	/**
 	 * AsyncJobManager reachable by this session for scoped job actions.
 	 *
@@ -1148,6 +1149,7 @@ export class AgentSession {
 	#advisorTranscriptRecorder?: AdvisorTranscriptRecorder;
 	/** Unsubscribe for the advisor agent's event stream feeding the recorder. */
 	#advisorAgentUnsubscribe?: () => void;
+	#moaLaneLabels: readonly string[] = [];
 	/** Latest advisor-recorder close, awaited by dispose() so the final turn lands on disk. */
 	#advisorRecorderClosed: Promise<void> = Promise.resolve();
 	#goalTurnCounter = 0;
@@ -1545,6 +1547,7 @@ export class AgentSession {
 		this.#validateRetryFallbackChains();
 		this.#toolRegistry = config.toolRegistry ?? new Map();
 		this.#requestedToolNames = config.requestedToolNames;
+		this.#moaLaneLabels = config.moa?.laneLabels ?? [];
 		this.#transformContext = config.transformContext ?? (messages => messages);
 		this.#onPayload = config.onPayload;
 		this.rawSseDebugBuffer = config.rawSseDebugBuffer ?? new RawSseDebugBuffer();
@@ -12448,6 +12451,14 @@ export class AgentSession {
 	 */
 	isAdvisorActive(): boolean {
 		return this.#advisorAgent !== undefined;
+	}
+
+	isMoaActive(): boolean {
+		return this.#moaLaneLabels.length > 0;
+	}
+
+	getMoaLaneLabels(): readonly string[] {
+		return this.#moaLaneLabels;
 	}
 
 	/**

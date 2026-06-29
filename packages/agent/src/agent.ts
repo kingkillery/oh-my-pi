@@ -28,6 +28,7 @@ import { getBundledModel } from "@pk-nerdsaver-ai/pi-catalog/models";
 import { logger } from "@pk-nerdsaver-ai/pi-utils";
 import { abortReasonText, agentLoop, agentLoopContinue } from "./agent-loop";
 import type { AppendOnlyContextManager } from "./append-only-context";
+import { createMoaStreamFn, type MoaConfig } from "./moa";
 import type {
 	AgentContext,
 	AgentEvent,
@@ -133,6 +134,8 @@ export interface AgentOptions {
 	 * Custom stream function (for proxy backends, etc.). Default uses streamSimple.
 	 */
 	streamFn?: StreamFn;
+	/** Optional read-only MOA lanes. Lanes run tool-free; this agent's model remains the synthesizer/verifier. */
+	moa?: MoaConfig;
 	/** Absolute wall-clock deadline in Unix epoch milliseconds. */
 	deadline?: number;
 
@@ -390,7 +393,9 @@ export class Agent {
 		this.#steeringMode = opts.steeringMode || "one-at-a-time";
 		this.#followUpMode = opts.followUpMode || "one-at-a-time";
 		this.#interruptMode = opts.interruptMode || "immediate";
-		this.streamFn = opts.streamFn || streamSimple;
+		this.streamFn = opts.moa
+			? createMoaStreamFn(opts.streamFn || streamSimple, opts.moa)
+			: opts.streamFn || streamSimple;
 		this.#sessionId = opts.sessionId;
 		this.#deadline = opts.deadline;
 		this.#promptCacheKey = opts.promptCacheKey;

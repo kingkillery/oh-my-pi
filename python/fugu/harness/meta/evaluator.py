@@ -13,6 +13,7 @@ from harness.evals.task_loader import load_jsonl_tasks
 from harness.meta.candidate_manager import _COPY_SURFACE, CandidateManager
 from harness.meta.frontier import Frontier, FrontierCandidate
 from harness.meta.proposer import MockProposer
+from harness.security.sandbox import SandboxPolicy, build_subprocess_env
 
 # Directories/patterns never copied into the ephemeral eval overlay: VCS, prior
 # runs, other candidates, caches, and tooling state. Keeps the copy cheap and the
@@ -66,6 +67,205 @@ def _parse_last_json(text: str) -> dict | None:
                 pass
         end = close
 
+# Routing/gateway env a real backend needs to reach its provider through the tight
+# eval sandbox, plus the agentic-CLI launch commands. These are connection settings
+# and command strings — NOT broad operator secrets (API keys for openai/anthropic
+# stay dropped so a malicious candidate edit cannot exfiltrate them mid-eval). A
+# remote 9router key is forwarded because the backend genuinely needs it; `--apply`
+# stays human-gated and the held-out anchor stays forbidden, matching the DGM
+# "sandboxing + human oversight" posture.
+_BACKEND_ENV_PASSTHROUGH = (
+    "FMH_9ROUTER_MODEL",
+    "9ROUTER_BASE_URL",
+    "9ROUTER_API_KEY",
+    "NINEROUTER_API_KEY",
+    "FMH_CODEX_CLI_CMD",
+    "FMH_CLAUDE_CODE_CMD",
+    "FMH_SUBPROCESS_CLI_CMD",
+)
+
+
+def _safe_token(value: object) -> str:
+    """Filesystem-safe slug for a task id used in a temp single-row suite name."""
+    return "".join(ch if ch.isalnum() else "_" for ch in str(value))[:64] or "task"
+
+
+def _build_overlay(candidate_dir: Path, source_root: Path = Path(".")) -> Path:
+    """Materialize a throwaway runnable workspace: full repo copy with the
+    candidate's editable-surface files overlaid on top. Caller owns cleanup.
+
+    Only ``_COPY_SURFACE`` files (already gated by ``check_paths``) are overlaid,
+    so this can never introduce a forbidden file. Shared by every isolated eval so
+    the overlay construction lives in exactly one place."""
+    source_root = Path(source_root).resolve()
+    candidate_dir = Path(candidate_dir)
+    overlay = Path(tempfile.mkdtemp(prefix="fmh_eval_overlay_"))
+    shutil.copytree(source_root, overlay, ignore=_OVERLAY_IGNORE, dirs_exist_ok=True)
+    for rel in _COPY_SURFACE:
+        src = candidate_dir / rel
+        if not src.exists():
+            continue
+        dest = overlay / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if src.is_dir():
+            shutil.copytree(src, dest, dirs_exist_ok=True)
+        else:
+            shutil.copy2(src, dest)
+    return overlay
+
+
+def _eval_sandbox_env(overlay: Path, backend: str, model: str) -> dict[str, str]:
+    """Sandboxed subprocess env for an isolated eval. Mock stays fully sealed of
+    *secrets* (only the env allowlist is forwarded); a real backend additionally gets
+    its model + routing/CLI connection vars, nothing more.
+
+    The parent interpreter's import paths are forwarded via PYTHONPATH (overlay first,
+    so the candidate's overlaid harness still shadows the installed one). Without this
+    a stripped env loses user-site/site-packages discovery and the subprocess can't
+    import typer/pydantic — which silently scored every isolated eval 0.0."""
+    import_paths = [str(overlay), *(p for p in sys.path if p)]
+    overrides = {
+        "PYTHONPATH": os.pathsep.join(dict.fromkeys(import_paths)),
+        # Force the in-proc path inside the subprocess to avoid infinite overlay
+        # recursion if the optimizer is ever invoked from within the eval.
+        "FMH_OPTIMIZER_INPROC_EVAL": "1",
+    }
+    if backend != "mock":
+        if model and model != "default":
+            overrides["FMH_9ROUTER_MODEL"] = model
+        for key in _BACKEND_ENV_PASSTHROUGH:
+            if key in os.environ:
+                overrides.setdefault(key, os.environ[key])
+    return build_subprocess_env(SandboxPolicy(), os.environ, overrides=overrides)
+
+
+class EvalInfraError(RuntimeError):
+    """Raised when an isolated eval fails for *infrastructure* reasons (run-eval
+    crashed, suite missing, no parseable summary) — as opposed to a task legitimately
+    failing its tests. The RQGM path must not score these as ``outcome=0``; the
+    lenient ``Optimizer`` boundary swallows them to 0.0 for backward compatibility."""
+
+
+def _run_eval_subprocess(overlay: Path, suite_path: Path, backend: str, model: str, limit: int) -> dict:
+    """Run ``run-eval`` against the overlay as a sandboxed subprocess so Python
+    imports the overlaid candidate code. Returns the parsed summary, or raises
+    :class:`EvalInfraError` (carrying captured stderr) on a hard failure."""
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "harness.cli.main",
+            "run-eval",
+            "--suite",
+            str(suite_path),
+            "--limit",
+            str(limit),
+            "--backend",
+            backend,
+        ],
+        cwd=str(overlay),
+        env=_eval_sandbox_env(overlay, backend, model),
+        capture_output=True,
+        text=True,
+        timeout=_EVAL_TIMEOUT_SECONDS,
+    )
+    if proc.returncode != 0:
+        detail = (proc.stderr or proc.stdout or "").strip()
+        raise EvalInfraError(f"run-eval exited {proc.returncode} (backend={backend}): {detail[-800:]}")
+    summary = _parse_last_json(proc.stdout)
+    if summary is None:
+        raise EvalInfraError(f"run-eval produced no parseable summary (backend={backend})")
+    return summary
+
+
+def evaluate_candidate_suite(
+    suite: str,
+    candidate_dir: Path,
+    backend: str = "mock",
+    model: str = "default",
+    source_root: Path = Path("."),
+    limit: int = _EVAL_LIMIT,
+    strict: bool = False,
+) -> float:
+    """Mean executable pass-rate of ``suite`` against the candidate's edited code.
+
+    One overlay + one ``run-eval`` subprocess for the whole suite. With
+    ``strict=False`` (the optimizer default) any failure returns 0.0; with
+    ``strict=True`` (the RQGM path) infra failures propagate as
+    :class:`EvalInfraError` instead of silently scoring 0.0."""
+    overlay = _build_overlay(candidate_dir, source_root)
+    try:
+        suite_path = overlay / "evals" / suite / "tasks.jsonl"
+        if not suite_path.exists():
+            if strict:
+                raise EvalInfraError(f"suite not found: evals/{suite}/tasks.jsonl")
+            return 0.0
+        summary = _run_eval_subprocess(overlay, suite_path, backend, model, limit)
+        rate = summary.get("pass_rate", 0.0)
+        return float(rate) if isinstance(rate, (int, float)) else 0.0
+    except Exception:  # noqa: BLE001
+        if strict:
+            raise
+        return 0.0
+    finally:
+        shutil.rmtree(overlay, ignore_errors=True)
+
+
+def evaluate_candidate_task(
+    suite: str,
+    task_id: str,
+    candidate_dir: Path,
+    backend: str = "mock",
+    model: str = "default",
+    source_root: Path = Path("."),
+    budget_overrides: dict | None = None,
+    strict: bool = False,
+) -> bool:
+    """Executable pass/fail of a single ``suite`` task against the candidate's
+    edited code. Runs that one ``TaskContract`` through the supervisor (via
+    ``run-eval`` on a one-row suite) in the overlay sandbox; returns whether its
+    ``success_commands`` all passed (status == "passed").
+
+    ``budget_overrides`` patches the contract budget (e.g. fewer agent turns for a
+    cheap cascade canary) — the affordability lever that works for every backend,
+    including agentic CLIs that ignore the model param. With ``strict=True`` infra
+    failures propagate as :class:`EvalInfraError` rather than scoring False."""
+    overlay = _build_overlay(candidate_dir, source_root)
+    try:
+        suite_path = overlay / "evals" / suite / "tasks.jsonl"
+        if not suite_path.exists():
+            if strict:
+                raise EvalInfraError(f"suite not found: evals/{suite}/tasks.jsonl")
+            return False
+        target: str | None = None
+        for line in suite_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            contract = row.get("task_contract", {})
+            if str(contract.get("task_id")) == str(task_id) or str(row.get("eval_task_id")) == str(task_id):
+                if budget_overrides:
+                    budget = dict(contract.get("budget", {}))
+                    budget.update(budget_overrides)
+                    contract["budget"] = budget
+                    row["task_contract"] = contract
+                target = json.dumps(row)
+                break
+        if target is None:
+            if strict:
+                raise EvalInfraError(f"task {task_id!r} not found in evals/{suite}/tasks.jsonl")
+            return False
+        single = suite_path.parent / f"_single_{_safe_token(task_id)}.jsonl"
+        single.write_text(target + "\n", encoding="utf-8")
+        summary = _run_eval_subprocess(overlay, single, backend, model, limit=1)
+        rate = summary.get("pass_rate", 0.0)
+        return bool(isinstance(rate, (int, float)) and rate >= 1.0)
+    except Exception:  # noqa: BLE001
+        if strict:
+            raise
+        return False
+    finally:
+        shutil.rmtree(overlay, ignore_errors=True)
 
 class Optimizer:
     def __init__(self, root: Path = Path("harness_candidates"), proposer=None, frontier: Frontier | None = None) -> None:
@@ -92,80 +292,11 @@ class Optimizer:
         return passed / len(tasks)
 
     def _isolated_pass_rate(self, suite: str, candidate_dir: Path, source_root: Path = Path(".")) -> float:
-        """Evaluate ``suite`` against the candidate's *edited* code.
-
-        Builds a throwaway runnable workspace: full repo copy with the candidate's
-        editable-surface files overlaid on top, then runs ``run-eval`` as a
-        subprocess so Python imports the overlaid code. The overlay is transient and
-        is NOT a candidate artifact, so the persisted candidate dir's
-        forbidden-file guarantee is untouched. Only ``_COPY_SURFACE`` files (already
-        gated by ``check_paths``) are overlaid, so this cannot introduce a forbidden
-        file. Returns 0.0 on any failure, mirroring the lenient in-process behavior."""
-        source_root = Path(source_root).resolve()
-        candidate_dir = Path(candidate_dir)
-        overlay = Path(tempfile.mkdtemp(prefix="fmh_eval_overlay_"))
-        try:
-            shutil.copytree(source_root, overlay, ignore=_OVERLAY_IGNORE, dirs_exist_ok=True)
-            # Overlay the candidate's edited editable-surface files on top.
-            for rel in _COPY_SURFACE:
-                src = candidate_dir / rel
-                if not src.exists():
-                    continue
-                dest = overlay / rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                if src.is_dir():
-                    shutil.copytree(src, dest, dirs_exist_ok=True)
-                else:
-                    shutil.copy2(src, dest)
-
-            suite_path = overlay / "evals" / suite / "tasks.jsonl"
-            if not suite_path.exists():
-                return 0.0
-            # Sandbox the eval subprocess so a malicious candidate edit can't
-            # read operator secrets (ANTHROPIC_API_KEY etc.) from the env. The
-            # default SandboxPolicy drops everything outside the env_allowlist
-            # (paths, locale, etc.) and clears HTTP(S) proxy vars.
-            sandbox_env = build_subprocess_env(
-                SandboxPolicy(),
-                os.environ,
-                overrides={
-                    "PYTHONPATH": str(overlay),
-                    # Force the in-proc path inside the subprocess to avoid infinite
-                    # overlay recursion if the optimizer is ever invoked from within
-                    # the eval.
-                    "FMH_OPTIMIZER_INPROC_EVAL": "1",
-                },
-            )
-            proc = subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "harness.cli.main",
-                    "run-eval",
-                    "--suite",
-                    str(suite_path),
-                    "--limit",
-                    str(_EVAL_LIMIT),
-                    "--backend",
-                    "mock",
-                ],
-                cwd=str(overlay),
-                env=sandbox_env,
-                capture_output=True,
-                text=True,
-                timeout=_EVAL_TIMEOUT_SECONDS,
-            )
-            if proc.returncode != 0:
-                return 0.0
-            summary = _parse_last_json(proc.stdout)
-            if not summary:
-                return 0.0
-            rate = summary.get("pass_rate", 0.0)
-            return float(rate) if isinstance(rate, (int, float)) else 0.0
-        except Exception:  # noqa: BLE001 - never crash the optimizer on eval failure
-            return 0.0
-        finally:
-            shutil.rmtree(overlay, ignore_errors=True)
+        """Evaluate ``suite`` against the candidate's *edited* code under the mock
+        backend. Delegates to the shared module-level :func:`evaluate_candidate_suite`
+        so the overlay + sandboxed ``run-eval`` mechanism lives in one place.
+        Returns 0.0 on any failure, mirroring the lenient in-process behavior."""
+        return evaluate_candidate_suite(suite, candidate_dir, backend="mock", source_root=source_root)
 
     def _eval_suite(self, suite: str, runs_root: Path, candidate_dir: Path | None = None) -> float:
         if suite == "holdout":
