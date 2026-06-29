@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added the `/rqgm` slash command, which runs the Red Queen Gödel Machine co-evolutionary search (arXiv:2606.26294) through the Fusion Meta-Harness (`fmh rqgm search`), backed by the standalone `red-queen-godel-machine` package.
+- Added Mixture-of-Agents settings, preset resolution, and status-line visibility for read-only candidate lanes.
+- Added a best-effort collab link handoff file for the Pi Speak gateway while a collab host is active.
+
 ## [16.1.10] - 2026-06-22
 
 ### Added

@@ -30,6 +30,7 @@ import type { SessionInfo } from "../session/session-listing";
 import { SessionManager } from "../session/session-manager";
 import { TASK_SUBAGENT_LIFECYCLE_CHANNEL, TASK_SUBAGENT_PROGRESS_CHANNEL } from "../task";
 import { generateRoomKey, generateWriteToken, importRoomKey } from "./crypto";
+import { clearCollabLinkFile } from "./link-file";
 import {
 	type AgentSnapshot,
 	COLLAB_PROMPT_MESSAGE_TYPE,
@@ -271,6 +272,7 @@ export class CollabHost {
 		this.#socket?.close();
 		this.#socket = null;
 		this.#ctx.collabHost = undefined;
+		clearCollabLinkFile();
 		this.#ctx.statusLine.setCollabStatus(null);
 		this.#ctx.ui.requestRender();
 	}

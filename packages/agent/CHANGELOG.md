@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added Mixture-of-Agents stream composition for read-only candidate lanes feeding private advice into a tool-capable synthesizer/verifier model.
+
 ## [16.1.5] - 2026-06-19
 
 ### Fixed
