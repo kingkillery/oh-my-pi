@@ -58,6 +58,7 @@ export type * from "./task/types";
 // Tools (detail types and utilities)
 export * from "./tools";
 export * from "./utils/git";
+export * from "./workspace";
 // UI components for extensions
 export {
 	HookEditorComponent as ExtensionEditorComponent,

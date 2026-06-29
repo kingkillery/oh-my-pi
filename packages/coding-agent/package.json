@@ -543,6 +543,14 @@
 			"types": "./src/tui/*.ts",
 			"import": "./src/tui/*.ts"
 		},
+		"./workspace": {
+			"types": "./src/workspace/index.ts",
+			"import": "./src/workspace/index.ts"
+		},
+		"./workspace/*": {
+			"types": "./src/workspace/*.ts",
+			"import": "./src/workspace/*.ts"
+		},
 		"./utils/*": {
 			"types": "./src/utils/*.ts",
 			"import": "./src/utils/*.ts"

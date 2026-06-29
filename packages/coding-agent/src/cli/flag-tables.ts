@@ -143,6 +143,19 @@ export const STRING_SETTERS: Record<string, StringSetter> = {
 	"--session-dir": (result, value) => {
 		result.sessionDir = value;
 	},
+	"--workspace-mode": (result, value, deps) => {
+		if (value === "auto" || value === "copy" || value === "worktree") {
+			result.workspaceMode = value;
+		} else {
+			deps.logger.warn("Invalid value passed to --workspace-mode", {
+				value,
+				validValues: ["auto", "copy", "worktree"],
+			});
+		}
+	},
+	"--workspace-root": (result, value) => {
+		result.workspaceRoot = value;
+	},
 	"--models": (result, value) => {
 		result.models = value.split(",").map(s => s.trim());
 	},
@@ -177,6 +190,21 @@ export const STRING_SETTERS: Record<string, StringSetter> = {
 	},
 	"--export": (result, value) => {
 		result.export = value;
+	},
+	"--env-file": (result, value) => {
+		result.envFiles = [...(result.envFiles ?? []), value];
+	},
+	"--copy-secret": (result, value) => {
+		result.secretFiles = [...(result.secretFiles ?? []), value];
+	},
+	"--secret-allowlist": (result, value) => {
+		result.secretAllowlist = value;
+	},
+	"--export-patch": (result, value) => {
+		result.exportPatch = value;
+	},
+	"--workspace-name": (result, value) => {
+		result.workspaceName = value;
 	},
 	"--hook": (result, value) => {
 		result.hooks = result.hooks ?? [];
@@ -277,4 +305,8 @@ export const VALUELESS_FLAGS: ReadonlySet<string> = new Set([
 	"--no-title",
 	"--auto-approve",
 	"--yolo",
+	"--ethereal",
+	"--preserve-workspace",
+	"--cleanup-workspace",
+	"--copy-env",
 ]);

@@ -11,6 +11,7 @@ Package-specific references:
 - [MCP configuration guide](../../docs/mcp-config.md)
 - [MCP runtime lifecycle](../../docs/mcp-runtime-lifecycle.md)
 - [MCP server/tool authoring](../../docs/mcp-server-tool-authoring.md)
+- [Ethereal Workspaces](../../docs/ethereal-workspaces.md)
 - [DEVELOPMENT](./DEVELOPMENT.md)
 
 ## Memory backends

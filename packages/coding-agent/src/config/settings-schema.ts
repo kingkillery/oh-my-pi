@@ -277,6 +277,7 @@ const EMPTY_STRING_RECORD: Record<string, string> = {};
 const DEFAULT_CYCLE_ORDER: string[] = ["smol", "default", "slow"];
 const EMPTY_MODEL_TAGS_RECORD: ModelTagsSettings = {};
 const HINDSIGHT_RECALL_TYPES_DEFAULT: string[] = ["world", "experience"];
+const WORKSPACE_MODE_VALUES = ["auto", "copy", "worktree"] as const;
 export const DEFAULT_BASH_INTERCEPTOR_RULES: BashInterceptorRule[] = [
 	{
 		pattern: "^\\s*(cat|head|tail|less|more)\\s+",
@@ -3653,6 +3654,94 @@ export const SETTINGS_SCHEMA = {
 			label: "Goal Continuation Modes",
 			description: "Run modes where active goals may auto-continue between turns",
 		},
+	},
+
+	// Ethereal Workspaces
+	"workspace.enabled": {
+		type: "boolean",
+		default: false,
+		ui: {
+			tab: "tasks",
+			group: "Isolation",
+			label: "Ethereal Workspaces",
+			description: "Run top-level agent sessions inside a disposable temporary copy of the current repository.",
+		},
+	},
+
+	"workspace.mode": {
+		type: "enum",
+		values: WORKSPACE_MODE_VALUES,
+		default: "copy",
+		ui: {
+			tab: "tasks",
+			group: "Isolation",
+			label: "Workspace Mode",
+			description:
+				"Auto prefers reflink copy for Git repos, then git worktree with a dirty overlay, and falls back to copy for non-Git repos.",
+			options: [
+				{ value: "auto", label: "Auto", description: "Use reflink copy when available, otherwise git worktree" },
+				{ value: "copy", label: "Copy", description: "Safe full copy with cache and secret exclusions" },
+				{ value: "worktree", label: "Git Worktree", description: "Fast git worktree plus dirty-file overlay" },
+			],
+		},
+	},
+
+	"workspace.root": {
+		type: "string",
+		default: undefined,
+		ui: {
+			tab: "tasks",
+			group: "Isolation",
+			label: "Workspace Root",
+			description: "Directory where Ethereal Workspaces are created. Defaults to the OS temp directory.",
+		},
+	},
+
+	"workspace.preserve": {
+		type: "boolean",
+		default: false,
+		ui: {
+			tab: "tasks",
+			group: "Isolation",
+			label: "Preserve Workspace",
+			description: "Keep Ethereal Workspaces after runs instead of deleting them.",
+		},
+	},
+
+	"workspace.copyEnv": {
+		type: "boolean",
+		default: false,
+		ui: {
+			tab: "tasks",
+			group: "Isolation",
+			label: "Copy Env Files",
+			description: "Copy common repo .env files into Ethereal Workspaces. Disabled by default for safety.",
+		},
+	},
+
+	"workspace.envFiles": {
+		type: "array",
+		default: EMPTY_STRING_ARRAY,
+	},
+
+	"workspace.secretFiles": {
+		type: "array",
+		default: EMPTY_STRING_ARRAY,
+	},
+
+	"workspace.secretAllowlist": {
+		type: "string",
+		default: undefined,
+	},
+
+	"workspace.exportPatch": {
+		type: "string",
+		default: undefined,
+	},
+
+	"workspace.name": {
+		type: "string",
+		default: undefined,
 	},
 
 	// Delegation
