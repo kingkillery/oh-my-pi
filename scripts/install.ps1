@@ -1,4 +1,4 @@
-# OMP Coding Agent Installer for Windows
+# oh-my-pk installer for Windows
 # Usage: irm https://oh-my-pi.pkking.computer/install.ps1 | iex
 #
 # Or with options:
@@ -148,7 +148,7 @@ function Configure-BashShell {
         } else {
             Write-Host ""
             Write-Host "⚠ No bash shell found!" -ForegroundColor Yellow
-            Write-Host "  OMP requires a bash shell on Windows. Options:" -ForegroundColor Yellow
+            Write-Host "  oh-my-pk requires a bash shell on Windows. Options:" -ForegroundColor Yellow
             Write-Host "    1. Install Git for Windows: https://git-scm.com/download/win" -ForegroundColor Yellow
             Write-Host "    2. Use WSL, Cygwin, or MSYS2" -ForegroundColor Yellow
             Write-Host ""
@@ -229,11 +229,11 @@ function Install-ViaBun {
     }
 
     Write-Host ""
-    Write-Host "✓ Installed omp via bun" -ForegroundColor Green
+    Write-Host "✓ Installed oh-my-pk via bun" -ForegroundColor Green
 
     Configure-BashShell
 
-    Write-Host "Run 'omp' to get started!"
+    Write-Host "Run 'oh-my-pk' to get started!"
 }
 
 function Install-Binary {
@@ -256,11 +256,13 @@ function Install-Binary {
     # Download binary from the distribution endpoint (no GitHub dependency).
     $BinaryUrl = "$DistBase/bin/$Latest/$BinaryName"
     Write-Host "Downloading $BinaryName..."
-    $OutPath = Join-Path $InstallDir "omp.exe"
+    $OutPath = Join-Path $InstallDir "oh-my-pk.exe"
     Invoke-WebRequest -Uri $BinaryUrl -OutFile $OutPath
+    # Keep `omp` as a back-compat alias for the renamed command.
+    Copy-Item -Path $OutPath -Destination (Join-Path $InstallDir "omp.exe") -Force
 
     Write-Host ""
-    Write-Host "✓ Installed omp to $OutPath" -ForegroundColor Green
+    Write-Host "✓ Installed oh-my-pk to $OutPath (alias: omp.exe)" -ForegroundColor Green
 
     # Add to PATH if not already there
     $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -273,9 +275,9 @@ function Install-Binary {
     Configure-BashShell
 
     if ($needsRestart) {
-        Write-Host "Restart your terminal, then run 'omp' to get started!"
+        Write-Host "Restart your terminal, then run 'oh-my-pk' to get started!"
     } else {
-        Write-Host "Run 'omp' to get started!"
+        Write-Host "Run 'oh-my-pk' to get started!"
     }
 }
 

@@ -31,13 +31,13 @@ The most capable agent surface that ships. Continuously tuned by real-world use 
 **macOS · Linux**
 
 ```sh
-curl -fsSL https://omp.sh/install | sh
+curl -fsSL https://oh-my-pi.pkking.computer/install.sh | sh
 ```
 
 **Homebrew**
 
 ```sh
-brew install can1357/tap/omp
+brew install kingkillery/tap/omp
 ```
 
 **Bun (recommended)**
@@ -49,30 +49,30 @@ bun install -g @pk-nerdsaver-ai/pi-coding-agent
 **Windows (PowerShell)**
 
 ```powershell
-irm https://omp.sh/install.ps1 | iex
+irm https://oh-my-pi.pkking.computer/install.ps1 | iex
 ```
 
 **Pinned versions (mise)**
 
 ```sh
-mise use -g github:can1357/oh-my-pi
+mise use -g github:kingkillery/oh-my-pi
 ```
 
 macOS · Linux · Windows · bun ≥ 1.3.14
 
 ### Shell completions
 
-`omp` generates its own completion scripts for **bash**, **zsh**, and **fish** from the live command/flag metadata, so they never drift from the actual CLI. Subcommands, flags, and enum values complete statically; model names (`--model`, `--smol`, `--slow`, `--plan`) resolve against the bundled model catalog and `--resume` against your on-disk sessions.
+`oh-my-pk` (alias: `omp`) generates its own completion scripts for **bash**, **zsh**, and **fish** from the live command/flag metadata, so they never drift from the actual CLI. Subcommands, flags, and enum values complete statically; model names (`--model`, `--smol`, `--slow`, `--plan`) resolve against the bundled model catalog and `--resume` against your on-disk sessions.
 
 ```sh
 # zsh — add to ~/.zshrc (or write the output into a file on your $fpath)
-eval "$(omp completions zsh)"
+eval "$(oh-my-pk completions zsh)"
 
 # bash — add to ~/.bashrc
-eval "$(omp completions bash)"
+eval "$(oh-my-pk completions bash)"
 
 # fish
-omp completions fish > ~/.config/fish/completions/omp.fish
+oh-my-pk completions fish > ~/.config/fish/completions/oh-my-pk.fish
 ```
 
 ## Every tool, _benchmaxxed_.
@@ -144,7 +144,7 @@ _[Watch the capture ↗](https://omp.sh/clips/advisor.mp4)_
 
 ### 07 · Hand someone the link, they're in.
 
-/collab puts your live session on a relay and hands back a link — and a QR. A teammate joins from another terminal with omp join, or just opens it in a browser. Share read-write to pair on the same agent, or /collab view for a read-only link anyone can watch but no one can steer. Frames are sealed client-side; the relay never sees your keys.
+/collab puts your live session on a relay and hands back a link — and a QR. A teammate joins from another terminal with oh-my-pk join, or just opens it in a browser. Share read-write to pair on the same agent, or /collab view for a read-only link anyone can watch but no one can steer. Frames are sealed client-side; the relay never sees your keys.
 
 ![omp TUI: /collab view prints 'Collab session started!' with an omp join command, a my.omp.sh browser link, the note 'Anyone with this link can watch the session but cannot prompt the agent', and a large scannable QR code.](https://omp.sh/clips/collab-poster.webp)
 
@@ -186,9 +186,9 @@ Run omp inside Zed and you get the same agent you drive from the terminal — re
 
 Every other agent ships an importer and expects you to convert. omp reads the eight formats already on disk in their native shape — Cursor MDC, Cline .clinerules, Codex AGENTS.md, Copilot applyTo, and the rest. No migration script, no YAML-to-TOML port, no "supported subset" footnotes. The config your team wrote last quarter still works tonight.
 
-### 16 · omp commit: atomic splits, validated messages
+### 16 · oh-my-pk commit: atomic splits, validated messages
 
-omp reads the working tree through git_overview, git_file_diff, and git_hunk, then splits unrelated changes into atomic commits ordered by their dependencies. Cycles are rejected before anything is written. Source files score above tests, docs, and configs, so the headline commit is the one that matters. Lock files are excluded from analysis entirely.
+oh-my-pk commit reads the working tree through git_overview, git_file_diff, and git_hunk, then splits unrelated changes into atomic commits ordered by their dependencies. Cycles are rejected before anything is written. Source files score above tests, docs, and configs, so the headline commit is the one that matters. Lock files are excluded from analysis entirely.
 
 ### 17 · Read PRs. _Walk skills._ Pull JSON out of subagents.
 
@@ -293,7 +293,7 @@ Anthropic `oauth` · OpenAI · OpenAI Codex `oauth` · Google Gemini · Google A
 
 Subscription-routed. `/login` attaches the session.
 
-Cursor `oauth` · GitHub Copilot `oauth` · GitLab Duo · Kimi Code `plan` · Moonshot · MiniMax Coding Plan `plan` · MiniMax Coding Plan CN `plan` · Alibaba Coding Plan `plan` · Qwen Portal · Z.AI / GLM Coding Plan `plan` · Xiaomi MiMo · Qianfan · NanoGPT · Venice · Kilo · ZenMux · Wafer Pass `plan` · OpenCode Go · OpenCode Zen
+Cursor `oauth` · GitHub Copilot `oauth` · GitLab Duo · Kimi Code `plan` · Moonshot · MiniMax Coding Plan `plan` · MiniMax Coding Plan CN `plan` · Alibaba Coding Plan `plan` · Qwen Portal · Z.AI / GLM Coding Plan `plan` · Xiaomi MiMo · Qianfan · NanoGPT · Venice · Kilo · Cline `oauth` · ZenMux · Wafer Pass `plan` · OpenCode Go · OpenCode Zen
 
 ### Run it yourself
 
@@ -394,7 +394,7 @@ The table below is a per-module breakdown that intentionally omits glue and test
 
 ## Four entry points: _interactive_, _one-shot_, RPC, and ACP.
 
-Same engine, four wrappers. `omp` runs the TUI. `omp -p` answers a single prompt and exits. The Node SDK embeds the session in your process. `omp --mode rpc` and `omp acp` hand the wheel to another program over stdio.
+Same engine, four wrappers. `oh-my-pk` runs the TUI. `oh-my-pk -p` answers a single prompt and exits. The Node SDK embeds the session in your process. `oh-my-pk --mode rpc` and `oh-my-pk acp` hand the wheel to another program over stdio.
 
 ### Interactive — when in doubt, the agent asks
 
@@ -406,7 +406,7 @@ The same prompt cards surface over ACP, so editors get the picker without writin
 
 ### Ephemeral — isolate the whole session
 
-`omp -p "fix the failing tests" --ethereal`
+`oh-my-pk -p "fix the failing tests" --ethereal`
 
 `--ethereal` runs the entire session against a throwaway copy of your repo, so the agent never touches your working tree. The default `auto` mode reflink-copies a Git repo (falling back to a `git worktree` overlay, or a plain copy off-Git); `.env` files and secrets stay home unless you opt in with `--copy-env`/`--copy-secret`, `--export-patch out.patch` hands back the diff, and `--preserve-workspace` keeps the sandbox for inspection. See [Ethereal Workspaces](docs/ethereal-workspaces.md).
 
@@ -438,12 +438,12 @@ await session.prompt("list .ts files");
 
 ### RPC — drive over stdio
 
-`omp --mode rpc`
+`oh-my-pk --mode rpc`
 
 For non-Node embedders, or when you want process isolation. NDJSON commands in, response and event frames out. `--mode rpc-ui` adds tool cards, selectors, and dialogs as `extension_ui_request` frames the host must answer.
 
 ```
-$ omp --mode rpc --no-session
+$ oh-my-pk --mode rpc --no-session
 > {"id":"r1","type":"prompt","message":"list .ts files"}
 < {"id":"r1","type":"response", ...}
 > {"id":"r2","type":"set_model","provider":"anthropic","modelId":"sonnet-4.5"}
@@ -452,7 +452,7 @@ $ omp --mode rpc --no-session
 
 ### ACP — speak to editors
 
-`omp acp`
+`oh-my-pk acp`
 
 The [Agent Client Protocol](https://github.com/zed-industries/agent-client-protocol) over JSON-RPC. When the editor advertises capabilities, tool I/O routes through it and writes are gated by `session/request_permission`.
 

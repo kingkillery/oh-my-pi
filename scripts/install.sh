@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-# OMP Coding Agent Installer
+# oh-my-pk installer
 # Usage: curl -fsSL https://oh-my-pi.pkking.computer/install.sh | sh
 #
 # Options:
@@ -180,11 +180,12 @@ install_via_bun() {
         }
     fi
     echo ""
-    echo "✓ Installed omp via bun"
-    echo "Run 'omp' to get started!"
+    echo "✓ Installed oh-my-pk via bun"
+    echo "Run 'oh-my-pk' to get started!"
 }
 
-# Install binary from GitHub releases
+# Install prebuilt binary from the distribution endpoint (Cloudflare Worker ->
+# private Hugging Face repo); no GitHub Releases dependency.
 install_binary() {
     # Detect platform
     OS="$(uname -s)"
@@ -223,15 +224,18 @@ install_binary() {
     # Download binary from the distribution endpoint.
     BINARY_URL="${DIST_BASE}/bin/${LATEST}/${BINARY}"
     echo "Downloading ${BINARY}..."
-    curl -fsSL "$BINARY_URL" -o "${INSTALL_DIR}/omp"
+    curl -fsSL "$BINARY_URL" -o "${INSTALL_DIR}/oh-my-pk"
+    chmod +x "${INSTALL_DIR}/oh-my-pk"
+    # Keep `omp` as a back-compat alias for the renamed command.
+    cp "${INSTALL_DIR}/oh-my-pk" "${INSTALL_DIR}/omp"
     chmod +x "${INSTALL_DIR}/omp"
     echo ""
-    echo "✓ Installed omp to ${INSTALL_DIR}/omp"
+    echo "✓ Installed oh-my-pk to ${INSTALL_DIR}/oh-my-pk (alias: omp)"
 
     # Check if in PATH
     case ":$PATH:" in
-        *":$INSTALL_DIR:"*) echo "Run 'omp' to get started!" ;;
-        *) echo "Add ${INSTALL_DIR} to your PATH, then run 'omp'" ;;
+        *":$INSTALL_DIR:"*) echo "Run 'oh-my-pk' to get started!" ;;
+        *) echo "Add ${INSTALL_DIR} to your PATH, then run 'oh-my-pk'" ;;
     esac
 }
 

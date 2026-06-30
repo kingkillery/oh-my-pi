@@ -1,6 +1,6 @@
 {
   "name": "omp-monorepo",
-  "homepage": "https://omp.sh",
+  "homepage": "https://github.com/kingkillery/oh-my-pi",
   "private": true,
   "type": "module",
   "packageManager": "bun@1.3.14",
