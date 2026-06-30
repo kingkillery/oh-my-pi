@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import * as path from "node:path";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 /**
  * `omp ttsr` — inspect and test Time-Traveling Stream Rules.
  *
@@ -8,7 +9,6 @@ import * as path from "node:path";
  * shows every TTSR-registered rule the current project/user config would load.
  */
 import { Args, Command, Flags } from "@pk-nerdsaver-ai/pi-utils/cli";
-import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import {
 	runTtsrCommand,
 	TTSR_ACTIONS,

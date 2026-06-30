@@ -15,9 +15,9 @@ import { describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import { commands, isSubcommand, resolveCliArgv } from "@pk-nerdsaver-ai/pi-coding-agent/cli-commands";
 import { looksLikeLocalPath } from "@pk-nerdsaver-ai/pi-coding-agent/commands/install";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 
 describe("install command is registered as a top-level subcommand", () => {
 	test("CLI runner sees `install` as a known command", () => {

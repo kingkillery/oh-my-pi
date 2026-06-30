@@ -393,7 +393,9 @@ export async function runModelsCommand(command: ModelsCommandArgs): Promise<void
 	const json = command.flags.json ?? false;
 
 	if (action === "find" && (!pattern || pattern.trim().length === 0)) {
-		process.stderr.write(`\`${APP_NAME} models find\` requires a search substring, e.g. \`${APP_NAME} models find minimax\`\n`);
+		process.stderr.write(
+			`\`${APP_NAME} models find\` requires a search substring, e.g. \`${APP_NAME} models find minimax\`\n`,
+		);
 		process.exitCode = 1;
 		return;
 	}

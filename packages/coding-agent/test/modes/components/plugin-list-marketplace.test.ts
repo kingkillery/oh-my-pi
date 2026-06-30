@@ -1,7 +1,6 @@
 import { beforeAll, describe, expect, it, spyOn } from "bun:test";
 import * as os from "node:os";
 import { stripVTControlCharacters } from "node:util";
-import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import { PluginManager } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/plugins";
 import {
 	type InstalledPluginSummary,
@@ -15,6 +14,7 @@ import {
 	PluginSettingsComponent,
 } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/plugin-settings";
 import { initTheme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 
 beforeAll(async () => {
 	await initTheme();

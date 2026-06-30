@@ -13,8 +13,9 @@
 // import time. Because profile-bootstrap statically imports this module before
 // `setProfile` runs, a root-barrel import here would snapshot the default
 // profile's env and break `--profile` .env loading (keeps this module side-effect-free).
-import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils/dirs";
+
 import type { CommandEntry } from "@pk-nerdsaver-ai/pi-utils/cli";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils/dirs";
 
 export const commands: CommandEntry[] = [
 	{ name: "launch", load: () => import("./commands/launch").then(m => m.default) },

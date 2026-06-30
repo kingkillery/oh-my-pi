@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import type { Model } from "@pk-nerdsaver-ai/pi-ai";
-import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import {
 	resolveCliModel,
@@ -8,6 +7,7 @@ import {
 	resolveModelRoleValue,
 } from "@pk-nerdsaver-ai/pi-coding-agent/config/model-resolver";
 import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 
 function model(provider: string, id: string): Model<"anthropic-messages"> {
 	return buildModel({
