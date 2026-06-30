@@ -3,6 +3,7 @@
  */
 
 import { PROVIDER_REGISTRY } from "@pk-nerdsaver-ai/pi-ai";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import { Args, Command, Flags } from "@pk-nerdsaver-ai/pi-utils/cli";
 import chalk from "chalk";
 import { isAuthenticated, ModelRegistry } from "../config/model-registry";
@@ -31,9 +32,9 @@ export default class Token extends Command {
 	};
 
 	static examples = [
-		"# Get API key for Anthropic\n  omp token anthropic",
-		"# Get raw Copilot credential JSON\n  omp token github-copilot --raw",
-		"# Force refresh and get Gemini CLI token\n  omp token google-gemini-cli --force-refresh",
+		`# Get API key for Anthropic\n  ${APP_NAME} token anthropic`,
+		`# Get raw Copilot credential JSON\n  ${APP_NAME} token github-copilot --raw`,
+		`# Force refresh and get Gemini CLI token\n  ${APP_NAME} token google-gemini-cli --force-refresh`,
 	];
 
 	async run(): Promise<void> {

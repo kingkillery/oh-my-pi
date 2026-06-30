@@ -138,6 +138,8 @@ export interface AgentOptions {
 	moa?: MoaConfig;
 	/** Absolute wall-clock deadline in Unix epoch milliseconds. */
 	deadline?: number;
+	/** Optional hard cap on model requests per run (Fusion sidekick budget). */
+	maxModelRequestsPerRun?: number;
 
 	/**
 	 * Optional session identifier forwarded to LLM providers.
@@ -324,6 +326,7 @@ export class Agent {
 	#interruptMode: "immediate" | "wait";
 	#sessionId?: string;
 	#deadline?: number;
+	#maxModelRequestsPerRun?: number;
 	#promptCacheKey?: string;
 	#metadata?: Record<string, unknown>;
 	#metadataResolver?: (provider: string) => Record<string, unknown> | undefined;
@@ -398,6 +401,7 @@ export class Agent {
 			: opts.streamFn || streamSimple;
 		this.#sessionId = opts.sessionId;
 		this.#deadline = opts.deadline;
+		this.#maxModelRequestsPerRun = opts.maxModelRequestsPerRun;
 		this.#promptCacheKey = opts.promptCacheKey;
 		this.#providerSessionState = opts.providerSessionState;
 		this.#thinkingBudgets = opts.thinkingBudgets;
@@ -1050,6 +1054,7 @@ export class Agent {
 			interruptMode: this.#interruptMode,
 			sessionId: this.#sessionId,
 			deadline: this.#deadline,
+			maxModelRequestsPerRun: this.#maxModelRequestsPerRun,
 			promptCacheKey: this.#promptCacheKey,
 			metadata: this.#metadataResolver ? undefined : this.#metadata,
 			metadataResolver: this.#metadataResolver,

@@ -17,6 +17,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { commands, isSubcommand, resolveCliArgv } from "@pk-nerdsaver-ai/pi-coding-agent/cli-commands";
 import { looksLikeLocalPath } from "@pk-nerdsaver-ai/pi-coding-agent/commands/install";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 
 describe("install command is registered as a top-level subcommand", () => {
 	test("CLI runner sees `install` as a known command", () => {
@@ -26,7 +27,7 @@ describe("install command is registered as a top-level subcommand", () => {
 
 	test("CLI runner rejects only bare reserved management words", () => {
 		expect(resolveCliArgv(["extensions"])).toEqual({
-			error: '`omp extensions` is not a management command. Use `omp plugin list` / `omp plugin install`, or run `omp launch extensions` if you meant to send "extensions" as a prompt.',
+			error: `\`${APP_NAME} extensions\` is not a management command. Use \`${APP_NAME} plugin list\` / \`${APP_NAME} plugin install\`, or run \`${APP_NAME} launch extensions\` if you meant to send "extensions" as a prompt.`,
 		});
 		expect(resolveCliArgv(["extensions", "are", "not", "loading"])).toEqual({
 			argv: ["launch", "extensions", "are", "not", "loading"],

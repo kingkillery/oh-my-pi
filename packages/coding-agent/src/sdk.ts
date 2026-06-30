@@ -412,6 +412,8 @@ export interface CreateAgentSessionOptions {
 	providerPromptCacheKey?: string;
 	/** Absolute wall-clock deadline in Unix epoch milliseconds. */
 	deadline?: number;
+	/** Optional per-run model-request cap forwarded to the Agent (Fusion sidekick budget). */
+	maxModelRequestsPerRun?: number;
 
 	/** Custom tools to register (in addition to built-in tools). Accepts both CustomTool and ToolDefinition. */
 	customTools?: (CustomTool | ToolDefinition)[];
@@ -2200,6 +2202,16 @@ export async function createAgentSession(options: CreateAgentSessionOptions = {}
 				eagerTasks,
 				eagerTasksAlways,
 				taskBatch: settings.get("task.batch"),
+				fusionSidekick:
+					agentKind === "main" && settings.get("fusion.enabled") === true && settings.get("fusion.mode") !== "off",
+				fusionEscalate:
+					agentKind === "main" &&
+					settings.get("fusion.enabled") === true &&
+					settings.get("fusion.mode") === "escalate",
+				sidekickModel: settings.get("fusion.sidekickModel") || "pi/smol",
+				// `session` is assigned late (let session!: AgentSession), and this prompt
+				// closure can run during construction before that — guard the access.
+				sidekickId: agentKind === "main" ? (session as AgentSession | undefined)?.getFusionSidekickId() : undefined,
 				secretsEnabled,
 				workspaceTree: workspaceTreePromise,
 				memoryRootEnabled: memoryBackend.id === "local",
@@ -2488,6 +2500,7 @@ export async function createAgentSession(options: CreateAgentSessionOptions = {}
 			sessionId: providerSessionId,
 			promptCacheKey: options.providerPromptCacheKey,
 			deadline: options.deadline,
+			maxModelRequestsPerRun: options.maxModelRequestsPerRun,
 			transformContext,
 			transformProviderContext,
 			steeringMode: settings.get("steeringMode") ?? "one-at-a-time",

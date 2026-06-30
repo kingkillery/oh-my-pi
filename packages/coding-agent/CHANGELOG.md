@@ -8,6 +8,12 @@
 - Added Mixture-of-Agents settings, preset resolution, and status-line visibility for read-only candidate lanes.
 - Added a best-effort collab link handoff file for the Pi Speak gateway while a collab host is active.
 - Added Ethereal Workspaces for launching sessions inside disposable temporary repository workspaces, with `copy`, `worktree`, and `auto` modes, copy-on-write reflink detection, dirty worktree overlays, opt-in env/secret copying, redacted manifests, patch export, and cleanup/preserve controls.
+- Added Cline account support: `/login cline` (WorkOS device-authorization flow) or `CLINE_API_KEY` for the Cline OpenAI-compatible gateway (`https://api.cline.bot/api/v1`), with author-prefixed model ids and live model discovery after login.
+- Added Fusion cost mode (`fusion.enabled`): the frontier main agent keeps planning, design, and review while delegating settled mechanical work to a configurable cheap **sidekick** model (`fusion.sidekickModel`, default `pi/smol`): interactive sessions spawn one persistent, IRC-addressable `Sidekick` subagent at startup and reuse it (warm context) across delegations via `irc send`, with a fresh-`task` fallback if it is ever unavailable. `fusion.mode` selects `delegate` (prompt-driven offload) or `escalate` (cheap-first, escalate hard reasoning); `fusion.compactModel` optionally ramps the main model down to a cheaper tier at each compaction boundary (auto and manual `/compact`, where the cache is already invalidated so the switch is free); `fusion.sidekickRequestBudget` hard-caps model requests per delegated subagent turn (bounding reused/woken turns via the agent loop, not just the spawn monitor); and the frontier-vs-sidekick token split with an estimated savings figure surfaces in both `/usage` and an optional `fusion_savings` status-line segment.
+
+### Fixed
+
+- Fixed subagent budget compounding across retry attempts (issue #5): when the Fusion sidekick model-request cap (`maxModelRequestsPerRun`) is hit, `driveSessionToYield` now detects the cut and breaks the reminder loop immediately rather than re-prompting, which previously compounded the cap up to 4×. Added `maxModelRequestsPerRun` getter to the `Agent` and `AgentSession` classes, and updated `driveSessionToYield` to abort with a clear budget-exhausted reason.
 
 ## [16.1.10] - 2026-06-22
 

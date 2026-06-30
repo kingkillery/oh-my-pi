@@ -26,7 +26,7 @@ import { modelsAreEqual } from "@pk-nerdsaver-ai/pi-catalog/models";
 import { DEFAULT_MODEL_PER_PROVIDER } from "@pk-nerdsaver-ai/pi-catalog/provider-models";
 import { resolveBareVariantAlias, resolveVariantAlias } from "@pk-nerdsaver-ai/pi-catalog/variant-collapse";
 import { fuzzyMatch } from "@pk-nerdsaver-ai/pi-tui";
-import { logger } from "@pk-nerdsaver-ai/pi-utils";
+import { APP_NAME, logger } from "@pk-nerdsaver-ai/pi-utils";
 import chalk from "chalk";
 import MODEL_PRIO from "../priority.json" with { type: "json" };
 import { parseThinkingLevel, resolveThinkingLevelForModel } from "../thinking";
@@ -1479,7 +1479,7 @@ export function resolveCliModel(options: {
 			model: undefined,
 			selector: undefined,
 			warning: undefined,
-			error: `Unknown provider "${cliProvider}". Run "omp models" to see available providers/models.`,
+			error: `Unknown provider "${cliProvider}". Run "${APP_NAME} models" to see available providers/models.`,
 		};
 	}
 
@@ -1569,7 +1569,7 @@ export function resolveCliModel(options: {
 			selector: undefined,
 			thinkingLevel: undefined,
 			warning,
-			error: `Model "${display}" not found. Run "omp models" to see available models.`,
+			error: `Model "${display}" not found. Run "${APP_NAME} models" to see available models.`,
 		};
 	}
 

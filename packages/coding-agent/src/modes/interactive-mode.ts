@@ -90,6 +90,7 @@ import type { SessionManager } from "../session/session-manager";
 import type { ShakeMode } from "../session/shake-types";
 import { BUILTIN_SLASH_COMMAND_RESERVED_NAMES, BUILTIN_SLASH_COMMANDS } from "../slash-commands/builtin-registry";
 import { formatDuration } from "../slash-commands/helpers/format";
+import { spawnSubagent } from "../slash-commands/helpers/subagent";
 import { STTController, type SttState } from "../stt";
 import { discoverTitleSystemPromptFile, resolvePromptInput } from "../system-prompt";
 import { formatTaskId } from "../task/render";
@@ -481,6 +482,7 @@ export class InteractiveMode implements InteractiveModeContext {
 	#goalTurnHadToolCalls = false;
 	#goalContinuationTurnInFlight = false;
 	#goalSuppressNextContinuation = false;
+	#fusionSidekickSpawned = false;
 	#planModePreviousModelState: { model: Model; thinkingLevel?: ThinkingLevel } | undefined;
 	#pendingModelSwitch: { model: Model; thinkingLevel?: ThinkingLevel } | undefined;
 	#planModeHasEntered = false;
@@ -687,6 +689,44 @@ export class InteractiveMode implements InteractiveModeContext {
 		welcome?.playIntro(() => this.ui.requestComponentRender(welcome));
 	}
 
+	/**
+	 * Fusion cost mode: spawn one persistent, IRC-addressable "Sidekick" subagent on
+	 * the configured cheap model so the main agent can delegate mechanical work to a
+	 * warm context via `irc send to:"Sidekick"`. Idempotent (once per launch); the
+	 * sidekick's reused IRC-woken turns are bounded by `fusion.sidekickRequestBudget`
+	 * (enforced in the agent loop, wired through executor.ts buildSubagentSessionOptions).
+	 * Best-effort: failures only warn, and the delegation prompt keeps a fresh-`task`
+	 * fallback so delegation still works if the sidekick is unavailable.
+	 */
+	async #ensureFusionSidekick(): Promise<void> {
+		try {
+			if (this.#fusionSidekickSpawned) return;
+			if (this.session.settings.get("fusion.enabled") !== true) return;
+			if (this.session.settings.get("fusion.mode") === "off") return;
+			this.#fusionSidekickSpawned = true;
+			// Pass the raw selector (e.g. `pi/smol`) straight through; the executor resolves
+			// it at run time exactly like the `task` agent's own `pi/task` model, so it works
+			// even before OAuth-discovered tiers finish loading. The delegation prompt keeps a
+			// fresh-`task` fallback if the sidekick is ever unavailable.
+			const sidekickModel = this.session.settings.get("fusion.sidekickModel") || "pi/smol";
+			const sidekickId = await spawnSubagent(
+				this,
+				{
+					modelOverride: sidekickModel,
+					thinkingLevel: ThinkingLevel.Inherit,
+					name: "Sidekick",
+					task: "You are the reusable Fusion sidekick for this session. Reply with a one-line 'ready' and yield immediately. After that, handle the settled mechanical/bulk tasks the main agent delegates to you over IRC — multi-file edits to a decided API, renames, boilerplate, data collection, running tests/builds, and broad searches — and report back concisely. Do not make design decisions or re-delegate.",
+				},
+				"task",
+			);
+			// Record the actual allocated id (may be "Sidekick-2" on a resumed session) so the
+			// delegation prompt addresses the live peer and the cost meter reads its real spend.
+			if (sidekickId) this.session.setFusionSidekickId(sidekickId);
+		} catch (err) {
+			logger.warn("Fusion sidekick spawn failed", { error: String(err) });
+		}
+	}
+
 	async init(options: InteractiveModeInitOptions = {}): Promise<void> {
 		if (this.isInitialized) return;
 
@@ -818,6 +858,9 @@ export class InteractiveMode implements InteractiveModeContext {
 
 		// Initialize hooks with TUI-based UI context
 		await this.initHooksAndCustomTools();
+
+		// Fusion cost mode: bring up the persistent warm sidekick (best-effort, non-blocking).
+		void this.#ensureFusionSidekick();
 
 		// Restore mode from session (e.g. plan mode on resume)
 		this.session.setSessionSwitchReconciler?.(() => this.#reconcileModeFromSession({ preserveActiveGoal: true }));

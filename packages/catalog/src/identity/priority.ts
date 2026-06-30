@@ -33,6 +33,7 @@ const DEFAULT_MODEL_PROVIDER_ORDER = [
 	"gitlab-duo",
 	"opencode-go",
 	"kilo",
+	"cline",
 	"vercel-ai-gateway",
 	"cloudflare-ai-gateway",
 	"nanogpt",

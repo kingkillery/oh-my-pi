@@ -18,7 +18,7 @@ import {
 	Spacer,
 	Text,
 } from "@pk-nerdsaver-ai/pi-tui";
-import { logger } from "@pk-nerdsaver-ai/pi-utils";
+import { APP_NAME, logger } from "@pk-nerdsaver-ai/pi-utils";
 import { clearPluginRootsAndCaches, resolveOrDefaultProjectRegistryPath } from "../../discovery/helpers";
 import { PluginManager } from "../../extensibility/plugins/manager";
 import type { InstalledPluginSummary } from "../../extensibility/plugins/marketplace";
@@ -112,9 +112,15 @@ export class PluginListComponent extends Container {
 		if (entries.length === 0) {
 			this.addChild(new Text(theme.fg("muted", "  No plugins installed"), 0, 0));
 			this.addChild(new Spacer(1));
-			this.addChild(new Text(theme.fg("dim", "  Install npm plugins:        omp plugin install <package>"), 0, 0));
 			this.addChild(
-				new Text(theme.fg("dim", "  Install marketplace plugins: omp plugin install <name>@<marketplace>"), 0, 0),
+				new Text(theme.fg("dim", `  Install npm plugins:        ${APP_NAME} plugin install <package>`), 0, 0),
+			);
+			this.addChild(
+				new Text(
+					theme.fg("dim", `  Install marketplace plugins: ${APP_NAME} plugin install <name>@<marketplace>`),
+					0,
+					0,
+				),
 			);
 			this.addChild(new Spacer(1));
 			this.addChild(new DynamicBorder());

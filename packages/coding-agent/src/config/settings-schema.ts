@@ -119,6 +119,7 @@ export const TAB_GROUPS: Record<SettingTab, readonly string[]> = {
 		"Agent",
 		"Git",
 		"Mixture of Agents",
+		"Fusion",
 	],
 	context: ["General", "Compaction", "Rules (TTSR)", "Experimental"],
 	memory: ["General", "Auto-Learn", "Mnemopi", "Hindsight"],
@@ -164,7 +165,8 @@ export type StatusLineSegmentId =
 	| "session_name"
 	| "usage"
 	| "collab"
-	| "moa";
+	| "moa"
+	| "fusion_savings";
 
 /** Submenu choice metadata. */
 export type SubmenuOption<V extends string = string> = {
@@ -759,6 +761,102 @@ export const SETTINGS_SCHEMA = {
 			label: "Maximum Lanes",
 			description: "Hard cap on resolved lanes. Excess selectors are skipped with a warning.",
 			condition: "moaEnabled",
+		},
+	},
+
+	// Devin-style fusion: delegate settled mechanical work to a cheap sidekick,
+	// keep reasoning on the frontier model, and meter the token-cost savings.
+	"fusion.enabled": {
+		type: "boolean",
+		default: false,
+		ui: {
+			tab: "interaction",
+			group: "Fusion",
+			label: "Enable Fusion (cost mode)",
+			description:
+				"Delegate settled mechanical work to a cheap sidekick model and keep reasoning on the frontier model, reducing frontier token use.",
+		},
+	},
+
+	"fusion.mode": {
+		type: "enum",
+		values: ["off", "delegate", "escalate"] as const,
+		default: "escalate",
+		ui: {
+			tab: "interaction",
+			group: "Fusion",
+			label: "Fusion Mode",
+			description: "How aggressively to route work to the sidekick.",
+			options: [
+				{ value: "off", label: "Off", description: "Fusion disabled at the mode layer (overrides enabled=true)." },
+				{
+					value: "delegate",
+					label: "Delegate",
+					description: "Prompt-driven: the main model offloads settled mechanical work to the sidekick.",
+				},
+				{
+					value: "escalate",
+					label: "Escalate",
+					description: "Delegate + difficulty-gated routing: cheap-first, escalate hard work to the frontier.",
+				},
+			],
+			condition: "fusionEnabled",
+		},
+	},
+
+	"fusion.sidekickModel": {
+		type: "string",
+		default: "pi/smol",
+		ui: {
+			tab: "interaction",
+			group: "Fusion",
+			label: "Sidekick Model",
+			description: "Cheap model selector the sidekick runs (alias or provider/id). Defaults to pi/smol.",
+			condition: "fusionEnabled",
+		},
+	},
+
+	"fusion.compactModel": {
+		type: "string",
+		default: "",
+		ui: {
+			tab: "interaction",
+			group: "Fusion",
+			label: "Post-Compaction Model",
+			description:
+				"Optional cheaper model to switch the main agent to at each compaction boundary (the cache is already invalidated there, so the switch is free). Empty disables it.",
+			condition: "fusionEnabled",
+		},
+	},
+
+	"fusion.sidekickRequestBudget": {
+		type: "number",
+		default: 0,
+		ui: {
+			tab: "interaction",
+			group: "Fusion",
+			label: "Sidekick Request Budget",
+			description:
+				"Hard cap on model requests per delegated subagent turn in fusion mode, including reused warm-sidekick turns (0 = unlimited).",
+			options: [
+				{ value: "0", label: "Unlimited" },
+				{ value: "20", label: "20 requests" },
+				{ value: "40", label: "40 requests" },
+				{ value: "80", label: "80 requests" },
+			],
+			condition: "fusionEnabled",
+		},
+	},
+
+	"fusion.showSavings": {
+		type: "boolean",
+		default: true,
+		ui: {
+			tab: "interaction",
+			group: "Fusion",
+			label: "Show Savings Estimate",
+			description: "Show an estimated frontier-vs-sidekick token-cost savings figure in the status line and /usage.",
+			condition: "fusionEnabled",
 		},
 	},
 
@@ -4957,6 +5055,18 @@ export type MoaPreset = SettingValue<"moa.preset">;
 /** MOA enabled toggle (derived from settings schema). */
 export type MoaEnabled = SettingValue<"moa.enabled">;
 
+export interface FusionSettings {
+	enabled: boolean;
+	mode: FusionMode;
+	sidekickModel: string;
+	compactModel: string;
+	sidekickRequestBudget: number;
+	showSavings: boolean;
+}
+
+/** Fusion mode identifier (derived from settings schema). */
+export type FusionMode = SettingValue<"fusion.mode">;
+
 /** Map group prefix -> typed settings interface */
 export interface GroupTypeMap {
 	compaction: CompactionSettings;
@@ -4979,6 +5089,7 @@ export interface GroupTypeMap {
 	subagent: SubagentSettings;
 	delegate: DelegateSettings;
 	moa: MoaSettings;
+	fusion: FusionSettings;
 }
 
 export type GroupPrefix = keyof GroupTypeMap;

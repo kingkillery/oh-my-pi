@@ -1,11 +1,12 @@
 #!/usr/bin/env bun
 
+import * as fs from "node:fs";
 import { createRequire } from "node:module";
 import * as path from "node:path";
 
 const packageDir = path.join(import.meta.dir, "..");
 const repoRoot = path.join(packageDir, "..", "..");
-const outputPath = path.join(packageDir, "dist", "omp");
+const outputPath = path.join(packageDir, "dist", "oh-my-pk");
 
 // Transformers.js is an optional, native-heavy dependency that is never bundled
 // into the binary; the tiny-model worker `bun install`s it into a runtime cache
@@ -65,6 +66,11 @@ async function main(): Promise<void> {
 					"fastembed",
 					"--external",
 					"onnxruntime-node",
+					"--external",
+					// Optional peer of `linkedom` (only used for <canvas> rendering, which
+					// omp never invokes); its native addon isn't built on most hosts, so
+					// bundling it breaks `--compile`. Externalize it like the other natives.
+					"canvas",
 					"--root",
 					".",
 					"./packages/coding-agent/src/cli.ts",
@@ -85,7 +91,7 @@ async function main(): Promise<void> {
 					"./packages/coding-agent/src/extensibility/legacy-pi-ai-shim.ts",
 					"./packages/coding-agent/src/extensibility/legacy-pi-coding-agent-shim.ts",
 					"--outfile",
-					"packages/coding-agent/dist/omp",
+					"packages/coding-agent/dist/oh-my-pk",
 				],
 				buildEnv,
 				repoRoot,
@@ -94,6 +100,19 @@ async function main(): Promise<void> {
 			// Bun 1.3.12 emits a truncated Mach-O signature on darwin builds.
 			if (shouldAdhocSignDarwinBinary()) {
 				await runCommand(["codesign", "--force", "--sign", "-", outputPath]);
+			}
+			// Refresh the `omp` back-compat alias from the primary `oh-my-pk` build.
+			// Best-effort: on Windows the in-use `omp.exe` is often locked (EPERM),
+			// which must not fail the build now that `oh-my-pk` is the real output.
+			const exeSuffix = process.platform === "win32" ? ".exe" : "";
+			const aliasPath = path.join(packageDir, "dist", `omp${exeSuffix}`);
+			try {
+				fs.copyFileSync(`${outputPath}${exeSuffix}`, aliasPath);
+				if (process.platform !== "win32") fs.chmodSync(aliasPath, 0o755);
+			} catch (err) {
+				console.warn(
+					`Skipped refreshing omp alias (${aliasPath}): ${err instanceof Error ? err.message : String(err)}`,
+				);
 			}
 		} finally {
 			await runCommand(["bun", "scripts/embed-mupdf-wasm.ts", "--reset"]);

@@ -12426,6 +12426,135 @@
 			}
 		}
 	},
+	"cline": {
+		"anthropic/claude-sonnet-4-6": {
+			"id": "anthropic/claude-sonnet-4-6",
+			"name": "Claude Sonnet 4.6",
+			"api": "openai-completions",
+			"provider": "cline",
+			"baseUrl": "https://api.cline.bot/api/v1",
+			"reasoning": true,
+			"input": [
+				"text",
+				"image"
+			],
+			"cost": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0
+			},
+			"contextWindow": 200000,
+			"maxTokens": 64000,
+			"thinking": {
+				"mode": "effort",
+				"efforts": [
+					"minimal",
+					"low",
+					"medium",
+					"high",
+					"xhigh"
+				]
+			}
+		},
+		"deepseek/deepseek-chat": {
+			"id": "deepseek/deepseek-chat",
+			"name": "DeepSeek V3",
+			"api": "openai-completions",
+			"provider": "cline",
+			"baseUrl": "https://api.cline.bot/api/v1",
+			"reasoning": false,
+			"input": [
+				"text"
+			],
+			"cost": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0
+			},
+			"contextWindow": 64000,
+			"maxTokens": 8192
+		},
+		"google/gemini-2.5-pro": {
+			"id": "google/gemini-2.5-pro",
+			"name": "Gemini 2.5 Pro",
+			"api": "openai-completions",
+			"provider": "cline",
+			"baseUrl": "https://api.cline.bot/api/v1",
+			"reasoning": true,
+			"input": [
+				"text",
+				"image"
+			],
+			"cost": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0
+			},
+			"contextWindow": 1048576,
+			"maxTokens": 65536,
+			"thinking": {
+				"mode": "effort",
+				"efforts": [
+					"minimal",
+					"low",
+					"medium",
+					"high"
+				],
+				"requiresEffort": true
+			}
+		},
+		"minimax/minimax-m2.5": {
+			"id": "minimax/minimax-m2.5",
+			"name": "MiniMax M2.5",
+			"api": "openai-completions",
+			"provider": "cline",
+			"baseUrl": "https://api.cline.bot/api/v1",
+			"reasoning": true,
+			"input": [
+				"text"
+			],
+			"cost": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0
+			},
+			"contextWindow": 200000,
+			"maxTokens": 8192,
+			"thinking": {
+				"mode": "effort",
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				],
+				"requiresEffort": true
+			}
+		},
+		"openai/gpt-4o": {
+			"id": "openai/gpt-4o",
+			"name": "GPT-4o",
+			"api": "openai-completions",
+			"provider": "cline",
+			"baseUrl": "https://api.cline.bot/api/v1",
+			"reasoning": false,
+			"input": [
+				"text",
+				"image"
+			],
+			"cost": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0
+			},
+			"contextWindow": 128000,
+			"maxTokens": 16384
+		}
+	},
 	"cloudflare-ai-gateway": {
 		"anthropic/claude-3-5-haiku": {
 			"id": "anthropic/claude-3-5-haiku",

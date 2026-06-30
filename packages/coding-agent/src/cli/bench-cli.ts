@@ -13,7 +13,7 @@ import type {
 import { streamSimple } from "@pk-nerdsaver-ai/pi-ai";
 import { buildModelProviderPriorityRank, type CanonicalModelVariant } from "@pk-nerdsaver-ai/pi-catalog/identity";
 import { replaceTabs, truncateToWidth } from "@pk-nerdsaver-ai/pi-tui";
-import { formatDuration, getProjectDir } from "@pk-nerdsaver-ai/pi-utils";
+import { APP_NAME, formatDuration, getProjectDir } from "@pk-nerdsaver-ai/pi-utils";
 import chalk from "chalk";
 import type { ApiKeyResolverModel } from "../config/api-key-resolver";
 import { type CanonicalModelQueryOptions, ModelRegistry } from "../config/model-registry";
@@ -487,7 +487,7 @@ export async function runBenchCommand(command: BenchCommandArgs, deps: BenchDepe
 	const now = deps.now ?? (() => performance.now());
 	const interactive = deps.stdoutIsTTY ?? process.stdout.isTTY === true;
 	if (command.models.length === 0) {
-		throw new Error("Pass at least one model selector, e.g. `omp bench opus gpt-5.2`");
+		throw new Error(`Pass at least one model selector, e.g. \`${APP_NAME} bench opus gpt-5.2\``);
 	}
 
 	const runtime = await (deps.createRuntime ?? createDefaultRuntime)();
@@ -507,7 +507,7 @@ export async function runBenchCommand(command: BenchCommandArgs, deps: BenchDepe
 				if (!initialKey) {
 					const failure: BenchRunFailure = {
 						ok: false,
-						error: `No credentials for provider "${model.provider}". Run \`omp\` and use /login, or set the provider API key.`,
+						error: `No credentials for provider "${model.provider}". Run \`${APP_NAME}\` and use /login, or set the provider API key.`,
 					};
 					results.push(failure);
 					if (!json) writeStdout(`${formatRunLine(failure, index, runs)}\n`);

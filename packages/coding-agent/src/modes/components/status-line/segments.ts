@@ -592,6 +592,31 @@ const moaSegment: StatusLineSegment = {
 	},
 };
 
+const fusionSavingsSegment: StatusLineSegment = {
+	id: "fusion_savings",
+	render(ctx) {
+		if (ctx.session.settings?.get("fusion.enabled") !== true) return { content: "", visible: false };
+		if (ctx.session.settings?.get("fusion.mode") === "off") return { content: "", visible: false };
+		if (ctx.session.settings?.get("fusion.showSavings") !== true) return { content: "", visible: false };
+		const split = ctx.session.getFusionUsageSplit?.();
+		if (!split) return { content: "", visible: false };
+		const billable = (u: { input: number; output: number; cacheWrite: number }): number =>
+			u.input + u.output + u.cacheWrite;
+		const sidekickTokens = billable(split.sidekick);
+		if (sidekickTokens <= 0) return { content: "", visible: false };
+		const frontierTokens = billable(split.frontier);
+		const total = frontierTokens + sidekickTokens;
+		const share = total > 0 ? Math.round((sidekickTokens / total) * 100) : 0;
+		// Self-calibrated estimate: price the sidekick tokens at the frontier's own
+		// observed blended $/token (suppressed on flat-rate/OAuth tiers, cost ~ 0).
+		const frontierRate = frontierTokens > 0 && split.frontier.cost > 0 ? split.frontier.cost / frontierTokens : 0;
+		const estSavings = frontierRate > 0 ? Math.max(0, sidekickTokens * frontierRate - split.sidekick.cost) : 0;
+		const summary = estSavings > 0 ? `sk ${share}% ~$${estSavings.toFixed(2)}` : `sk ${share}%`;
+		const content = withIcon(theme.icon.agents, summary);
+		return { content: theme.fg("statusLineCost", content), visible: true };
+	},
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Segment Registry
 // ═══════════════════════════════════════════════════════════════════════════
@@ -622,6 +647,7 @@ export const SEGMENTS: Record<StatusLineSegmentId, StatusLineSegment> = {
 	usage: usageSegment,
 	collab: collabSegment,
 	moa: moaSegment,
+	fusion_savings: fusionSavingsSegment,
 };
 
 export function renderSegment(id: StatusLineSegmentId, ctx: SegmentContext): RenderedSegment {

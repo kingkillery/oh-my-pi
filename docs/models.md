@@ -488,16 +488,16 @@ subagent:
     my-fast-model: "openrouter/google/gemini-2.5-flash-lite"
 ```
 
-Aliases can point to any available model selector discovered by `omp models find`.
+Aliases can point to any available model selector discovered by `oh-my-pk models find`.
 
-## `/model` and `omp models`
+## `/model` and `oh-my-pk models`
 
 Both surfaces keep provider-prefixed models visible and selectable.
 
 They now also expose canonical/coalesced models:
 
 - `/model` includes a canonical view alongside provider tabs
-- `omp models` prints provider-grouped tables of every concrete model, and `omp models canonical` prints the coalesced canonical view
+- `oh-my-pk models` prints provider-grouped tables of every concrete model, and `oh-my-pk models canonical` prints the coalesced canonical view
 
 Selecting a canonical entry stores the canonical selector. Selecting a provider row stores the explicit `provider/modelId`.
 

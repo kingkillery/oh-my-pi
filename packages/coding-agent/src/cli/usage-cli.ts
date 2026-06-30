@@ -15,7 +15,7 @@ import {
 	type UsageReport,
 	type UsageUnit,
 } from "@pk-nerdsaver-ai/pi-ai";
-import { formatDuration, formatNumber } from "@pk-nerdsaver-ai/pi-utils";
+import { APP_NAME, formatDuration, formatNumber } from "@pk-nerdsaver-ai/pi-utils";
 import chalk from "chalk";
 import { ModelRegistry } from "../config/model-registry";
 import { discoverAuthStorage } from "../sdk";
@@ -703,7 +703,7 @@ export async function runUsageCommand(cmd: UsageCommandArgs): Promise<void> {
 				const scope = cmd.provider ? ` for provider "${cmd.provider}"` : "";
 				process.stderr.write(
 					chalk.yellow(
-						`No usage history recorded${scope} yet. Snapshots accumulate whenever usage is fetched (TUI footer, /usage, omp usage).\n`,
+						`No usage history recorded${scope} yet. Snapshots accumulate whenever usage is fetched (TUI footer, /usage, ${APP_NAME} usage).\n`,
 					),
 				);
 				process.exitCode = 1;
@@ -761,7 +761,7 @@ export async function runUsageCommand(cmd: UsageCommandArgs): Promise<void> {
 		if (filteredReports.length === 0 && accounts.length === 0) {
 			const scope = cmd.provider ? ` for provider "${cmd.provider}"` : "";
 			process.stderr.write(
-				chalk.yellow(`No credentials found${scope}. Run \`omp\` and use /login to add accounts.\n`),
+				chalk.yellow(`No credentials found${scope}. Run \`${APP_NAME}\` and use /login to add accounts.\n`),
 			);
 			process.exitCode = 1;
 			return;

@@ -8,7 +8,14 @@
  * `launch` — see #1496 for the original "args silently leak to the LLM"
  * regression that motivated the split.
  */
+// Import APP_NAME from the side-effect-free `/dirs` subpath, NOT the root barrel:
+// the root re-exports `./env`, which eagerly loads `.env` from the agent dir at
+// import time. Because profile-bootstrap statically imports this module before
+// `setProfile` runs, a root-barrel import here would snapshot the default
+// profile's env and break `--profile` .env loading (keeps this module side-effect-free).
+
 import type { CommandEntry } from "@pk-nerdsaver-ai/pi-utils/cli";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils/dirs";
 
 export const commands: CommandEntry[] = [
 	{ name: "launch", load: () => import("./commands/launch").then(m => m.default) },
@@ -48,7 +55,7 @@ export const commands: CommandEntry[] = [
 const RESERVED_TOP_LEVEL_WORDS = new Map<string, string>([
 	[
 		"extensions",
-		'`omp extensions` is not a management command. Use `omp plugin list` / `omp plugin install`, or run `omp launch extensions` if you meant to send "extensions" as a prompt.',
+		`\`${APP_NAME} extensions\` is not a management command. Use \`${APP_NAME} plugin list\` / \`${APP_NAME} plugin install\`, or run \`${APP_NAME} launch extensions\` if you meant to send "extensions" as a prompt.`,
 	],
 ]);
 

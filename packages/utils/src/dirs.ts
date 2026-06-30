@@ -16,8 +16,9 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { engines, version } from "../package.json" with { type: "json" };
 
-/** App name (e.g. "omp") */
-export const APP_NAME: string = "omp";
+/** User-facing command / display name (e.g. "oh-my-pk"). Data/dir identities
+ * (`CONFIG_DIR_NAME`, the XDG dir, the binary-artifact base) are kept separate. */
+export const APP_NAME: string = "oh-my-pk";
 
 /** Config directory name (e.g. ".omp") */
 export const CONFIG_DIR_NAME: string = ".omp";
@@ -263,7 +264,9 @@ class DirResolver {
 				const value = process.env[envVar];
 				if (!value) return undefined;
 				try {
-					const appRoot = path.join(value, APP_NAME);
+					// XDG dir name stays "omp" (matches `omp config init-xdg`); a data-dir
+					// identity, decoupled from the renamed command/display name above.
+					const appRoot = path.join(value, "omp");
 					if (profile) {
 						const profilePath = path.join(appRoot, "profiles", profile);
 						if (fs.existsSync(profilePath)) {
@@ -500,7 +503,9 @@ export function getLogsDir(): string {
 
 /** Get the path to a dated log file (~/.omp/logs/omp.YYYY-MM-DD.log). */
 export function getLogPath(date = new Date()): string {
-	return path.join(getLogsDir(), `${APP_NAME}.${date.toISOString().slice(0, 10)}.log`);
+	// Log basenames are a data identity (like CONFIG_DIR_NAME and getCrashLogPath
+	// below) — kept "omp", decoupled from the renamed APP_NAME display name.
+	return path.join(getLogsDir(), `omp.${date.toISOString().slice(0, 10)}.log`);
 }
 
 /**
@@ -745,7 +750,8 @@ export function getCrashLogPath(agentDir?: string): string {
 
 /** Get the debug log path (~/.omp/agent/omp-debug.log). */
 export function getDebugLogPath(agentDir?: string): string {
-	return dirs.agentSubdir(agentDir, `${APP_NAME}-debug.log`, "state");
+	// Data identity — kept "omp" to match getCrashLogPath/getLogPath (see above).
+	return dirs.agentSubdir(agentDir, "omp-debug.log", "state");
 }
 
 // =============================================================================

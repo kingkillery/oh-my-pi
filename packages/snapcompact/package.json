@@ -3,16 +3,16 @@
 	"name": "@pk-nerdsaver-ai/snapcompact",
 	"version": "16.1.11",
 	"description": "Bitmap-frame context compression for vision-capable LLMs",
-	"homepage": "https://omp.sh",
+	"homepage": "https://github.com/kingkillery/oh-my-pi",
 	"author": "Can Boluk",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/can1357/oh-my-pi.git",
+		"url": "git+https://github.com/kingkillery/oh-my-pi.git",
 		"directory": "packages/snapcompact"
 	},
 	"bugs": {
-		"url": "https://github.com/can1357/oh-my-pi/issues"
+		"url": "https://github.com/kingkillery/oh-my-pi/issues"
 	},
 	"keywords": [
 		"context-compression",

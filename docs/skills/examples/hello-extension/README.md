@@ -23,7 +23,7 @@ extensions:
 **Option C — load once via CLI flag:**
 
 ```
-omp --extension ./hello-extension
+oh-my-pk --extension ./hello-extension
 ```
 
 ## Usage

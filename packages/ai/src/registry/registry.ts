@@ -5,6 +5,7 @@ import { amazonBedrockProvider } from "./amazon-bedrock";
 import { anthropicProvider } from "./anthropic";
 import { azureProvider } from "./azure";
 import { cerebrasProvider } from "./cerebras";
+import { clineProvider } from "./cline";
 import { cloudflareAiGatewayProvider } from "./cloudflare-ai-gateway";
 import { cursorProvider } from "./cursor";
 import { deepseekProvider } from "./deepseek";
@@ -79,6 +80,7 @@ const ALL = [
 	openrouterProvider,
 	githubCopilotProvider,
 	cursorProvider,
+	clineProvider,
 	googleAntigravityProvider,
 	googleGeminiCliProvider,
 	openaiCodexDeviceProvider,

@@ -14,7 +14,7 @@ prints
 
 ```
 Collab session started!
- • Join from another terminal: omp join "mgAYTZwEnpRQtca0CTgn-Q.gdJUbTovD94ofDaa8YvhY0-ty16w4fn8PgB6PLnoA30"
+ • Join from another terminal: oh-my-pk join "mgAYTZwEnpRQtca0CTgn-Q.gdJUbTovD94ofDaa8YvhY0-ty16w4fn8PgB6PLnoA30"
  • or any web browser: my.omp.sh/#mgAYTZwEnpRQtca0CTgn-Q.gdJUbTovD94ofDaa8YvhY0-ty16w4fn8PgB6PLnoA30
 ```
 
@@ -46,7 +46,7 @@ The guest's previous session is restored on `/leave` (or when the host stops).
 
 ## Link format
 
-Accepted by `/join <link>` and `omp join "<link>"`:
+Accepted by `/join <link>` and `oh-my-pk join "<link>"`:
 
 ```
 <roomId>.<key>                                                    → default relay (wss://my.omp.sh)

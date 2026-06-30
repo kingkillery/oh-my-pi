@@ -1,3 +1,4 @@
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import chalk from "chalk";
 import type { CommitCommandArgs } from "./types";
 
@@ -70,7 +71,7 @@ export function parseCommitArgs(args: string[]): CommitCommandArgs | undefined {
 export function printCommitHelp(): void {
 	const lines = [
 		"Usage:",
-		"  omp commit [options]",
+		`  ${APP_NAME} commit [options]`,
 		"",
 		"Options:",
 		"  --push           Push after committing",

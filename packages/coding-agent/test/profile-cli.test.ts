@@ -242,6 +242,12 @@ describe("global --profile flag", () => {
 			const childEnv: Record<string, string | undefined> = {
 				...process.env,
 				HOME: home,
+				// os.homedir() reads USERPROFILE on Windows and HOME on POSIX, so the
+				// profile/agent `.env` lookup (getAgentDir -> getBaseConfigRoot ->
+				// os.homedir()) would resolve to the real user profile on Windows and
+				// miss the seeded temp home. Redirect both so the probe finds the
+				// profile-scoped .env regardless of host.
+				USERPROFILE: home,
 				PI_CONFIG_DIR: configDir,
 				PI_NO_TITLE: "1",
 				NO_COLOR: "1",

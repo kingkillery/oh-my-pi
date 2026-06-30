@@ -1,6 +1,6 @@
 import * as os from "node:os";
 import * as path from "node:path";
-import { normalizeProfileName } from "@pk-nerdsaver-ai/pi-utils/dirs";
+import { APP_NAME, normalizeProfileName } from "@pk-nerdsaver-ai/pi-utils/dirs";
 
 export type ProfileAliasShell = "bash" | "zsh" | "fish" | "powershell" | "pwsh";
 
@@ -20,10 +20,10 @@ export interface ProfileAliasCommand {
 }
 
 const DEFAULT_ALIAS_COMMAND: ProfileAliasCommand = {
-	display: "omp",
-	posix: "omp",
-	fish: "omp",
-	powerShell: "omp",
+	display: APP_NAME,
+	posix: APP_NAME,
+	fish: APP_NAME,
+	powerShell: APP_NAME,
 };
 
 export interface ProfileAliasInstallOptions {
@@ -147,8 +147,9 @@ function validateAliasName(aliasName: string, shell: ProfileAliasShell): string 
 	if (!ALIAS_NAME_RE.test(normalized)) {
 		throw new Error(`Invalid alias "${aliasName}". Alias names must match ${ALIAS_NAME_RE.source}.`);
 	}
-	if (normalized.toLowerCase() === "omp") {
-		throw new Error('Invalid alias "omp". Refusing to shadow the base omp command.');
+	const lower = normalized.toLowerCase();
+	if (lower === "omp" || lower === APP_NAME.toLowerCase()) {
+		throw new Error(`Invalid alias "${aliasName}". Refusing to shadow the ${APP_NAME} command (or its "omp" alias).`);
 	}
 	if (getReservedAliasNames(shell).has(normalized.toLowerCase())) {
 		throw new Error(`Invalid alias "${aliasName}". Refusing to create a ${shell} reserved word.`);
@@ -247,7 +248,10 @@ function renderAliasBlock(
 	switch (shell) {
 		case "fish":
 			body = [
-				`function ${aliasName} --wraps omp --description 'OMP profile ${profile}'`,
+				// `--wraps` must name the command whose completions the script registers,
+				// which is APP_NAME (cli/completion-gen.ts emits `complete -c ${bin}` with
+				// bin = APP_NAME) — not the `omp` back-compat alias.
+				`function ${aliasName} --wraps ${APP_NAME} --description '${APP_NAME} profile ${profile}'`,
 				`    command ${command.fish} --profile=${profile} $argv`,
 				"end",
 			].join("\n");

@@ -14,7 +14,7 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { $which } from "@pk-nerdsaver-ai/pi-utils";
+import { $which, APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import { theme } from "../modes/theme/theme";
 import type { GallerySection } from "./gallery-cli";
 
@@ -62,7 +62,7 @@ export async function captureGalleryScreenshots(
 	const vhs = $which("vhs");
 	if (!vhs) {
 		throw new Error(
-			"`omp gallery --screenshot` requires VHS, which is not installed. " +
+			`\`${APP_NAME} gallery --screenshot\` requires VHS, which is not installed. ` +
 				"Install it (e.g. `brew install vhs`, or see https://github.com/charmbracelet/vhs) and retry.",
 		);
 	}

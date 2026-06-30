@@ -206,7 +206,7 @@ my-plugin/
   README.md                ← recommended: description + usage
 ```
 
-> Note: extension modules declared via `package.json` `omp.extensions` are **not** loaded from marketplace installs — that mechanism only applies to npm-installed or `omp plugin link`ed plugins. Ship marketplace plugin behavior through the conventional directories above.
+> Note: extension modules declared via `package.json` `omp.extensions` are **not** loaded from marketplace installs — that mechanism only applies to npm-installed or `oh-my-pk plugin link`ed plugins. Ship marketplace plugin behavior through the conventional directories above.
 
 ## Install command
 
@@ -219,8 +219,8 @@ my-plugin/
 CLI equivalent:
 
 ```
-omp plugin marketplace add owner/repo
-omp plugin install name@marketplace-name
+oh-my-pk plugin marketplace add owner/repo
+oh-my-pk plugin install name@marketplace-name
 ```
 
 Scope behavior:

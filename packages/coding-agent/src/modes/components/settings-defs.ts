@@ -132,6 +132,13 @@ const CONDITIONS: Record<string, () => boolean> = {
 			return false;
 		}
 	},
+	fusionEnabled: () => {
+		try {
+			return Settings.instance.get("fusion.enabled") === true;
+		} catch {
+			return false;
+		}
+	},
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
