@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it, spyOn } from "bun:test";
 import * as os from "node:os";
 import { stripVTControlCharacters } from "node:util";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import { PluginManager } from "@pk-nerdsaver-ai/pi-coding-agent/extensibility/plugins";
 import {
 	type InstalledPluginSummary,
@@ -118,8 +119,8 @@ describe("PluginListComponent", () => {
 
 		const text = stripVTControlCharacters(component.render(120).join("\n"));
 		expect(text).toContain("No plugins installed");
-		expect(text).toContain("omp plugin install <package>");
-		expect(text).toContain("omp plugin install <name>@<marketplace>");
+		expect(text).toContain(`${APP_NAME} plugin install <package>`);
+		expect(text).toContain(`${APP_NAME} plugin install <name>@<marketplace>`);
 	});
 
 	it("routes enter on a marketplace entry to onMarketplaceSelect", () => {
