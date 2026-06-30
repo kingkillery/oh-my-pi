@@ -115,14 +115,42 @@ export async function buildUsageReportText(runtime: SlashCommandRuntime): Promis
 		}
 	}
 
-	const stats = runtime.session.sessionManager.getUsageStatistics();
-	return [
+	const settings = runtime.session.settings;
+	const fusionActive =
+		settings.get("fusion.enabled") === true &&
+		settings.get("fusion.mode") !== "off" &&
+		settings.get("fusion.showSavings") === true;
+	const split = runtime.session.getFusionUsageSplit();
+	const billable = (u: typeof split.total): number => u.input + u.output + u.cacheWrite;
+	const lines = [
 		"Usage",
-		`Input tokens: ${stats.input}`,
-		`Output tokens: ${stats.output}`,
-		`Cache read tokens: ${stats.cacheRead}`,
-		`Cache write tokens: ${stats.cacheWrite}`,
-		`Premium requests: ${stats.premiumRequests}`,
-		`Cost: $${stats.cost.toFixed(6)}`,
-	].join("\n");
+		`Input tokens: ${split.total.input}`,
+		`Output tokens: ${split.total.output}`,
+		`Cache read tokens: ${split.total.cacheRead}`,
+		`Cache write tokens: ${split.total.cacheWrite}`,
+		`Premium requests: ${split.total.premiumRequests}`,
+		`Cost: $${split.total.cost.toFixed(6)}`,
+	];
+	const sidekickTokens = billable(split.sidekick);
+	if (fusionActive && sidekickTokens > 0) {
+		const frontierTokens = billable(split.frontier);
+		const totalTokens = frontierTokens + sidekickTokens;
+		const share = totalTokens > 0 ? (sidekickTokens / totalTokens) * 100 : 0;
+		lines.push(
+			"",
+			"Fusion (cost mode)",
+			`Frontier tokens: ${frontierTokens}`,
+			`Sidekick tokens: ${sidekickTokens} (${share.toFixed(1)}% of billable tokens)`,
+			`Frontier cost: $${split.frontier.cost.toFixed(6)} · Sidekick cost: $${split.sidekick.cost.toFixed(6)}`,
+		);
+		// Self-calibrated estimate: price the sidekick's tokens at the frontier's own
+		// observed blended $/token. Only meaningful when the frontier actually billed
+		// (flat-rate / OAuth tiers report ~0 cost, so the estimate is suppressed).
+		const frontierRate = frontierTokens > 0 && split.frontier.cost > 0 ? split.frontier.cost / frontierTokens : 0;
+		if (frontierRate > 0) {
+			const estSavings = Math.max(0, sidekickTokens * frontierRate - split.sidekick.cost);
+			lines.push(`Est. savings vs all-frontier: $${estSavings.toFixed(6)}`);
+		}
+	}
+	return lines.join("\n");
 }

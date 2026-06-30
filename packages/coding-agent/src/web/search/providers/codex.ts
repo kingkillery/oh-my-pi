@@ -10,7 +10,7 @@ import * as os from "node:os";
 import { type AuthStorage, type FetchImpl, type OAuthAccess, withOAuthAccess } from "@pk-nerdsaver-ai/pi-ai";
 import { decodeJwt } from "@pk-nerdsaver-ai/pi-ai/oauth/openai-codex";
 import { getBundledModels } from "@pk-nerdsaver-ai/pi-catalog/models";
-import { $env, readSseJson } from "@pk-nerdsaver-ai/pi-utils";
+import { $env, APP_NAME, readSseJson } from "@pk-nerdsaver-ai/pi-utils";
 import packageJson from "../../../../package.json" with { type: "json" };
 import type { SearchResponse, SearchSource } from "../../../web/search/types";
 import { SearchProviderError } from "../../../web/search/types";
@@ -498,7 +498,7 @@ export async function searchCodex(params: SearchParams): Promise<SearchResponse>
 	const seed = await findCodexAuth(params.authStorage, params.sessionId, params.signal);
 	if (!seed) {
 		throw new Error(
-			"No Codex OAuth credentials found. Login with 'omp /login openai-codex' to enable Codex web search.",
+			`No Codex OAuth credentials found. Login with '${APP_NAME} /login openai-codex' to enable Codex web search.`,
 		);
 	}
 

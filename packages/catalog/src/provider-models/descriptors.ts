@@ -13,6 +13,7 @@ import {
 	alibabaCodingPlanModelManagerOptions,
 	anthropicModelManagerOptions,
 	cerebrasModelManagerOptions,
+	clineModelManagerOptions,
 	cloudflareAiGatewayModelManagerOptions,
 	deepseekModelManagerOptions,
 	firepassModelManagerOptions,
@@ -87,6 +88,14 @@ export const CATALOG_PROVIDERS = [
 		envVars: ["CEREBRAS_API_KEY"],
 		createModelManagerOptions: (config: ModelManagerConfig) => cerebrasModelManagerOptions(config),
 		catalogDiscovery: { label: "Cerebras" },
+	},
+	{
+		id: "cline",
+		defaultModel: "anthropic/claude-sonnet-4-6",
+		envVars: ["CLINE_API_KEY"],
+		createModelManagerOptions: (config: ModelManagerConfig) => clineModelManagerOptions(config),
+		dynamicModelsAuthoritative: true,
+		catalogDiscovery: { label: "Cline", oauthProvider: "cline" },
 	},
 	{
 		id: "cloudflare-ai-gateway",

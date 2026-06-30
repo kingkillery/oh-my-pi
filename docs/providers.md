@@ -46,7 +46,7 @@ Use the interactive slash commands inside a session:
 - `/login` — opens the OAuth/key selector. `/login <provider>` jumps straight to one provider (e.g. `/login anthropic`); for an OAuth flow that needs a pasted callback, run `/login <redirect-url>` to complete it.
 - `/logout` — opens the provider selector to remove stored credentials.
 
-For headless or remote setups backed by a shared auth broker, the CLI exposes `omp auth-broker login <provider>` / `omp auth-broker logout` (and `status`, `list`, `import`, `migrate`). See [Secrets and credentials](./secrets.md) for the broker model.
+For headless or remote setups backed by a shared auth broker, the CLI exposes `oh-my-pk auth-broker login <provider>` / `oh-my-pk auth-broker logout` (and `status`, `list`, `import`, `migrate`). See [Secrets and credentials](./secrets.md) for the broker model.
 
 When a model has no credentials, `omp` tells you to run `/login` or set the provider's environment variable.
 
@@ -110,6 +110,7 @@ Each provider has one or more environment variables that supply a key when no st
 | `cloudflare-ai-gateway` | `CLOUDFLARE_AI_GATEWAY_API_KEY` |
 | `litellm` | `LITELLM_API_KEY`; optional `LITELLM_BASE_URL` for the proxy endpoint |
 | `kilo` | `KILO_API_KEY` |
+| `cline` | `CLINE_API_KEY` (or `/login cline`) |
 | `zai` | `ZAI_API_KEY` |
 | `zenmux` | `ZENMUX_API_KEY` |
 | `zhipu-coding-plan` | `ZHIPU_API_KEY` |
@@ -344,8 +345,8 @@ disabledProviders:
 
 **The wrong key is being used (a stale key from `.env`).** Resolution favors runtime `--api-key`, then a `models.yml` config key, then stored credentials, then environment/`.env`. An already-set process environment variable also beats every `.env` file, and `<cwd>/.env` beats `~/.env`. If an unexpected key wins, check for an exported shell variable and the four `.env` files in precedence order, and clear the one that should not apply.
 
-**A provider still appears even though I disabled it.** `disabledProviders` arrays are replaced, not merged: a project `<project>/.omp/config.yml` array fully overrides the global one. Verify the *effective* list for the directory you are in (path-scoped entries only apply at or under their configured path), and confirm the ID is spelled exactly. Use `omp config get disabledProviders` to inspect the merged value (see [Settings](./settings.md)).
+**A provider still appears even though I disabled it.** `disabledProviders` arrays are replaced, not merged: a project `<project>/.omp/config.yml` array fully overrides the global one. Verify the *effective* list for the directory you are in (path-scoped entries only apply at or under their configured path), and confirm the ID is spelled exactly. Use `oh-my-pk config get disabledProviders` to inspect the merged value (see [Settings](./settings.md)).
 
 **A discovery provider name had no effect on models (or vice-versa).** The ID namespace is shared. `gemini`, `codex`, `claude`, `native`, and `agents` are discovery-source IDs; the Google model backend is `google`. Make sure you are disabling the right kind of provider.
 
-**A custom `models.yml` provider does not load.** A YAML or schema error makes the registry skip the custom file. Validate the file with `omp models` (use `omp models find <substr>` to scope it to one provider), confirm each provider has a `baseUrl`, a valid `api`, and at least one model entry, and that an implicit local engine is not silently shadowing it (an explicit `ollama`/`lm-studio`/`llama.cpp` entry replaces the built-in discovery for that ID). See [Model and Provider Configuration](./models.md).
+**A custom `models.yml` provider does not load.** A YAML or schema error makes the registry skip the custom file. Validate the file with `oh-my-pk models` (use `oh-my-pk models find <substr>` to scope it to one provider), confirm each provider has a `baseUrl`, a valid `api`, and at least one model entry, and that an implicit local engine is not silently shadowing it (an explicit `ollama`/`lm-studio`/`llama.cpp` entry replaces the built-in discovery for that ID). See [Model and Provider Configuration](./models.md).

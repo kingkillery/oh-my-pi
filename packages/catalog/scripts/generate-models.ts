@@ -29,6 +29,7 @@ import {
 import { PROVIDER_DESCRIPTORS } from "../src/provider-models/descriptors";
 import {
 	ANTHROPIC_CURATED_FALLBACK_MODELS,
+	buildClineStaticSeed,
 	buildXaiOAuthStaticSeed,
 	clampFireworksKimiMaxTokens,
 	clampKimiK27CodeMaxTokens,
@@ -482,6 +483,10 @@ async function generateModels() {
 	// persisted `modelRoles.default = "xai-oauth/<id>"` is honored before the
 	// async refresh fires (interactive boot does not await refresh).
 	allModels.push(...buildXaiOAuthStaticSeed());
+	// Cline is not in models.dev and its /v1/models listing is auth-gated; seed
+	// the curated bundle so a persisted `modelRoles.default = "cline/<id>"`
+	// resolves at boot before the async post-login discovery refresh fires.
+	allModels.push(...buildClineStaticSeed());
 	// Seed Anthropic models that are live on the first-party API or in limited
 	// release but that models.dev has not catalogued yet (e.g. Claude Fable 5 /
 	// Mythos 5). Deduped behind upstream entries; metadata is pinned in

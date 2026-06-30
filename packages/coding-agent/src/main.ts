@@ -11,6 +11,7 @@ import { EventLoopKeepalive } from "@pk-nerdsaver-ai/pi-agent-core";
 import type { ImageContent } from "@pk-nerdsaver-ai/pi-ai";
 import {
 	$env,
+	APP_NAME,
 	directoryExists,
 	getLogPath,
 	getProjectDir,
@@ -648,7 +649,7 @@ export async function createSessionManager(
 		if (!match) {
 			throw new SessionResolutionError(
 				`Session "${forkSource}" not found.`,
-				"Run `omp --resume` without an argument to pick from recent sessions, or `omp` to start a new one.",
+				`Run \`${APP_NAME} --resume\` without an argument to pick from recent sessions, or \`${APP_NAME}\` to start a new one.`,
 			);
 		}
 		return await SessionManager.forkFrom(match.session.path, cwd, parsed.sessionDir);
@@ -666,7 +667,7 @@ export async function createSessionManager(
 		if (!match) {
 			throw new SessionResolutionError(
 				`Session "${sessionArg}" not found.`,
-				"Run `omp --resume` without an argument to pick from recent sessions, or `omp` to start a new one.",
+				`Run \`${APP_NAME} --resume\` without an argument to pick from recent sessions, or \`${APP_NAME}\` to start a new one.`,
 			);
 		}
 		if (match.scope === "local") {

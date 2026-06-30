@@ -1,6 +1,7 @@
 /**
  * View, clean, and push reported tool issues from automated QA.
  */
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import { Args, Command, Flags } from "@pk-nerdsaver-ai/pi-utils/cli";
 import { cleanGrievances, listGrievances, pushGrievances } from "../cli/grievances-cli";
 
@@ -28,12 +29,12 @@ export default class Grievances extends Command {
 	};
 
 	static examples = [
-		"omp grievances",
-		"omp grievances list --tool find",
-		"omp grievances clean --id 209",
-		"omp grievances clean --tool find",
-		"omp grievances clean --all",
-		"omp grievances push",
+		`${APP_NAME} grievances`,
+		`${APP_NAME} grievances list --tool find`,
+		`${APP_NAME} grievances clean --id 209`,
+		`${APP_NAME} grievances clean --tool find`,
+		`${APP_NAME} grievances clean --all`,
+		`${APP_NAME} grievances push`,
 	];
 
 	async run(): Promise<void> {

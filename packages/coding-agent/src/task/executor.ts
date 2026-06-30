@@ -2012,6 +2012,14 @@ export async function runSubprocess(options: ExecutorOptions): Promise<SingleRes
 
 			const { normalized: normalizedOutputSchema } = normalizeSchema(outputSchema);
 
+			// Fusion cost mode bounds each delegated subagent turn (including reused
+			// IRC-woken turns) to `fusion.sidekickRequestBudget` model requests; 0 = unlimited.
+			const fusionRequestBudget =
+				settings.get("fusion.enabled") === true && settings.get("fusion.mode") !== "off"
+					? settings.get("fusion.sidekickRequestBudget")
+					: 0;
+			const maxModelRequestsPerRun = fusionRequestBudget > 0 ? fusionRequestBudget : undefined;
+
 			// Captured by the lifecycle reviver: rebuilding an equivalent session from
 			// the same JSONL file re-invokes createAgentSession with the exact options
 			// of the original run (same agent id, tools, model, system prompt,
@@ -2053,6 +2061,7 @@ export async function runSubprocess(options: ExecutorOptions): Promise<SingleRes
 				hasUI: false,
 				spawns: spawnsEnv,
 				taskDepth: childDepth,
+				maxModelRequestsPerRun,
 				parentHindsightSessionState: options.parentHindsightSessionState,
 				parentMnemopiSessionState: options.parentMnemopiSessionState,
 				parentTaskPrefix: id,

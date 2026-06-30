@@ -757,6 +757,13 @@ async function runLoopBody(
 					endAgentStream(stream, newMessages, telemetry, stepCounter.count);
 					return;
 				}
+				// Fusion sidekick budget: a per-run hard cap on model requests. Rides on
+				// the persistent session config, so it bounds the initial spawn run AND
+				// every later IRC-woken turn (which the executor's per-run monitor misses).
+				if (config.maxModelRequestsPerRun !== undefined && stepCounter.count >= config.maxModelRequestsPerRun) {
+					endAgentStream(stream, newMessages, telemetry, stepCounter.count);
+					return;
+				}
 				// Yield at the top of each iteration to prevent busy-wait when
 				// the agent loop is executing tool calls back-to-back.
 				await yieldIfDue();

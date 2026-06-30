@@ -156,6 +156,12 @@ Everything else—multi-file changes, refactors, new features, tests, investigat
 {{/if}}
 {{/has}}
 {{/if}}
+{{#if fusionSidekick}}{{#has tools "task"}}
+
+## Sidekick (cost mode)
+A cheap **sidekick** model (`{{sidekickModel}}`) is available. Minimize your own actions: keep planning, design, ambiguity resolution, root-cause debugging, and final review for yourself, but route settled mechanical work — multi-file edits to a decided API, renames, boilerplate, data collection, running tests/builds, and broad searches — to the sidekick. Prefer the warm **`{{sidekickId}}`** peer via `irc send to:"{{sidekickId}}"` (await its reply) so it reuses its context across your requests; if it does not respond, fall back to a fresh `{{toolRefs.task}}` with model `{{sidekickModel}}`. Read only what you must; let the sidekick do the legwork and report back.
+{{#if fusionEscalate}}Cheap-first, but escalate the hard parts: keep work that needs design judgment, resolves ambiguity, debugs a root cause, or synthesizes across many results on your own frontier reasoning — the sidekick is cheaper, not a substitute for hard reasoning.{{/if}}
+{{/has}}{{/if}}
 
 EXECUTION WORKFLOW
 ==============

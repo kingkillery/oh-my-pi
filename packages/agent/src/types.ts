@@ -95,6 +95,9 @@ export interface AgentLoopConfig extends SimpleStreamOptions {
 	/** Absolute wall-clock deadline in Unix epoch milliseconds. */
 	deadline?: number;
 
+	/** Optional hard cap on model requests per `runLoop`; bounds reused/woken (IRC) sidekick turns. */
+	maxModelRequestsPerRun?: number;
+
 	/**
 	 * Optional resolver called per LLM request to produce request metadata.
 	 * When set, the agent loop evaluates it **after** `getApiKey` resolves the

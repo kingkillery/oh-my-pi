@@ -1,4 +1,5 @@
 import { type FetchImpl, getEnvApiKey } from "@pk-nerdsaver-ai/pi-ai";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import type { AgentStorage } from "../session/agent-storage";
 import { findCredential, withHardTimeout } from "./search/providers/utils";
 
@@ -293,7 +294,7 @@ export async function searchWithParallel(
 	const apiKey = findParallelApiKey(storage);
 	if (!apiKey) {
 		throw new ParallelApiError(
-			"Parallel credentials not found. Set PARALLEL_API_KEY or login with 'omp /login parallel'.",
+			`Parallel credentials not found. Set PARALLEL_API_KEY or login with '${APP_NAME} /login parallel'.`,
 		);
 	}
 
@@ -327,7 +328,7 @@ export async function extractWithParallel(
 	const apiKey = findParallelApiKey(storage);
 	if (!apiKey) {
 		throw new ParallelApiError(
-			"Parallel credentials not found. Set PARALLEL_API_KEY or login with 'omp /login parallel'.",
+			`Parallel credentials not found. Set PARALLEL_API_KEY or login with '${APP_NAME} /login parallel'.`,
 		);
 	}
 

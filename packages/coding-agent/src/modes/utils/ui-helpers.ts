@@ -1,6 +1,7 @@
 import type { AgentMessage } from "@pk-nerdsaver-ai/pi-agent-core";
 import type { AssistantMessage, ImageContent, Message, Usage } from "@pk-nerdsaver-ai/pi-ai";
 import { type Component, Spacer, Text, TruncatedText } from "@pk-nerdsaver-ai/pi-tui";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import type { AdvisorMessageDetails } from "../../advisor";
 import { COLLAB_PROMPT_MESSAGE_TYPE, type CollabPromptDetails } from "../../collab/protocol";
 import { settings } from "../../config/settings";
@@ -668,7 +669,7 @@ export class UiHelpers {
 				theme.bold(theme.fg("warning", "Update Available")) +
 					"\n" +
 					theme.fg("muted", `New version ${newVersion} is available. Run: `) +
-					theme.fg("accent", "omp update"),
+					theme.fg("accent", `${APP_NAME} update`),
 				1,
 				0,
 			),

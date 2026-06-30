@@ -7,7 +7,7 @@
  */
 import * as os from "node:os";
 import * as path from "node:path";
-import { getProjectDir, Snowflake } from "@pk-nerdsaver-ai/pi-utils";
+import { APP_NAME, getProjectDir, Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 import { Args, Command, Flags } from "@pk-nerdsaver-ai/pi-utils/cli";
 import chalk from "chalk";
 import { Settings, settings } from "../config/settings";
@@ -29,9 +29,9 @@ export default class Say extends Command {
 	};
 
 	static examples = [
-		'omp say "hello world"',
-		'omp say "hello world" --out /tmp/hello.wav',
-		'omp say "bonjour" --voice af_heart --model kokoro',
+		`${APP_NAME} say "hello world"`,
+		`${APP_NAME} say "hello world" --out /tmp/hello.wav`,
+		`${APP_NAME} say "bonjour" --voice af_heart --model kokoro`,
 	];
 
 	async run(): Promise<void> {
@@ -60,7 +60,7 @@ export default class Say extends Command {
 				process.stderr.write(
 					chalk.red(
 						`error: could not synthesize with local TTS model "${model}". ` +
-							"Run `omp setup speech` to install it.\n",
+							`Run \`${APP_NAME} setup speech\` to install it.\n`,
 					),
 				);
 				exitCode = 1;

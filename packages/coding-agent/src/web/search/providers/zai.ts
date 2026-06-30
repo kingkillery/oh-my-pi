@@ -5,6 +5,7 @@
  * the unified SearchResponse shape used by the web search tool.
  */
 import { type ApiKey, type AuthStorage, type FetchImpl, getEnvApiKey, withAuth } from "@pk-nerdsaver-ai/pi-ai";
+import { APP_NAME } from "@pk-nerdsaver-ai/pi-utils";
 import { asRecord, asString } from "../../../web/scrapers/utils";
 import type { SearchResponse, SearchSource } from "../../../web/search/types";
 import { SearchProviderError } from "../../../web/search/types";
@@ -291,7 +292,7 @@ export async function searchZai(params: ZaiSearchParams): Promise<SearchResponse
 
 	const rawResult = await withAuth(keyOrResolver, key => callZaiSearch(key, params), {
 		signal: params.signal,
-		missingKeyMessage: "Z.AI credentials not found. Set ZAI_API_KEY or login with 'omp /login zai'.",
+		missingKeyMessage: `Z.AI credentials not found. Set ZAI_API_KEY or login with '${APP_NAME} /login zai'.`,
 	});
 	const payload = parseSearchPayload(rawResult);
 	let sources = toSources(payload.results);

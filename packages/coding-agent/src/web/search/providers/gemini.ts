@@ -14,7 +14,7 @@ import {
 	getAntigravityUserAgent,
 	getGeminiCliHeaders,
 } from "@pk-nerdsaver-ai/pi-catalog/wire/gemini-headers";
-import { fetchWithRetry } from "@pk-nerdsaver-ai/pi-utils";
+import { APP_NAME, fetchWithRetry } from "@pk-nerdsaver-ai/pi-utils";
 
 import type { SearchCitation, SearchResponse, SearchSource } from "../../../web/search/types";
 import { SearchProviderError } from "../../../web/search/types";
@@ -435,7 +435,7 @@ export async function searchGemini(params: GeminiSearchParams): Promise<SearchRe
 	const seed = await findGeminiAuth(params.authStorage, params.sessionId, params.signal);
 	if (!seed) {
 		throw new Error(
-			"No Gemini OAuth credentials found. Login with 'omp /login google-gemini-cli' or 'omp /login google-antigravity' to enable Gemini web search.",
+			`No Gemini OAuth credentials found. Login with '${APP_NAME} /login google-gemini-cli' or '${APP_NAME} /login google-antigravity' to enable Gemini web search.`,
 		);
 	}
 

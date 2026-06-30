@@ -407,6 +407,14 @@ export interface BuildSystemPromptOptions {
 	eagerTasksAlways?: boolean;
 	/** Whether `task.batch` is enabled; gates batch-call guidance in the Eager Tasks section. */
 	taskBatch?: boolean;
+	/** Fusion cost mode: inject the sidekick-delegation policy (main agent only). */
+	fusionSidekick?: boolean;
+	/** Fusion `escalate` mode: add the cheap-first / escalate-hard-work guidance. */
+	fusionEscalate?: boolean;
+	/** Sidekick model selector advertised in the fusion delegation policy. */
+	sidekickModel?: string;
+	/** Allocated IRC id of the warm sidekick (may be "Sidekick-2" on a resumed session). */
+	sidekickId?: string;
 	/** Rules with alwaysApply=true — their full content is injected into the prompt. */
 	alwaysApplyRules?: AlwaysApplyRule[];
 	/** Whether secret obfuscation is active. When true, explains the redaction format in the prompt. */
@@ -454,6 +462,10 @@ export async function buildSystemPrompt(options: BuildSystemPromptOptions = {}):
 		eagerTasks = false,
 		eagerTasksAlways = false,
 		taskBatch = true,
+		fusionSidekick = false,
+		fusionEscalate = false,
+		sidekickModel = "pi/smol",
+		sidekickId = "Sidekick",
 		secretsEnabled = false,
 		workspaceTree: providedWorkspaceTree,
 		memoryRootEnabled = false,
@@ -672,6 +684,10 @@ export async function buildSystemPrompt(options: BuildSystemPromptOptions = {}):
 		eagerTasks,
 		eagerTasksAlways,
 		taskBatch,
+		fusionSidekick,
+		fusionEscalate,
+		sidekickModel,
+		sidekickId,
 		secretsEnabled,
 		hasMemoryRoot: memoryRootEnabled,
 		hasObsidian: hasObsidian(),

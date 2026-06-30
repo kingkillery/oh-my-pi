@@ -2,8 +2,8 @@
 
 The auth broker and auth gateway are two cooperating HTTP services that move OAuth refresh tokens and provider access tokens off developer laptops and into a single broker host.
 
-- **`omp auth-broker serve`** holds the canonical SQLite credential vault, performs OAuth refreshes, and exposes a small REST API (`/v1/snapshot`, `/v1/snapshot/stream`, `/v1/credential/:id/refresh`, `/v1/credential/:id/disable`, `/v1/credential`, `/v1/usage`, `/v1/healthz`).
-- **`omp auth-gateway serve`** is a forward-proxy. It accepts OpenAI Chat Completions, Anthropic Messages, OpenAI Responses, and pi-native stream requests, resolves the broker-backed credential, and dispatches through `pi-ai` provider logic. Clients (containerised omp, llm-git, the macOS usage widget, …) never see the access token.
+- **`oh-my-pk auth-broker serve`** holds the canonical SQLite credential vault, performs OAuth refreshes, and exposes a small REST API (`/v1/snapshot`, `/v1/snapshot/stream`, `/v1/credential/:id/refresh`, `/v1/credential/:id/disable`, `/v1/credential`, `/v1/usage`, `/v1/healthz`).
+- **`oh-my-pk auth-gateway serve`** is a forward-proxy. It accepts OpenAI Chat Completions, Anthropic Messages, OpenAI Responses, and pi-native stream requests, resolves the broker-backed credential, and dispatches through `pi-ai` provider logic. Clients (containerised omp, llm-git, the macOS usage widget, …) never see the access token.
 
 Transport security between operator, broker, and gateway is delegated to the operator (Tailscale / Wireguard / reverse proxy + TLS). Every endpoint except `/v1/healthz` (broker) and `/healthz` (gateway) requires a bearer token.
 
@@ -39,21 +39,21 @@ Source: `packages/ai/src/auth-broker/`, `packages/ai/src/auth-gateway/`, `packag
                   api.anthropic.com / api.openai.com / …
 ```
 
-The broker is the only writer of OAuth refresh tokens. Clients (including the gateway itself) load a redacted snapshot in which every `refresh` field has been replaced with `REMOTE_REFRESH_SENTINEL`; when an access token expires the client calls `POST /v1/credential/:id/refresh` and the broker performs the refresh server-side. `RemoteAuthCredentialStore` rejects local replace/upsert/delete-by-provider mutations, with errors pointing at `omp auth-broker login` / `omp auth-broker logout`.
+The broker is the only writer of OAuth refresh tokens. Clients (including the gateway itself) load a redacted snapshot in which every `refresh` field has been replaced with `REMOTE_REFRESH_SENTINEL`; when an access token expires the client calls `POST /v1/credential/:id/refresh` and the broker performs the refresh server-side. `RemoteAuthCredentialStore` rejects local replace/upsert/delete-by-provider mutations, with errors pointing at `oh-my-pk auth-broker login` / `oh-my-pk auth-broker logout`.
 
 ## auth-broker
 
 ### CLI
 
 ```
-omp auth-broker serve     [--bind=host:port]                    # boot the broker
-omp auth-broker token     [--regenerate] [--json]               # print or rotate the bearer token
-omp auth-broker login     [<provider>] [--via=user@host] [--dry-run]
-omp auth-broker logout    [<provider>]
-omp auth-broker list      [--json]
-omp auth-broker import    <file|dir> [--provider=<id>] [--include-disabled] [--dry-run] [--json]
-omp auth-broker migrate   --from-local [--include-oauth] [--include-env] [--dry-run] [--json]
-omp auth-broker status    [--json]
+oh-my-pk auth-broker serve     [--bind=host:port]                    # boot the broker
+oh-my-pk auth-broker token     [--regenerate] [--json]               # print or rotate the bearer token
+oh-my-pk auth-broker login     [<provider>] [--via=user@host] [--dry-run]
+oh-my-pk auth-broker logout    [<provider>]
+oh-my-pk auth-broker list      [--json]
+oh-my-pk auth-broker import    <file|dir> [--provider=<id>] [--include-disabled] [--dry-run] [--json]
+oh-my-pk auth-broker migrate   --from-local [--include-oauth] [--include-env] [--dry-run] [--json]
+oh-my-pk auth-broker status    [--json]
 ```
 
 - `serve` opens the local SQLite store at `getAgentDbPath()` and binds an HTTP listener (default `127.0.0.1:8765`). On startup a token is ensured at `<config-dir>/auth-broker.token` (mode `0600`, `0700` parent dir). The background refresher refreshes any OAuth credential whose `expires - Date.now() < refreshSkewMs` (default 5 min) every `refreshIntervalMs` (default 60 s).
@@ -91,10 +91,10 @@ Requests use `Authorization: Bearer <token>`. The server compares against an in-
 ### CLI
 
 ```
-omp auth-gateway serve   [--bind=host:port] [--no-auth]
-omp auth-gateway token   [--regenerate] [--json]
-omp auth-gateway status  [--json]
-omp auth-gateway check   [--strict] [--json]
+oh-my-pk auth-gateway serve   [--bind=host:port] [--no-auth]
+oh-my-pk auth-gateway token   [--regenerate] [--json]
+oh-my-pk auth-gateway status  [--json]
+oh-my-pk auth-gateway check   [--strict] [--json]
 ```
 
 - `serve` requires `OMP_AUTH_BROKER_URL` (or `auth.broker.url` in `config.yml`) — the gateway is itself a broker client. It calls `AuthBrokerClient.fetchSnapshot()`, wraps it in `RemoteAuthCredentialStore`, and constructs an `AuthStorage` that resolves access tokens through the broker. Default bind is `127.0.0.1:4000`. The gateway token is stored at `<config-dir>/auth-gateway.token` (`0600`); `--no-auth` disables the bearer check entirely (loopback-only use).
@@ -156,7 +156,7 @@ The broker is **off** unless `OMP_AUTH_BROKER_URL` (or `auth.broker.url` in `con
 
 | Variable                | Purpose                                                                                                                                            | Required when                                                                                                             |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `OMP_AUTH_BROKER_URL`   | Base URL of the remote auth-broker (e.g. `https://broker.tailnet:8765`). Selecting this puts the client in broker mode — local SQLite is bypassed. | Any time the omp client should resolve credentials through a broker (and required by `omp auth-gateway serve`).           |
+| `OMP_AUTH_BROKER_URL`   | Base URL of the remote auth-broker (e.g. `https://broker.tailnet:8765`). Selecting this puts the client in broker mode — local SQLite is bypassed. | Any time the omp client should resolve credentials through a broker (and required by `oh-my-pk auth-gateway serve`).           |
 | `OMP_AUTH_BROKER_TOKEN` | Bearer token used for every broker endpoint except `/v1/healthz`.                                                                                  | When `OMP_AUTH_BROKER_URL` is set and no token is available from `auth.broker.token` or `<config-dir>/auth-broker.token`. |
 | `OMP_AUTH_BROKER_SNAPSHOT_TTL_MS` | Freshness window for the encrypted local snapshot cache. Default `3600000` (1 h); `0` disables cache reads and writes. | Optional in broker mode. |
 | `OMP_AUTH_BROKER_SNAPSHOT_CACHE`  | Path override for the encrypted local snapshot cache. Default `~/.omp/cache/auth-broker-snapshot.enc` (or XDG cache equivalent). | Optional in broker mode. |
@@ -180,8 +180,8 @@ The gateway has no dedicated env vars — it inherits `OMP_AUTH_BROKER_*` becaus
 
 | Path                              | Owner                                                | Mode                          |
 | --------------------------------- | ---------------------------------------------------- | ----------------------------- |
-| `<config-dir>/auth-broker.token`  | `omp auth-broker serve` (created at first start)     | `0600` in a `0700` parent dir |
-| `<config-dir>/auth-gateway.token` | `omp auth-gateway serve` (skipped under `--no-auth`) | `0600` in a `0700` parent dir |
+| `<config-dir>/auth-broker.token`  | `oh-my-pk auth-broker serve` (created at first start)     | `0600` in a `0700` parent dir |
+| `<config-dir>/auth-gateway.token` | `oh-my-pk auth-gateway serve` (skipped under `--no-auth`) | `0600` in a `0700` parent dir |
 
 `<config-dir>` resolves to `~/.omp/` (respecting `PI_CONFIG_DIR`).
 

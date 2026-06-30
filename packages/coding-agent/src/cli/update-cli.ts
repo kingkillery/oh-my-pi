@@ -13,10 +13,16 @@ import { $ } from "bun";
 import chalk from "chalk";
 import { theme } from "../modes/theme/theme";
 
-const REPO = "can1357/oh-my-pi";
+/**
+ * Binary distribution endpoint (Cloudflare Worker → private Hugging Face repo).
+ * Mirrors `scripts/install.{sh,ps1}`: compiled binaries live at
+ * `${DIST_BASE}/bin/<tag>/<name>` and the current tag at `${DIST_BASE}/version`.
+ * Override with `OMP_DIST_BASE`. This fork publishes no GitHub Releases.
+ */
+const DIST_BASE = Bun.env.OMP_DIST_BASE ?? "https://oh-my-pi.pkking.computer";
 const PACKAGE = "@pk-nerdsaver-ai/pi-coding-agent";
-const HOMEBREW_FORMULA = "can1357/tap/omp";
-const MISE_TOOL = "github:can1357/oh-my-pi";
+const HOMEBREW_FORMULA = "kingkillery/tap/omp";
+const MISE_TOOL = "github:kingkillery/oh-my-pi";
 /**
  * Official npm registry origin.
  *
@@ -255,6 +261,22 @@ async function getLatestRelease(): Promise<ReleaseInfo> {
 }
 
 /**
+ * Resolve the version the fork's distribution endpoint currently serves
+ * (`${DIST_BASE}/version` → `vX.Y.Z`), authoritative for binary installs.
+ * Returns undefined when unreachable so callers can fall back to npm.
+ */
+async function getDistVersion(): Promise<string | undefined> {
+	try {
+		const response = await fetch(`${DIST_BASE}/version`);
+		if (!response.ok) return undefined;
+		const version = (await response.text()).trim().replace(/^v/, "");
+		return version || undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+/**
  * Compare semver versions. Returns:
  * - negative if a < b
  * - 0 if a == b
@@ -276,6 +298,9 @@ function compareVersions(a: string, b: string): number {
  * Get the appropriate binary name for this platform.
  */
 function getBinaryName(): string {
+	// Distribution artifact base stays "omp" (the HF/dist + install-script name),
+	// independent of the renamed command/display name (APP_NAME).
+	const base = "omp";
 	const platform = process.platform;
 	const arch = process.arch;
 
@@ -307,9 +332,18 @@ function getBinaryName(): string {
 	}
 
 	if (os === "windows") {
-		return `${APP_NAME}-${os}-${archName}.exe`;
+		return `${base}-${os}-${archName}.exe`;
 	}
-	return `${APP_NAME}-${os}-${archName}`;
+	return `${base}-${os}-${archName}`;
+}
+
+/**
+ * Build the fork's binary download URL. Binaries are served by the Cloudflare
+ * Worker at `${DIST_BASE}/bin/<tag>/<name>` (private Hugging Face backing repo),
+ * exactly as `scripts/install.{sh,ps1}` resolve them — never GitHub Releases.
+ */
+export function buildBinaryDownloadUrl(expectedVersion: string, binaryName: string = getBinaryName()): string {
+	return `${DIST_BASE}/bin/v${expectedVersion}/${binaryName}`;
 }
 
 /**
@@ -329,7 +363,8 @@ async function verifyInstalledVersion(expectedVersion: string): Promise<Installe
 		const result = await $`${ompPath} --version`.quiet().nothrow();
 		if (result.exitCode !== 0) return { ok: false, path: ompPath };
 		const output = result.text().trim();
-		// Output format: "omp/X.Y.Z"
+		// Output format: "<bin>/X.Y.Z" (the leading token is APP_NAME, e.g. "oh-my-pk/1.2.3");
+		// the regex matches the /X.Y.Z suffix regardless of the bin-name prefix.
 		const match = output.match(/\/(\d+\.\d+\.\d+)/);
 		const actual = match?.[1];
 		return { ok: actual === expectedVersion, actual, path: ompPath };
@@ -359,7 +394,9 @@ async function printVerification(expectedVersion: string): Promise<void> {
 		return;
 	}
 	console.log(chalk.yellow(`\nWarning: ${formatVerificationFailure(result, expectedVersion)}`));
-	console.log(chalk.yellow(`You may need to reinstall: curl -fsSL https://omp.sh/install | sh`));
+	const reinstall =
+		process.platform === "win32" ? `irm ${DIST_BASE}/install.ps1 | iex` : `curl -fsSL ${DIST_BASE}/install.sh | sh`;
+	console.log(chalk.yellow(`You may need to reinstall: ${reinstall}`));
 }
 
 async function unlinkIfExists(filePath: string): Promise<void> {
@@ -566,9 +603,12 @@ async function updateViaMise(expectedVersion: string, force: boolean): Promise<v
  * Download a release binary to a target path, replacing an existing file.
  */
 async function updateViaBinaryAt(targetPath: string, expectedVersion: string): Promise<void> {
+	// The fork serves binaries off DIST_BASE/version (the canonical pointer for
+	// the binary surface); prefer it over the npm-derived version so a binary
+	// update always matches what the endpoint actually serves.
+	const version = (await getDistVersion()) ?? expectedVersion;
 	const binaryName = getBinaryName();
-	const tag = `v${expectedVersion}`;
-	const url = `https://github.com/${REPO}/releases/download/${tag}/${binaryName}`;
+	const url = buildBinaryDownloadUrl(version, binaryName);
 
 	const tempPath = `${targetPath}.new`;
 	// Unique per attempt: a stale backup from an earlier update may still be
@@ -590,12 +630,12 @@ async function updateViaBinaryAt(targetPath: string, expectedVersion: string): P
 		targetPath,
 		tempPath,
 		backupPath,
-		expectedVersion,
+		expectedVersion: version,
 		verifyInstalledVersion,
 	});
 	// Reclaim backups from earlier updates whose owning process has since exited.
 	await sweepStaleBackups(targetPath);
-	printVerifiedVersion(expectedVersion);
+	printVerifiedVersion(version);
 	console.log(chalk.dim(`Restart ${APP_NAME} to use the new version`));
 }
 

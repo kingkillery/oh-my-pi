@@ -2040,6 +2040,98 @@ export function kiloModelManagerOptions(config?: KiloModelManagerConfig): ModelM
 }
 
 // ---------------------------------------------------------------------------
+// 10.7 Cline (cline.bot account gateway)
+// ---------------------------------------------------------------------------
+
+const CLINE_BASE_URL = "https://api.cline.bot/api/v1";
+
+interface ClineSeedModel {
+	id: string;
+	name: string;
+	reasoning: boolean;
+	contextWindow: number;
+	maxTokens: number;
+	input?: ("text" | "image")[];
+}
+
+/**
+ * Curated offline seed for the Cline gateway. Cline is absent from models.dev
+ * and its `/api/v1/models` listing is auth-gated, so without a seed the picker
+ * is empty until a live `/login cline` refresh runs. Ids are taken verbatim
+ * from Cline's published catalog (docs/api/models.mdx); live discovery is
+ * authoritative and overlays real pricing/limits after login.
+ */
+const CLINE_SEED_MODELS: readonly ClineSeedModel[] = [
+	{
+		id: "anthropic/claude-sonnet-4-6",
+		name: "Claude Sonnet 4.6",
+		reasoning: true,
+		contextWindow: 200_000,
+		maxTokens: 64_000,
+		input: ["text", "image"],
+	},
+	{
+		id: "google/gemini-2.5-pro",
+		name: "Gemini 2.5 Pro",
+		reasoning: true,
+		contextWindow: 1_048_576,
+		maxTokens: 65_536,
+		input: ["text", "image"],
+	},
+	{
+		id: "openai/gpt-4o",
+		name: "GPT-4o",
+		reasoning: false,
+		contextWindow: 128_000,
+		maxTokens: 16_384,
+		input: ["text", "image"],
+	},
+	{ id: "deepseek/deepseek-chat", name: "DeepSeek Chat", reasoning: false, contextWindow: 64_000, maxTokens: 8_192 },
+	{ id: "minimax/minimax-m2.5", name: "MiniMax M2.5", reasoning: true, contextWindow: 200_000, maxTokens: 8_192 },
+];
+
+export interface ClineModelManagerConfig {
+	apiKey?: string;
+	baseUrl?: string;
+	fetch?: FetchImpl;
+}
+
+export function buildClineStaticSeed(baseUrl?: string): ModelSpec<"openai-completions">[] {
+	const resolvedBaseUrl = baseUrl ?? CLINE_BASE_URL;
+	return CLINE_SEED_MODELS.map(
+		(seed): ModelSpec<"openai-completions"> => ({
+			id: seed.id,
+			name: seed.name,
+			api: "openai-completions",
+			provider: "cline",
+			baseUrl: resolvedBaseUrl,
+			reasoning: seed.reasoning,
+			input: seed.input ?? ["text"],
+			cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+			contextWindow: seed.contextWindow,
+			maxTokens: seed.maxTokens,
+		}),
+	);
+}
+
+export function clineModelManagerOptions(config?: ClineModelManagerConfig): ModelManagerOptions<"openai-completions"> {
+	const apiKey = config?.apiKey;
+	const baseUrl = config?.baseUrl ?? CLINE_BASE_URL;
+	return {
+		providerId: "cline",
+		staticModels: buildClineStaticSeed(baseUrl),
+		fetchDynamicModels: () =>
+			fetchOpenAICompatibleModels({
+				api: "openai-completions",
+				provider: "cline",
+				baseUrl,
+				apiKey,
+				fetch: config?.fetch,
+			}),
+	};
+}
+
+// ---------------------------------------------------------------------------
 // Alibaba Coding Plan
 // ---------------------------------------------------------------------------
 
@@ -3674,6 +3766,8 @@ const MODELS_DEV_PROVIDER_DESCRIPTORS_SPECIALIZED: readonly ModelsDevProviderDes
 	openAiCompletionsDescriptor("huggingface", "huggingface", "https://router.huggingface.co/v1"),
 	// --- Kilo Gateway ---
 	openAiCompletionsDescriptor("kilo", "kilo", "https://api.kilo.ai/api/gateway"),
+	// --- Cline (cline.bot account gateway) ---
+	openAiCompletionsDescriptor("cline", "cline", "https://api.cline.bot/api/v1"),
 	// --- Moonshot AI ---
 	openAiCompletionsDescriptor("moonshotai", "moonshot", "https://api.moonshot.ai/v1"),
 	// --- NanoGPT ---

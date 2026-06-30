@@ -1,6 +1,6 @@
 # macOS signing & notarization
 
-The compiled macOS `omp` binaries shipped on GitHub Releases are signed with a
+The compiled macOS `omp` binaries distributed via the install endpoint (a Cloudflare Worker fronting a private Hugging Face repo) are signed with a
 **Developer ID Application** certificate and **notarized** by Apple. This makes
 them Gatekeeper-acceptable and is the prerequisite for an official Homebrew
 submission (see [#776](https://github.com/can1357/oh-my-pi/issues/776)).
@@ -48,7 +48,7 @@ reports `rejected / source=Unnotarized Developer ID`. This is expected and is
 
 What this means in practice:
 
-- `curl https://omp.sh/install | sh` — `curl` sets no quarantine bit, so
+- `curl -fsSL https://oh-my-pi.pkking.computer/install.sh | sh` — `curl` sets no quarantine bit, so
   Gatekeeper is never consulted; the binary just runs. ✅
 - Homebrew **formula** installs — Homebrew does not quarantine formula files, so
   Gatekeeper is never consulted. ✅

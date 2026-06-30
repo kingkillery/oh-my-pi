@@ -1094,6 +1094,35 @@ function toRestoredQueuedMessage(message: AgentMessage): RestoredQueuedMessage {
 	return { text: queueChipText(message), images: queuedImageContent(message) };
 }
 
+type FusionUsage = ReturnType<SessionManager["getUsageStatistics"]>;
+
+/** Frontier-vs-sidekick spend split for the Fusion cost meter. `sidekick` is the warm
+ * sidekick's real, separately-tracked spend; `frontier` is this main session's spend. */
+export interface UsageSplit {
+	total: FusionUsage;
+	frontier: FusionUsage;
+	sidekick: FusionUsage;
+}
+
+function emptyFusionUsage(): FusionUsage {
+	return { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, premiumRequests: 0, cost: 0 };
+}
+
+function addFusionUsage(target: FusionUsage, u: FusionUsage): void {
+	target.input += u.input;
+	target.output += u.output;
+	target.cacheRead += u.cacheRead;
+	target.cacheWrite += u.cacheWrite;
+	target.premiumRequests += u.premiumRequests;
+	target.cost += u.cost;
+}
+
+function sumFusionUsage(a: FusionUsage, b: FusionUsage): FusionUsage {
+	const result = { ...a };
+	addFusionUsage(result, b);
+	return result;
+}
+
 export class AgentSession {
 	readonly agent: Agent;
 	readonly sessionManager: SessionManager;
@@ -1137,6 +1166,8 @@ export class AgentSession {
 	#planModeState: PlanModeState | undefined;
 	#goalModeState: GoalModeState | undefined;
 	#goalRuntime: GoalRuntime;
+	#fusionSidekickId: string | undefined;
+	#fusionCompactionSwitched = false;
 	#advisorRuntime?: AdvisorRuntime;
 	#advisorEnabled = false;
 	/** The advisor's own agent, retained so `/dump advisor` can serialize its transcript. Undefined when no advisor is active. */
@@ -5330,6 +5361,37 @@ export class AgentSession {
 		return this.#goalRuntime;
 	}
 
+	/**
+	 * Track the warm Fusion sidekick's allocated agent id so the delegation prompt can
+	 * address it precisely (it may be "Sidekick-2" on a resumed session) and the cost
+	 * meter can read its real spend from the registry.
+	 */
+	setFusionSidekickId(id: string | undefined): void {
+		this.#fusionSidekickId = id;
+	}
+
+	getFusionSidekickId(): string | undefined {
+		return this.#fusionSidekickId;
+	}
+
+	/**
+	 * Frontier-vs-sidekick spend split for the Fusion cost meter. `sidekick` is the ACTUAL
+	 * spend of the warm Fusion sidekick, read from its own (separate) session via the global
+	 * registry — not inferred from `task` tool-results (which both miss the IRC-driven warm
+	 * sidekick and over-count unrelated subagents). `frontier` is this main session's spend.
+	 * Sidekick usage is zero when none is tracked/live (e.g. parked) — honest and conservative.
+	 */
+	getFusionUsageSplit(): UsageSplit {
+		const frontier = this.sessionManager.getUsageStatistics();
+		const sidekick = emptyFusionUsage();
+		if (this.#fusionSidekickId) {
+			const ref = AgentRegistry.global().get(this.#fusionSidekickId);
+			const usage = ref?.session?.sessionManager.getUsageStatistics();
+			if (usage) addFusionUsage(sidekick, usage);
+		}
+		return { total: sumFusionUsage(frontier, sidekick), frontier, sidekick };
+	}
+
 	markPlanReferenceSent(): void {
 		this.#planReferenceSent = true;
 	}
@@ -7874,6 +7936,8 @@ export class AgentSession {
 				});
 			}
 
+			// Fusion cost mode: ramp the main model down at the manual /compact boundary too.
+			await this.#applyFusionCompactionSwitch();
 			const compactionResult: CompactionResult = {
 				summary,
 				shortSummary,
@@ -8860,6 +8924,49 @@ export class AgentSession {
 		return candidate;
 	}
 
+	/**
+	 * Fusion cost mode: at a compaction boundary the provider/KV cache has already
+	 * been invalidated by the history rewrite, so switching the main model here is
+	 * "free" (no extra cache miss beyond the one compaction already paid). When
+	 * `fusion.compactModel` is configured, ramp the main model down to that cheaper
+	 * tier for the post-compaction stretch. Opt-in (empty selector = disabled),
+	 * ephemeral (never written to settings), and a no-op when the target is
+	 * unavailable, unauthed, or already active. Mirrors {@link #promoteContextModel}.
+	 */
+	async #applyFusionCompactionSwitch(): Promise<void> {
+		// Whole body guarded: this runs inside the compaction commit path, so an
+		// unexpected throw from model resolution/auth lookup must never mark a
+		// committed compaction as failed or stall auto-continue.
+		try {
+			if (this.settings.get("fusion.enabled") !== true) return;
+			if (this.settings.get("fusion.mode") === "off") return;
+			// Switch at most once per session so a later compaction never clobbers a model
+			// the user manually chose after the first downgrade.
+			if (this.#fusionCompactionSwitched) return;
+			const selector = this.settings.get("fusion.compactModel")?.trim();
+			if (!selector) return;
+			const currentModel = this.model;
+			if (!currentModel) return;
+			const availableModels = this.#modelRegistry.getAvailable();
+			if (availableModels.length === 0) return;
+			const target = resolveModelRoleValue(selector, availableModels, {
+				settings: this.settings,
+				matchPreferences: getModelMatchPreferences(this.settings),
+				modelRegistry: this.#modelRegistry,
+			}).model;
+			if (!target || modelsAreEqual(target, currentModel)) return;
+			if (!this.#modelRegistry.hasConfiguredAuth(target)) return;
+			await this.setModelTemporary(target, undefined, { ephemeral: true });
+			this.#fusionCompactionSwitched = true;
+			logger.debug("Fusion compaction switch", {
+				from: `${currentModel.provider}/${currentModel.id}`,
+				to: `${target.provider}/${target.id}`,
+			});
+		} catch (error) {
+			logger.warn("Fusion compaction switch failed", { error: String(error) });
+		}
+	}
+
 	#setModelWithProviderSessionReset(model: Model): void {
 		const currentModel = this.model;
 		if (currentModel) {
@@ -9776,6 +9883,9 @@ export class AgentSession {
 				details,
 				preserveData,
 			};
+			// Fusion cost mode: ramp the main model down to the configured cheaper
+			// tier now that the history rewrite has already invalidated the cache.
+			await this.#applyFusionCompactionSwitch();
 			await this.#emitSessionEvent({ type: "auto_compaction_end", action, result, aborted: false, willRetry });
 
 			let continuationScheduled = false;
