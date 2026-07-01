@@ -49,7 +49,9 @@ bun --cwd=packages/coding-agent run build
 BINARY_DIR="$WORK_DIR/binary-bin"
 mkdir -p "$BINARY_DIR"
 cp packages/coding-agent/dist/omp "$BINARY_DIR/omp"
+cp packages/coding-agent/dist/ompk "$BINARY_DIR/ompk"
 smoke_cli "$BINARY_DIR/omp"
+smoke_cli "$BINARY_DIR/ompk"
 
 section "Source install smoke"
 SOURCE_BUN_HOME="$WORK_DIR/bun-source"
@@ -58,6 +60,7 @@ SOURCE_BUN_HOME="$WORK_DIR/bun-source"
    export PATH="$BUN_INSTALL/bin:$PATH"
    bun --cwd="$ROOT_DIR/packages/coding-agent" link
    smoke_cli "$BUN_INSTALL/bin/omp"
+   smoke_cli "$BUN_INSTALL/bin/ompk"
 )
 
 section "Tarball install smoke"
@@ -179,6 +182,7 @@ mkdir -p "$TARBALL_APP_DIR"
       exit 1
    }
    smoke_cli ./node_modules/.bin/omp
+   smoke_cli ./node_modules/.bin/ompk
 )
 
 echo ""

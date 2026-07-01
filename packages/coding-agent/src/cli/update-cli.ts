@@ -12,6 +12,7 @@ import { $which, APP_NAME, isEnoent, VERSION } from "@pk-nerdsaver-ai/pi-utils";
 import { $ } from "bun";
 import chalk from "chalk";
 import { theme } from "../modes/theme/theme";
+import { getDistVersion, getLatestRelease, type ReleaseInfo } from "./update-release-source";
 
 /**
  * Binary distribution endpoint (Cloudflare Worker → private Hugging Face repo).
@@ -61,11 +62,6 @@ const SUPPORTED_NATIVE_TAGS: ReadonlySet<string> = new Set([
 
 function currentNativeTag(): string {
 	return `${process.platform}-${process.arch}`;
-}
-
-interface ReleaseInfo {
-	tag: string;
-	version: string;
 }
 
 /** Result from running the installed binary and parsing its reported version. */
@@ -238,42 +234,6 @@ async function resolveUpdateTarget(): Promise<UpdateTarget> {
 	if (bunBinDir) return { method: "bun" };
 
 	throw new Error(`Could not resolve ${APP_NAME} binary path in PATH`);
-}
-
-/**
- * Get the latest release info from the npm registry.
- * Uses npm instead of GitHub API to avoid unauthenticated rate limiting.
- */
-async function getLatestRelease(): Promise<ReleaseInfo> {
-	const response = await fetch(`${NPM_REGISTRY}${PACKAGE}/latest`);
-	if (!response.ok) {
-		throw new Error(`Failed to fetch release info: ${response.statusText}`);
-	}
-
-	const data = (await response.json()) as { version: string };
-	const version = data.version;
-	const tag = `v${version}`;
-
-	return {
-		tag,
-		version,
-	};
-}
-
-/**
- * Resolve the version the fork's distribution endpoint currently serves
- * (`${DIST_BASE}/version` → `vX.Y.Z`), authoritative for binary installs.
- * Returns undefined when unreachable so callers can fall back to npm.
- */
-async function getDistVersion(): Promise<string | undefined> {
-	try {
-		const response = await fetch(`${DIST_BASE}/version`);
-		if (!response.ok) return undefined;
-		const version = (await response.text()).trim().replace(/^v/, "");
-		return version || undefined;
-	} catch {
-		return undefined;
-	}
 }
 
 /**
@@ -606,7 +566,7 @@ async function updateViaBinaryAt(targetPath: string, expectedVersion: string): P
 	// The fork serves binaries off DIST_BASE/version (the canonical pointer for
 	// the binary surface); prefer it over the npm-derived version so a binary
 	// update always matches what the endpoint actually serves.
-	const version = (await getDistVersion()) ?? expectedVersion;
+	const version = (await getDistVersion(DIST_BASE)) ?? expectedVersion;
 	const binaryName = getBinaryName();
 	const url = buildBinaryDownloadUrl(version, binaryName);
 
@@ -648,7 +608,7 @@ export async function runUpdateCommand(opts: { force: boolean; check: boolean })
 	// Check for updates
 	let release: ReleaseInfo;
 	try {
-		release = await getLatestRelease();
+		release = await getLatestRelease({ distBase: DIST_BASE, packageName: PACKAGE, npmRegistry: NPM_REGISTRY });
 	} catch (err) {
 		console.error(chalk.red(`Failed to check for updates: ${err}`));
 		process.exit(1);

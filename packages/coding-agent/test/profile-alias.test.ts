@@ -286,8 +286,8 @@ describe("profile alias installer", () => {
 		expect(fs.get("/home/me/.zshrc")).toBe(original);
 	});
 
-	it("refuses to shadow the base omp command case-insensitively", async () => {
-		for (const aliasName of ["omp", "OMP"]) {
+	it("refuses to shadow official command names case-insensitively", async () => {
+		for (const aliasName of ["oh-my-pk", "OH-MY-PK", "omp", "OMP", "ompk", "OMPK"]) {
 			await expect(
 				installProfileAlias({
 					profile: "work",

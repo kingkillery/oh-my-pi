@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added `ompk` as a short launch alias alongside `oh-my-pk` and `omp` for package installs, published npm bins, and binary installers.
 - Added the `/rqgm` slash command, which runs the Red Queen Gödel Machine co-evolutionary search (arXiv:2606.26294) through the Fusion Meta-Harness (`fmh rqgm search`), backed by the standalone `red-queen-godel-machine` package.
 - Added Mixture-of-Agents settings, preset resolution, and status-line visibility for read-only candidate lanes.
 - Added a best-effort collab link handoff file for the Pi Speak gateway while a collab host is active.
@@ -14,6 +15,7 @@
 ### Fixed
 
 - Fixed subagent budget compounding across retry attempts (issue #5): when the Fusion sidekick model-request cap (`maxModelRequestsPerRun`) is hit, `driveSessionToYield` now detects the cut and breaks the reminder loop immediately rather than re-prompting, which previously compounded the cap up to 4×. Added `maxModelRequestsPerRun` getter to the `Agent` and `AgentSession` classes, and updated `driveSessionToYield` to abort with a clear budget-exhausted reason.
+- Fixed `oh-my-pk update` to check the fork distribution endpoint before npm, so pushed fork binaries become visible immediately while npm remains the fallback when the distribution endpoint is unavailable.
 
 ## [16.1.10] - 2026-06-22
 

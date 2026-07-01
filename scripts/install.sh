@@ -181,7 +181,7 @@ install_via_bun() {
     fi
     echo ""
     echo "✓ Installed oh-my-pk via bun"
-    echo "Run 'oh-my-pk' to get started!"
+    echo "Run 'oh-my-pk' (or 'ompk') to get started!"
 }
 
 # Install prebuilt binary from the distribution endpoint (Cloudflare Worker ->
@@ -226,16 +226,18 @@ install_binary() {
     echo "Downloading ${BINARY}..."
     curl -fsSL "$BINARY_URL" -o "${INSTALL_DIR}/oh-my-pk"
     chmod +x "${INSTALL_DIR}/oh-my-pk"
-    # Keep `omp` as a back-compat alias for the renamed command.
+    # Keep `omp` and `ompk` as launch aliases for the renamed command.
     cp "${INSTALL_DIR}/oh-my-pk" "${INSTALL_DIR}/omp"
     chmod +x "${INSTALL_DIR}/omp"
+    cp "${INSTALL_DIR}/oh-my-pk" "${INSTALL_DIR}/ompk"
+    chmod +x "${INSTALL_DIR}/ompk"
     echo ""
-    echo "✓ Installed oh-my-pk to ${INSTALL_DIR}/oh-my-pk (alias: omp)"
+    echo "✓ Installed oh-my-pk to ${INSTALL_DIR}/oh-my-pk (aliases: omp, ompk)"
 
     # Check if in PATH
     case ":$PATH:" in
-        *":$INSTALL_DIR:"*) echo "Run 'oh-my-pk' to get started!" ;;
-        *) echo "Add ${INSTALL_DIR} to your PATH, then run 'oh-my-pk'" ;;
+        *":$INSTALL_DIR:"*) echo "Run 'oh-my-pk' (or 'ompk') to get started!" ;;
+        *) echo "Add ${INSTALL_DIR} to your PATH, then run 'oh-my-pk' or 'ompk'" ;;
     esac
 }
 

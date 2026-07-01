@@ -101,18 +101,20 @@ async function main(): Promise<void> {
 			if (shouldAdhocSignDarwinBinary()) {
 				await runCommand(["codesign", "--force", "--sign", "-", outputPath]);
 			}
-			// Refresh the `omp` back-compat alias from the primary `oh-my-pk` build.
+			// Refresh launch aliases from the primary `oh-my-pk` build.
 			// Best-effort: on Windows the in-use `omp.exe` is often locked (EPERM),
 			// which must not fail the build now that `oh-my-pk` is the real output.
 			const exeSuffix = process.platform === "win32" ? ".exe" : "";
-			const aliasPath = path.join(packageDir, "dist", `omp${exeSuffix}`);
-			try {
-				fs.copyFileSync(`${outputPath}${exeSuffix}`, aliasPath);
-				if (process.platform !== "win32") fs.chmodSync(aliasPath, 0o755);
-			} catch (err) {
-				console.warn(
-					`Skipped refreshing omp alias (${aliasPath}): ${err instanceof Error ? err.message : String(err)}`,
-				);
+			for (const aliasName of ["omp", "ompk"] as const) {
+				const aliasPath = path.join(packageDir, "dist", `${aliasName}${exeSuffix}`);
+				try {
+					fs.copyFileSync(`${outputPath}${exeSuffix}`, aliasPath);
+					if (process.platform !== "win32") fs.chmodSync(aliasPath, 0o755);
+				} catch (err) {
+					console.warn(
+						`Skipped refreshing ${aliasName} alias (${aliasPath}): ${err instanceof Error ? err.message : String(err)}`,
+					);
+				}
 			}
 		} finally {
 			await runCommand(["bun", "scripts/embed-mupdf-wasm.ts", "--reset"]);

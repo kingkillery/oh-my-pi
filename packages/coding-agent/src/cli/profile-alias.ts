@@ -142,14 +142,18 @@ function getReservedAliasNames(shell: ProfileAliasShell): ReadonlySet<string> {
 	}
 }
 
+const OFFICIAL_COMMAND_NAMES = new Set([APP_NAME.toLowerCase(), "omp", "ompk"] as const);
+
 function validateAliasName(aliasName: string, shell: ProfileAliasShell): string {
 	const normalized = aliasName.trim();
 	if (!ALIAS_NAME_RE.test(normalized)) {
 		throw new Error(`Invalid alias "${aliasName}". Alias names must match ${ALIAS_NAME_RE.source}.`);
 	}
 	const lower = normalized.toLowerCase();
-	if (lower === "omp" || lower === APP_NAME.toLowerCase()) {
-		throw new Error(`Invalid alias "${aliasName}". Refusing to shadow the ${APP_NAME} command (or its "omp" alias).`);
+	if (OFFICIAL_COMMAND_NAMES.has(lower)) {
+		throw new Error(
+			`Invalid alias "${aliasName}". Refusing to shadow the ${APP_NAME} command or its official aliases.`,
+		);
 	}
 	if (getReservedAliasNames(shell).has(normalized.toLowerCase())) {
 		throw new Error(`Invalid alias "${aliasName}". Refusing to create a ${shell} reserved word.`);

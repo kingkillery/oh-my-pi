@@ -62,7 +62,7 @@ macOS · Linux · Windows · bun ≥ 1.3.14
 
 ### Shell completions
 
-`oh-my-pk` (alias: `omp`) generates its own completion scripts for **bash**, **zsh**, and **fish** from the live command/flag metadata, so they never drift from the actual CLI. Subcommands, flags, and enum values complete statically; model names (`--model`, `--smol`, `--slow`, `--plan`) resolve against the bundled model catalog and `--resume` against your on-disk sessions.
+`oh-my-pk` (aliases: `omp`, `ompk`) generates its own completion scripts for **bash**, **zsh**, and **fish** from the live command/flag metadata, so they never drift from the actual CLI. Subcommands, flags, and enum values complete statically; model names (`--model`, `--smol`, `--slow`, `--plan`) resolve against the bundled model catalog and `--resume` against your on-disk sessions.
 
 ```sh
 # zsh — add to ~/.zshrc (or write the output into a file on your $fpath)

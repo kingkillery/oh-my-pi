@@ -233,7 +233,7 @@ function Install-ViaBun {
 
     Configure-BashShell
 
-    Write-Host "Run 'oh-my-pk' to get started!"
+    Write-Host "Run 'oh-my-pk' (or 'ompk') to get started!"
 }
 
 function Install-Binary {
@@ -258,11 +258,12 @@ function Install-Binary {
     Write-Host "Downloading $BinaryName..."
     $OutPath = Join-Path $InstallDir "oh-my-pk.exe"
     Invoke-WebRequest -Uri $BinaryUrl -OutFile $OutPath
-    # Keep `omp` as a back-compat alias for the renamed command.
+    # Keep `omp` and `ompk` as launch aliases for the renamed command.
     Copy-Item -Path $OutPath -Destination (Join-Path $InstallDir "omp.exe") -Force
+    Copy-Item -Path $OutPath -Destination (Join-Path $InstallDir "ompk.exe") -Force
 
     Write-Host ""
-    Write-Host "✓ Installed oh-my-pk to $OutPath (alias: omp.exe)" -ForegroundColor Green
+    Write-Host "✓ Installed oh-my-pk to $OutPath (aliases: omp.exe, ompk.exe)" -ForegroundColor Green
 
     # Add to PATH if not already there
     $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -275,9 +276,9 @@ function Install-Binary {
     Configure-BashShell
 
     if ($needsRestart) {
-        Write-Host "Restart your terminal, then run 'oh-my-pk' to get started!"
+        Write-Host "Restart your terminal, then run 'oh-my-pk' (or 'ompk') to get started!"
     } else {
-        Write-Host "Run 'oh-my-pk' to get started!"
+        Write-Host "Run 'oh-my-pk' (or 'ompk') to get started!"
     }
 }
 

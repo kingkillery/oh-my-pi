@@ -1,5 +1,10 @@
 # Bundle Update Log
 
+## 2026-07-01
+* **Creation**: Added [Fork update channel](/concepts/fork-update-channel.md) documenting how updates and installers are routed to our fork.
+* **Creation**: Added [Launch agent slash command](/concepts/launch-agent-slash-command.md) documenting the new `/agent` slash command.
+* **Creation**: Created the `.omp/commands/agent.md` slash command definition to run a task agent autonomously.
+
 ## 2026-06-20
 * **Initialization**: Created the `.wiki` OKF bundle for the oh-my-pi fork.
 * **Creation**: Added [Spiral `/loop` design](/concepts/spiral-loop-design.md) capturing the verifier/synthesis loop-enhancement design.
