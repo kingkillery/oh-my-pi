@@ -136,8 +136,6 @@ describe("shouldRunFusionCompactionSwitch", () => {
 
 	it("skips when nothing is configured — opt-in by design", () => {
 		expect(shouldRunFusionCompactionSwitch(baseOpts)).toBe(false);
-		expect(
-			shouldRunFusionCompactionSwitch({ ...baseOpts, dynamicRouting: true }),
-		).toBe(false);
+		expect(shouldRunFusionCompactionSwitch({ ...baseOpts, dynamicRouting: true })).toBe(false);
 	});
 });

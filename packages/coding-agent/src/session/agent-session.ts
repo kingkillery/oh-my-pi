@@ -296,6 +296,7 @@ import {
 	resolveSidekickRoute,
 	shouldRunFusionCompactionSwitch,
 } from "./fusion-router";
+import { emptyFusionUsage, sumFusionUsage, type UsageSplit } from "./fusion-usage";
 import {
 	type BashExecutionMessage,
 	type CustomMessage,
@@ -1101,35 +1102,6 @@ function queueChipText(message: AgentMessage): string {
 
 function toRestoredQueuedMessage(message: AgentMessage): RestoredQueuedMessage {
 	return { text: queueChipText(message), images: queuedImageContent(message) };
-}
-
-type FusionUsage = ReturnType<SessionManager["getUsageStatistics"]>;
-
-/** Frontier-vs-sidekick spend split for the Fusion cost meter. `sidekick` is the warm
- * sidekick's real, separately-tracked spend; `frontier` is this main session's spend. */
-export interface UsageSplit {
-	total: FusionUsage;
-	frontier: FusionUsage;
-	sidekick: FusionUsage;
-}
-
-function emptyFusionUsage(): FusionUsage {
-	return { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, premiumRequests: 0, cost: 0 };
-}
-
-function addFusionUsage(target: FusionUsage, u: FusionUsage): void {
-	target.input += u.input;
-	target.output += u.output;
-	target.cacheRead += u.cacheRead;
-	target.cacheWrite += u.cacheWrite;
-	target.premiumRequests += u.premiumRequests;
-	target.cost += u.cost;
-}
-
-function sumFusionUsage(a: FusionUsage, b: FusionUsage): FusionUsage {
-	const result = { ...a };
-	addFusionUsage(result, b);
-	return result;
 }
 
 export class AgentSession {
@@ -5401,20 +5373,16 @@ export class AgentSession {
 	}
 
 	/**
-	 * Frontier-vs-sidekick spend split for the Fusion cost meter. `sidekick` is the ACTUAL
-	 * spend of the warm Fusion sidekick, read from its own (separate) session via the global
+	 * Frontier-vs-sidekick token split for the Fusion meter. `sidekick` is the ACTUAL
+	 * usage of the warm Fusion sidekick, read from its own (separate) session via the global
 	 * registry — not inferred from `task` tool-results (which both miss the IRC-driven warm
-	 * sidekick and over-count unrelated subagents). `frontier` is this main session's spend.
+	 * sidekick and over-count unrelated subagents). `frontier` is this main session's usage.
 	 * Sidekick usage is zero when none is tracked/live (e.g. parked) — honest and conservative.
 	 */
 	getFusionUsageSplit(): UsageSplit {
 		const frontier = this.sessionManager.getUsageStatistics();
-		const sidekick = emptyFusionUsage();
-		if (this.#fusionSidekickId) {
-			const ref = AgentRegistry.global().get(this.#fusionSidekickId);
-			const usage = ref?.session?.sessionManager.getUsageStatistics();
-			if (usage) addFusionUsage(sidekick, usage);
-		}
+		const ref = this.#fusionSidekickId ? AgentRegistry.global().get(this.#fusionSidekickId) : undefined;
+		const sidekick = ref?.session?.sessionManager.getUsageStatistics() ?? emptyFusionUsage();
 		return { total: sumFusionUsage(frontier, sidekick), frontier, sidekick };
 	}
 
@@ -9099,7 +9067,9 @@ export class AgentSession {
 		try {
 			const strongSelector = this.settings.get("fusion.sidekickStrongModel")?.trim();
 			if (!strongSelector) return;
-			const sidekick = this.#fusionSidekickId ? AgentRegistry.global().get(this.#fusionSidekickId)?.session : undefined;
+			const sidekick = this.#fusionSidekickId
+				? AgentRegistry.global().get(this.#fusionSidekickId)?.session
+				: undefined;
 			if (!sidekick) return;
 			const tier = resolveSidekickRoute(route, pool);
 			const selector = tier === "strong" ? strongSelector : this.settings.get("fusion.sidekickModel") || "pi/smol";

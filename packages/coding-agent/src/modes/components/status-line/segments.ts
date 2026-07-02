@@ -10,6 +10,7 @@ import {
 	relativePathWithinRoot,
 } from "@pk-nerdsaver-ai/pi-utils";
 import { type ThemeColor, theme } from "../../../modes/theme/theme";
+import { computeFusionTokenSplit } from "../../../session/fusion-usage";
 import { shortenPath } from "../../../tools/render-utils";
 import { getSessionAccentAnsi, getSessionAccentHex } from "../../../utils/session-color";
 import { sanitizeStatusText } from "../../shared";
@@ -595,14 +596,23 @@ const moaSegment: StatusLineSegment = {
 const fusionSegment: StatusLineSegment = {
 	id: "fusion",
 	render(ctx) {
-		if (ctx.session.settings?.get("fusion.enabled") !== true) return { content: "", visible: false };
-		const mode = ctx.session.settings?.get("fusion.mode");
-		if (mode === "off") return { content: "", visible: false };
+		const settings = ctx.session.settings;
+		const mode = settings?.get("fusion.mode");
+		const active = settings?.get("fusion.enabled") === true && mode !== "off";
+		if (!active) {
+			const configured =
+				settings?.isConfigured("fusion.enabled") === true || settings?.isConfigured("fusion.mode") === true;
+			if (!configured) return { content: "", visible: false };
+			const content = withIcon(theme.icon.agents, "fusion off");
+			return { content: theme.fg("muted", content), visible: true };
+		}
 		// Budget-fusion: a nonzero sidekick request budget hard-caps each sidekick
 		// run, so surface the cap alongside the mode.
-		const budget = ctx.session.settings?.get("fusion.sidekickRequestBudget");
+		const budget = settings?.get("fusion.sidekickRequestBudget");
 		const summary =
-			typeof budget === "number" && budget > 0 ? `fusion ${mode}${theme.sep.dot}cap ${budget}` : `fusion ${mode}`;
+			typeof budget === "number" && budget > 0
+				? `fusion on ${mode}${theme.sep.dot}cap ${budget}`
+				: `fusion on ${mode}`;
 		const content = withIcon(theme.icon.agents, summary);
 		return { content: theme.fg("accent", content), visible: true };
 	},
@@ -616,20 +626,11 @@ const fusionSavingsSegment: StatusLineSegment = {
 		if (ctx.session.settings?.get("fusion.showSavings") !== true) return { content: "", visible: false };
 		const split = ctx.session.getFusionUsageSplit?.();
 		if (!split) return { content: "", visible: false };
-		const billable = (u: { input: number; output: number; cacheWrite: number }): number =>
-			u.input + u.output + u.cacheWrite;
-		const sidekickTokens = billable(split.sidekick);
+		const { share, sidekickTokens, frontierTokens } = computeFusionTokenSplit(split);
 		if (sidekickTokens <= 0) return { content: "", visible: false };
-		const frontierTokens = billable(split.frontier);
-		const total = frontierTokens + sidekickTokens;
-		const share = total > 0 ? Math.round((sidekickTokens / total) * 100) : 0;
-		// Self-calibrated estimate: price the sidekick tokens at the frontier's own
-		// observed blended $/token (suppressed on flat-rate/OAuth tiers, cost ~ 0).
-		const frontierRate = frontierTokens > 0 && split.frontier.cost > 0 ? split.frontier.cost / frontierTokens : 0;
-		const estSavings = frontierRate > 0 ? Math.max(0, sidekickTokens * frontierRate - split.sidekick.cost) : 0;
-		const summary = estSavings > 0 ? `sk ${share}% ~$${estSavings.toFixed(2)}` : `sk ${share}%`;
+		const summary = `sk ${Math.round(share)}% ${formatNumber(sidekickTokens)}${theme.sep.dot}main ${formatNumber(frontierTokens)}`;
 		const content = withIcon(theme.icon.agents, summary);
-		return { content: theme.fg("statusLineCost", content), visible: true };
+		return { content: theme.fg("statusLineSpend", content), visible: true };
 	},
 };
 
