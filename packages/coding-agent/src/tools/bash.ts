@@ -9,9 +9,9 @@ import type {
 } from "@pk-nerdsaver-ai/pi-agent-core";
 import type { Component } from "@pk-nerdsaver-ai/pi-tui";
 import { ImageProtocol, TERMINAL } from "@pk-nerdsaver-ai/pi-tui";
-import { getProjectDir, isEnoent, logger, prompt } from "@pk-nerdsaver-ai/pi-utils";
+import { formatBytes, getProjectDir, isEnoent, logger, prompt } from "@pk-nerdsaver-ai/pi-utils";
 import { type } from "arktype";
-import { type BashResult, executeBash } from "../exec/bash-executor";
+import { type BashMinimizedOutput, type BashResult, executeBash } from "../exec/bash-executor";
 import type { RenderResultOptions } from "../extensibility/custom-tools/types";
 import { InternalUrlRouter } from "../internal-urls";
 import { truncateToVisualLines } from "../modes/components/visual-truncate";
@@ -137,6 +137,7 @@ export interface BashToolDetails {
 	wallTimeMs?: number;
 	/** Exit code of a command that ran to completion but failed (non-zero). */
 	exitCode?: number;
+	minimized?: BashMinimizedOutput;
 	terminalId?: string;
 	async?: {
 		state: "running" | "completed" | "failed";
@@ -500,6 +501,9 @@ export class BashTool implements AgentTool<typeof bashSchemaBase | typeof bashSc
 		}
 		if (failedExit) {
 			details.exitCode = exitCode;
+		}
+		if (!isInteractiveResult(result) && result.minimized) {
+			details.minimized = result.minimized;
 		}
 		// Final defense at the tool-result boundary: no bash path (client bridge,
 		// head-retention spill, minimizer miss) may emit more than
@@ -1328,6 +1332,14 @@ export function createShellRenderer<TArgs>(config: ShellRendererConfig<TArgs>) {
 					}
 					if (rawOutputArtifact.artifactId) {
 						statsParts.push(`Artifact: ${rawOutputArtifact.artifactId}`);
+					}
+					if (details?.minimized) {
+						const saved = Math.max(0, details.minimized.inputBytes - details.minimized.outputBytes);
+						const pct =
+							details.minimized.inputBytes > 0 ? Math.round((saved / details.minimized.inputBytes) * 100) : 0;
+						const rawSize = formatBytes(details.minimized.inputBytes);
+						const slimSize = formatBytes(details.minimized.outputBytes);
+						statsParts.push(`Slim: ${pct}% ${rawSize}→${slimSize} (${details.minimized.filter})`);
 					}
 					if (isError && typeof details?.exitCode === "number") {
 						statsParts.push(`Exit: ${details.exitCode}`);

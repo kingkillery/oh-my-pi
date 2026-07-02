@@ -10,7 +10,7 @@ import {
 import { buildMinimizerOptions, executeBash } from "@pk-nerdsaver-ai/pi-coding-agent/exec/bash-executor";
 import { DEFAULT_MAX_BYTES } from "@pk-nerdsaver-ai/pi-coding-agent/session/streaming-output";
 import * as shellSnapshot from "@pk-nerdsaver-ai/pi-coding-agent/utils/shell-snapshot";
-import type { Shell } from "@pk-nerdsaver-ai/pi-natives";
+import type { Shell, ShellRunResult } from "@pk-nerdsaver-ai/pi-natives";
 import * as piNatives from "@pk-nerdsaver-ai/pi-natives";
 
 // Matches the schema default for `tools.artifactHeadBytes` (20 KB) used by
@@ -113,6 +113,88 @@ describe("executeBash", () => {
 			legacyFilters: true,
 		});
 	});
+	it("preserves native minimizer telemetry when output is rewritten", async () => {
+		vi.spyOn(Settings.prototype, "getShellConfig").mockReturnValue({
+			shell: "bash",
+			args: ["-c"],
+			env: { PATH: Bun.env.PATH ?? "" },
+			prefix: undefined,
+		});
+		vi.spyOn(shellSnapshot, "getOrCreateSnapshot").mockResolvedValue(null);
+		const runSpy = vi.spyOn(piNatives.Shell.prototype, "run").mockImplementation((_options, onChunk) => {
+			onChunk?.(null, "raw noisy output\n");
+			const result: ShellRunResult = {
+				exitCode: 0,
+				cancelled: false,
+				timedOut: false,
+				minimized: {
+					filter: "git-compact",
+					originalText: "raw noisy output\n",
+					text: "slim output\n",
+					inputBytes: 16,
+					outputBytes: 12,
+				},
+			};
+			return Promise.resolve(result);
+		});
+
+		const result = await executeBash("git status", { cwd: tempDir, timeout: 5000, sessionKey: "min-no-save" });
+		expect(runSpy).toHaveBeenCalledTimes(1);
+
+		expect(result.output).toBe("slim output\n");
+		expect(result.minimized).toEqual({
+			filter: "git-compact",
+			inputBytes: 16,
+			outputBytes: 12,
+		});
+	});
+
+	it("adds raw output artifact footer when minimized output is saved", async () => {
+		vi.spyOn(Settings.prototype, "getShellConfig").mockReturnValue({
+			shell: "bash",
+			args: ["-c"],
+			env: { PATH: Bun.env.PATH ?? "" },
+			prefix: undefined,
+		});
+		vi.spyOn(shellSnapshot, "getOrCreateSnapshot").mockResolvedValue(null);
+		const runSpy = vi.spyOn(piNatives.Shell.prototype, "run").mockImplementation((_options, onChunk) => {
+			onChunk?.(null, "raw noisy output\n");
+			const result: ShellRunResult = {
+				exitCode: 0,
+				cancelled: false,
+				timedOut: false,
+				minimized: {
+					filter: "git-compact",
+					originalText: "raw noisy output\n",
+					text: "slim output\n",
+					inputBytes: 16,
+					outputBytes: 12,
+				},
+			};
+			return Promise.resolve(result);
+		});
+
+		const result = await executeBash("git status", {
+			cwd: tempDir,
+			timeout: 5000,
+			sessionKey: "min-save",
+			onMinimizedSave: async (originalText, info) => {
+				expect(originalText).toBe("raw noisy output\n");
+				expect(info).toEqual({ filter: "git-compact", inputBytes: 16, outputBytes: 12 });
+				return "raw123";
+			},
+		});
+		expect(runSpy).toHaveBeenCalledTimes(1);
+
+		expect(result.output).toBe("slim output\n[raw output: artifact://raw123]\n");
+		expect(result.minimized).toEqual({
+			filter: "git-compact",
+			inputBytes: 16,
+			outputBytes: 12,
+			rawArtifactId: "raw123",
+		});
+	});
+
 	it("returns non-zero exit codes without cancellation", async () => {
 		const result = await executeBash("exit 7", { cwd: tempDir, timeout: 5000 });
 		expect(result.exitCode).toBe(7);

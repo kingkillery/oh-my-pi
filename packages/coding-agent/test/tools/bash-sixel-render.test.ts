@@ -150,6 +150,30 @@ describe("bashToolRenderer", () => {
 		expect(rendered).not.toContain("[raw output: artifact://13]");
 		expect(rendered).not.toContain("artifact://13");
 	});
+	it("renders native minimizer compression stats in the status footer", async () => {
+		const theme = await getThemeByName("dark");
+		expect(theme).toBeDefined();
+		const uiTheme = theme!;
+		const component = bashToolRenderer.renderResult(
+			{
+				content: [{ type: "text", text: "slim output\n[raw output: artifact://13]" }],
+				details: {
+					timeoutSeconds: 300,
+					minimized: { filter: "git-compact", inputBytes: 4096, outputBytes: 1024, rawArtifactId: "13" },
+				},
+				isError: false,
+			},
+			{ expanded: false, isPartial: false },
+			uiTheme,
+			{ command: "git status" },
+		);
+		const rendered = sanitizeText(component.render(120).join("\n"));
+		expect(rendered).toContain("slim output");
+		expect(rendered).toContain("Slim: 75% 4.0KB→1.0KB (git-compact)");
+		expect(rendered).toContain("Artifact: 13");
+		expect(rendered).not.toContain("[raw output: artifact://13]");
+	});
+
 	it("renders the exit status in the footer and strips the textual exit notice for failed commands", async () => {
 		const theme = await getThemeByName("dark");
 		expect(theme).toBeDefined();

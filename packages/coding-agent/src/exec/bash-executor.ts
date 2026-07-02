@@ -40,6 +40,12 @@ export interface BashExecutorOptions {
 		info: { filter: string; inputBytes: number; outputBytes: number },
 	) => Promise<string | undefined>;
 }
+export interface BashMinimizedOutput {
+	filter: string;
+	inputBytes: number;
+	outputBytes: number;
+	rawArtifactId?: string;
+}
 
 export interface BashResult {
 	output: string;
@@ -51,6 +57,7 @@ export interface BashResult {
 	outputLines: number;
 	outputBytes: number;
 	artifactId?: string;
+	minimized?: BashMinimizedOutput;
 }
 
 const shellSessions = new Map<string, Shell>();
@@ -373,9 +380,15 @@ export async function executeBash(command: string, options?: BashExecutorOptions
 		// raw stream for the minimized text, persist the original as a session
 		// artifact, and splice an `artifact://<id>` footer into the visible text so
 		// the agent can retrieve the raw bytes losslessly.
+		let minimizedOutput: BashMinimizedOutput | undefined;
 		const minimized = winner.result.minimized;
 		if (minimized && minimized.text !== minimized.originalText) {
 			sink.replace(minimized.text);
+			minimizedOutput = {
+				filter: minimized.filter,
+				inputBytes: minimized.inputBytes,
+				outputBytes: minimized.outputBytes,
+			};
 			if (options?.onMinimizedSave) {
 				const artifactId = await options.onMinimizedSave(minimized.originalText, {
 					filter: minimized.filter,
@@ -383,6 +396,7 @@ export async function executeBash(command: string, options?: BashExecutorOptions
 					outputBytes: minimized.outputBytes,
 				});
 				if (artifactId) {
+					minimizedOutput = { ...minimizedOutput, rawArtifactId: artifactId };
 					const sep = minimized.text.endsWith("\n") ? "" : "\n";
 					sink.push(`${sep}[raw output: artifact://${artifactId}]\n`);
 				}
@@ -390,10 +404,12 @@ export async function executeBash(command: string, options?: BashExecutorOptions
 		}
 
 		// Normal completion
+		const dump = await sink.dump();
 		return {
 			exitCode: winner.result.exitCode,
 			cancelled: false,
-			...(await sink.dump()),
+			...dump,
+			...(minimizedOutput ? { minimized: minimizedOutput } : {}),
 		};
 	} catch (err) {
 		resetSession = true;
