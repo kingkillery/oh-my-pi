@@ -1,0 +1,4356 @@
+{
+  "shard": "repo_docs",
+  "records": [
+    {
+      "id": "bb6c49f199ad",
+      "root": "repo",
+      "path": "README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Install",
+          "Shell completions",
+          "zsh — add to ~/.zshrc (or write the output into a file on your $fpath)",
+          "bash — add to ~/.bashrc",
+          "fish"
+        ],
+        "excerpt": "<p align=\"center\"> <img src=\"https://github.com/can1357/oh-my-pi/blob/main/assets/hero.png?raw=true\" alt=\"omp\"> </p> <p align=\"center\"> <strong>A coding agent with the IDE wired in.</strong> <strong><a href=\"https://omp.sh\">omp.sh</a></strong> </p> <p align=\"center\"> <a href=\"https://www.npmjs.com/package/@pk-nerdsaver-ai/pi-coding-agent\"><img src=\"https://img.shields.io/npm/v/@pk-nerdsaver-ai/pi-coding-agent?style=flat&colorA=222222&colorB=CB3837\" alt=\"npm version\"></a> <a href=\"https://github."
+      },
+      "signal_score": 60,
+      "noise_score": 13,
+      "signal_noise_ratio": 4.615,
+      "initial_label": "high_signal",
+      "heading_count": 56,
+      "keyword_hits": 123,
+      "noise_hits": 13,
+      "line_count": 582,
+      "char_count": 37031
+    },
+    {
+      "id": "12b9f6fe9da0",
+      "root": "repo",
+      "path": "docs/ERRATA-GPT5-HARMONY.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "ERRATA — GPT-5 Harmony-Header Leakage",
+          "1. The problem",
+          "2. Observed statistics & failure modes",
+          "2.1 Rate",
+          "2.2 Tool distribution"
+        ],
+        "excerpt": "# ERRATA — GPT-5 Harmony-Header Leakage Historical research note, not a current runtime contract. The statistics below come from the named local stats database snapshot, not from checked-in tests or runtime code. ## 1. The problem OpenAI frames tool calls in the Harmony chat protocol: ``` <|start|>assistant<|channel|>commentary to=functions.<NAME><|message|>{ARGS}<|call|> ``` `<|channel|>commentary to=functions.NAME` is the **routing header** — control tokens consumed by the runtime to dispatch "
+      },
+      "signal_score": 60,
+      "noise_score": 3,
+      "signal_noise_ratio": 20.0,
+      "initial_label": "high_signal",
+      "heading_count": 11,
+      "keyword_hits": 33,
+      "noise_hits": 3,
+      "line_count": 210,
+      "char_count": 10014
+    },
+    {
+      "id": "b82f95c770a8",
+      "root": "repo",
+      "path": "docs/advisor-watchdog.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Advisor and WATCHDOG.md",
+          "Implementation files",
+          "Enabling the advisor",
+          "What the advisor sees",
+          "Tools and isolation"
+        ],
+        "excerpt": "# Advisor and WATCHDOG.md The advisor is an optional second model attached to a session. It reviews the primary agent's transcript after each turn, can inspect the workspace with read-only tools, and injects concise advice back into the primary session. The advisor is not a second executor. It cannot edit files, run commands, approve actions, or change session state directly. ## Implementation files - [`src/advisor/runtime.ts`](../packages/coding-agent/src/advisor/runtime.ts) - [`src/advisor/adv"
+      },
+      "signal_score": 60,
+      "noise_score": 21,
+      "signal_noise_ratio": 2.857,
+      "initial_label": "high_signal",
+      "heading_count": 14,
+      "keyword_hits": 63,
+      "noise_hits": 21,
+      "line_count": 226,
+      "char_count": 12885
+    },
+    {
+      "id": "f89e4b629122",
+      "root": "repo",
+      "path": "docs/approval-mode.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Tool approval mode",
+          "Modes",
+          "User overrides",
+          "Safety overrides",
+          "Per-tool prompt details"
+        ],
+        "excerpt": "# Tool approval mode Tool approval has two independent inputs: 1. **Tool declaration** — every tool may declare an `approval` tier: - `read`: reads data or updates UI-only session metadata. - `write`: mutates workspace/session state but does not execute arbitrary code. - `exec`: executes code, shells out, drives a browser, spawns agents, or performs similarly broad actions. 2. **User policy** — `tools.approval.<toolName>: allow | deny | prompt` overrides the mode for that tool unless a non-yolo "
+      },
+      "signal_score": 60,
+      "noise_score": 0,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 8,
+      "keyword_hits": 35,
+      "noise_hits": 0,
+      "line_count": 121,
+      "char_count": 5749
+    },
+    {
+      "id": "84bab7c2049a",
+      "root": "repo",
+      "path": "docs/auth-broker-gateway.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Auth Broker and Auth Gateway",
+          "Data flow",
+          "auth-broker",
+          "CLI",
+          "Endpoints"
+        ],
+        "excerpt": "# Auth Broker and Auth Gateway The auth broker and auth gateway are two cooperating HTTP services that move OAuth refresh tokens and provider access tokens off developer laptops and into a single broker host. - **`oh-my-pk auth-broker serve`** holds the canonical SQLite credential vault, performs OAuth refreshes, and exposes a small REST API (`/v1/snapshot`, `/v1/snapshot/stream`, `/v1/credential/:id/refresh`, `/v1/credential/:id/disable`, `/v1/credential`, `/v1/usage`, `/v1/healthz`). - **`oh-m"
+      },
+      "signal_score": 60,
+      "noise_score": 3,
+      "signal_noise_ratio": 20.0,
+      "initial_label": "high_signal",
+      "heading_count": 19,
+      "keyword_hits": 87,
+      "noise_hits": 3,
+      "line_count": 199,
+      "char_count": 19553
+    },
+    {
+      "id": "e655588f08eb",
+      "root": "repo",
+      "path": "docs/bash-tool-runtime.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Bash tool runtime",
+          "Scope and runtime surfaces",
+          "End-to-end tool-call pipeline",
+          "1) Input handling and parameter merge",
+          "2) Optional interception (blocked-command path)"
+        ],
+        "excerpt": "# Bash tool runtime This document describes the **`bash` tool** runtime path used by agent tool calls, from command normalization to execution, truncation/artifacts, and rendering. It also calls out where behavior diverges in interactive TUI, print mode, RPC mode, and user-initiated bang (`!`) shell execution. ## Scope and runtime surfaces There are two different bash execution surfaces in coding-agent: 1. **Tool-call surface** (`toolName: \"bash\"`): used when the model calls the bash tool. - Ent"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 27,
+      "keyword_hits": 97,
+      "noise_hits": 1,
+      "line_count": 290,
+      "char_count": 17928
+    },
+    {
+      "id": "9c00078a4a78",
+      "root": "repo",
+      "path": "docs/blob-artifact-architecture.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Blob and artifact storage architecture",
+          "Why two storage systems exist",
+          "Storage boundaries and on-disk layout",
+          "Blob store boundary (global)",
+          "Artifact boundary (session-local)"
+        ],
+        "excerpt": "# Blob and artifact storage architecture This document describes how coding-agent stores large/binary payloads outside session JSONL, how truncated tool output is persisted, and how internal URLs (`artifact://`, `agent://`) resolve back to stored data. ## Why two storage systems exist The runtime uses two different persistence mechanisms for different data shapes: - **Content-addressed blobs** (`blob:sha256:<hash>`): global storage used to externalize large image base64 payloads and provider ima"
+      },
+      "signal_score": 60,
+      "noise_score": 6,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "high_signal",
+      "heading_count": 24,
+      "keyword_hits": 43,
+      "noise_hits": 6,
+      "line_count": 246,
+      "char_count": 14417
+    },
+    {
+      "id": "86c752a8ddbd",
+      "root": "repo",
+      "path": "docs/compaction.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Compaction and Branch Summaries",
+          "Key implementation files",
+          "Session entry model",
+          "Compaction pipeline",
+          "Triggers"
+        ],
+        "excerpt": "# Compaction and Branch Summaries Compaction and branch summaries are the two mechanisms that keep long sessions usable without losing prior work context. - **Compaction** rewrites old history into a summary on the current branch. - **Branch summary** captures abandoned branch context during `/tree` navigation. Both are persisted as session entries and converted back into user-context messages when rebuilding LLM input. ## Key implementation files - `packages/agent/src/compaction/compaction.ts` "
+      },
+      "signal_score": 60,
+      "noise_score": 15,
+      "signal_noise_ratio": 4.0,
+      "initial_label": "high_signal",
+      "heading_count": 32,
+      "keyword_hits": 115,
+      "noise_hits": 15,
+      "line_count": 421,
+      "char_count": 24026
+    },
+    {
+      "id": "206759703a81",
+      "root": "repo",
+      "path": "docs/config-usage.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Configuration Discovery and Resolution",
+          "Scope",
+          "Resolution flow (visual)",
+          "1) Config roots and source order",
+          "Canonical roots"
+        ],
+        "excerpt": "# Configuration Discovery and Resolution This document describes how the coding-agent resolves configuration today: which roots are scanned, how precedence works, and how resolved config is consumed by settings, skills, hooks, tools, and extensions. ## Scope Primary implementation: - `packages/coding-agent/src/config.ts` - `packages/coding-agent/src/config/config-file.ts` (re-exported from `config.ts`) - `packages/coding-agent/src/config/settings.ts` - `packages/coding-agent/src/config/settings-"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 33,
+      "keyword_hits": 52,
+      "noise_hits": 1,
+      "line_count": 316,
+      "char_count": 12719
+    },
+    {
+      "id": "e56c9e269aa1",
+      "root": "repo",
+      "path": "docs/context-files.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Context files",
+          "How context files relate to other concepts",
+          "Native `.omp` files",
+          "Monorepo example",
+          "Other supported context conventions"
+        ],
+        "excerpt": "# Context files Context files are Markdown instruction files that `omp` discovers automatically before a session starts and injects into the agent's project context. Use them for repository conventions, architecture notes, test and review expectations, and instructions that should travel with a user account or a project. You never have to ask the agent to go read `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or similar files — the relevant ones are already discovered, loaded, and placed in context when"
+      },
+      "signal_score": 60,
+      "noise_score": 7,
+      "signal_noise_ratio": 8.571,
+      "initial_label": "high_signal",
+      "heading_count": 20,
+      "keyword_hits": 108,
+      "noise_hits": 7,
+      "line_count": 237,
+      "char_count": 16860
+    },
+    {
+      "id": "d02ffe45e2cb",
+      "root": "repo",
+      "path": "docs/custom-tools.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Custom Tools",
+          "What this is (and is not)",
+          "Integration paths in current code",
+          "Discovery locations (loader API)",
+          "Important behavior"
+        ],
+        "excerpt": "# Custom Tools Custom tools are model-callable functions that plug into the same tool execution pipeline as built-in tools. A custom tool is a TypeScript/JavaScript module that exports a factory. The factory receives a host API (`CustomToolAPI`) and returns one tool or an array of tools. ## What this is (and is not) - **Custom tool**: callable by the model during a turn (`execute` + Zod parameter schema). - **Extension**: lifecycle/event framework that can register tools and intercept/modify eve"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 16,
+      "keyword_hits": 57,
+      "noise_hits": 1,
+      "line_count": 208,
+      "char_count": 7655
+    },
+    {
+      "id": "210c1c7be622",
+      "root": "repo",
+      "path": "docs/design/agent-hub-keybinding-optimization.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Agent Hub Keybinding Optimization",
+          "Status",
+          "Summary",
+          "1. Current State",
+          "Component Location"
+        ],
+        "excerpt": "# Agent Hub Keybinding Optimization ## Status **Implemented** — Agent Hub supports standard close, rename, filter, removal, and adaptive hint interactions. ## Summary Redesign the Agent Hub keybindings to follow standard TUI conventions, add missing functionality (rename, filter), and improve discoverability through adaptive hints. --- ## 1. Current State ### Component Location - **File**: `packages/coding-agent/src/modes/components/agent-hub.ts` - **Class**: `AgentHubOverlayComponent` - **Data "
+      },
+      "signal_score": 60,
+      "noise_score": 8,
+      "signal_noise_ratio": 7.5,
+      "initial_label": "high_signal",
+      "heading_count": 30,
+      "keyword_hits": 74,
+      "noise_hits": 8,
+      "line_count": 317,
+      "char_count": 10676
+    },
+    {
+      "id": "8d5b0aae80a2",
+      "root": "repo",
+      "path": "docs/environment-variables.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Environment Variables (Current Runtime Reference)",
+          "Resolution model and precedence",
+          "1) Model/provider authentication",
+          "Core provider credentials"
+        ],
+        "excerpt": "# Environment Variables (Current Runtime Reference) This reference is derived from current code paths in: - `packages/coding-agent/src/**` - `packages/ai/src/**` (provider/auth resolution used by coding-agent) - `packages/utils/src/**` and `packages/tui/src/**` where those vars directly affect coding-agent runtime It documents only active behavior. ## Resolution model and precedence Most runtime lookups use `$env` from `@pk-nerdsaver-ai/pi-utils` (`packages/utils/src/env.ts`). `$env` loading ord"
+      },
+      "signal_score": 60,
+      "noise_score": 12,
+      "signal_noise_ratio": 5.0,
+      "initial_label": "high_signal",
+      "heading_count": 28,
+      "keyword_hits": 166,
+      "noise_hits": 2,
+      "line_count": 429,
+      "char_count": 63933
+    },
+    {
+      "id": "c0a96f4059c9",
+      "root": "repo",
+      "path": "docs/extensions.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Extensions",
+          "What an extension is",
+          "Runtime model",
+          "Quick start",
+          "Extension API surfaces"
+        ],
+        "excerpt": "# Extensions Primary guide for authoring runtime extensions in `packages/coding-agent`. This document covers the current extension runtime in: - `src/extensibility/extensions/types.ts` - `src/extensibility/extensions/runner.ts` - `src/extensibility/extensions/wrapper.ts` - `src/extensibility/extensions/index.ts` - `src/modes/controllers/extension-ui-controller.ts` For discovery paths and filesystem loading rules, see [`extension-loading.md`](./extension-loading.md). ## What an extension is An ex"
+      },
+      "signal_score": 60,
+      "noise_score": 3,
+      "signal_noise_ratio": 20.0,
+      "initial_label": "high_signal",
+      "heading_count": 30,
+      "keyword_hits": 47,
+      "noise_hits": 3,
+      "line_count": 417,
+      "char_count": 14981
+    },
+    {
+      "id": "e5b3faadf446",
+      "root": "repo",
+      "path": "docs/fs-scan-cache-architecture.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Filesystem Scan Cache Architecture Contract",
+          "What this cache is",
+          "Ownership and public surface",
+          "Cache key partitioning (hard contract)",
+          "Scan collection behavior"
+        ],
+        "excerpt": "# Filesystem Scan Cache Architecture Contract This document defines the current contract for the shared filesystem scan cache implemented in Rust (`crates/pi-natives/src/fs_cache.rs`) and consumed by native discovery/search APIs exposed to `packages/coding-agent`. ## What this cache is The cache stores full directory-scan entry lists (`GlobMatch[]`) keyed by scan scope, traversal policy, and requested metadata detail. Higher-level operations (`glob` filtering, `fuzzyFind` scoring, and cached `gr"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 12,
+      "keyword_hits": 35,
+      "noise_hits": 1,
+      "line_count": 189,
+      "char_count": 8939
+    },
+    {
+      "id": "a9127a5e9669",
+      "root": "repo",
+      "path": "docs/handoff-generation-pipeline.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "`/handoff` generation pipeline",
+          "Scope",
+          "Implementation files",
+          "Trigger path",
+          "End-to-end lifecycle"
+        ],
+        "excerpt": "# `/handoff` generation pipeline This document describes how the coding-agent implements `/handoff`: trigger path, oneshot generation, session switch, context reinjection, persistence, and UI behavior. ## Scope Covers: - Interactive `/handoff` command dispatch - `AgentSession.handoff()` lifecycle and state transitions - `generateHandoff(...)` request shape - How old/new sessions persist handoff data differently - UI behavior for success, cancel, and failure Does not cover: - Generic tree navigat"
+      },
+      "signal_score": 60,
+      "noise_score": 9,
+      "signal_noise_ratio": 6.667,
+      "initial_label": "high_signal",
+      "heading_count": 22,
+      "keyword_hits": 60,
+      "noise_hits": 9,
+      "line_count": 262,
+      "char_count": 11635
+    },
+    {
+      "id": "c47dad75a73a",
+      "root": "repo",
+      "path": "docs/hooks.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Hooks",
+          "Current status in runtime",
+          "Key files",
+          "What a hook module is",
+          "Discovery and loading"
+        ],
+        "excerpt": "# Hooks This document describes the **current hook subsystem code** in `src/extensibility/hooks/*`. ## Current status in runtime The default CLI runtime initializes the **extension runner** path. In current startup flow: - `--hook` is treated as an alias for `--extension` (CLI paths are merged into `additionalExtensionPaths`) - JS/TS hook factories discovered through `hookCapability` (for example `.omp/hooks/pre/*.ts`) are loaded as extension modules so their `pi.on(...)` handlers bind to the ru"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 31,
+      "keyword_hits": 52,
+      "noise_hits": 1,
+      "line_count": 349,
+      "char_count": 11702
+    },
+    {
+      "id": "c86f0f5ae8e6",
+      "root": "repo",
+      "path": "docs/mcp-config.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "MCP configuration in OMP",
+          "Preferred config locations",
+          "Profiles",
+          "Add a schema reference",
+          "File shape"
+        ],
+        "excerpt": "# MCP configuration in OMP This guide explains how to add, edit, and validate MCP servers for the OMP coding agent. Source of truth in code: - Runtime config types: `packages/coding-agent/src/mcp/types.ts` - Config writer: `packages/coding-agent/src/mcp/config-writer.ts` - Loader + validation: `packages/coding-agent/src/mcp/config.ts` - Standalone `mcp.json` discovery: `packages/coding-agent/src/discovery/mcp-json.ts` - Schema: `packages/coding-agent/src/config/mcp-schema.json` ## Preferred conf"
+      },
+      "signal_score": 60,
+      "noise_score": 11,
+      "signal_noise_ratio": 5.455,
+      "initial_label": "high_signal",
+      "heading_count": 30,
+      "keyword_hits": 110,
+      "noise_hits": 11,
+      "line_count": 499,
+      "char_count": 16916
+    },
+    {
+      "id": "16836efb216c",
+      "root": "repo",
+      "path": "docs/mcp-runtime-lifecycle.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "MCP runtime lifecycle",
+          "Lifecycle at a glance",
+          "Discovery and load phase",
+          "Entry path from SDK",
+          "Config discovery and filtering"
+        ],
+        "excerpt": "# MCP runtime lifecycle This document describes how MCP servers are discovered, connected, exposed as tools, refreshed, and torn down in the coding-agent runtime. ## Lifecycle at a glance 1. **SDK startup** kicks off MCP discovery (unless MCP is disabled): headless/SDK sessions await `discoverAndLoadMCPTools()`; interactive sessions (`hasUI: true`) create the manager up front and defer `discoverAndConnect()` until the session is live. 2. **Discovery** (`loadAllMCPConfigs`) resolves MCP server co"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 24,
+      "keyword_hits": 64,
+      "noise_hits": 1,
+      "line_count": 226,
+      "char_count": 13930
+    },
+    {
+      "id": "0bca7ae1074a",
+      "root": "repo",
+      "path": "docs/mcp-server-tool-authoring.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "MCP server and tool authoring",
+          "Architecture at a glance",
+          "1) Server config model and validation",
+          "Transport pitfalls",
+          "2) Discovery, normalization, and precedence"
+        ],
+        "excerpt": "# MCP server and tool authoring This document explains how MCP server definitions become callable `mcp__*` tools in coding-agent, and what operators should expect when configs are invalid, duplicated, disabled, or auth-gated. ## Architecture at a glance ```text Config sources (.omp/.claude/.cursor/.vscode/mcp.json, mcp.json, etc.) -> discovery providers normalize to canonical MCPServer -> capability loader dedupes by server name (higher provider priority wins) -> loadAllMCPConfigs converts to MC"
+      },
+      "signal_score": 60,
+      "noise_score": 5,
+      "signal_noise_ratio": 12.0,
+      "initial_label": "high_signal",
+      "heading_count": 21,
+      "keyword_hits": 58,
+      "noise_hits": 5,
+      "line_count": 231,
+      "char_count": 10060
+    },
+    {
+      "id": "dd49f1d1802b",
+      "root": "repo",
+      "path": "docs/models.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Model and Provider Configuration (`models.yml`)",
+          "What controls model behavior",
+          "Config file location and legacy behavior",
+          "`models.yml` shape",
+          "Provider-level fields"
+        ],
+        "excerpt": "# Model and Provider Configuration (`models.yml`) This document describes how the coding-agent currently loads models, applies overrides, resolves credentials, and chooses models at runtime. ## What controls model behavior Primary implementation files: - `src/config/model-registry.ts` — loads built-in + custom models, provider overrides, runtime discovery, auth integration - `src/config/model-resolver.ts` — parses model patterns and selects initial/smol/slow models - `src/config/settings-schema."
+      },
+      "signal_score": 60,
+      "noise_score": 18,
+      "signal_noise_ratio": 3.333,
+      "initial_label": "high_signal",
+      "heading_count": 50,
+      "keyword_hits": 162,
+      "noise_hits": 18,
+      "line_count": 748,
+      "char_count": 32220
+    },
+    {
+      "id": "06980da4df42",
+      "root": "repo",
+      "path": "docs/natives-build-release-debugging.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Natives Build, Release, and Debugging Runbook",
+          "Implementation files",
+          "Build pipeline overview",
+          "1) Build entrypoints",
+          "2) N-API/Rust artifact build"
+        ],
+        "excerpt": "# Natives Build, Release, and Debugging Runbook This runbook describes how `@pk-nerdsaver-ai/pi-natives` produces `.node` addons, generated declarations, and compiled-binary embedded payloads, and how to debug loader/build failures. It follows the architecture terms from `docs/natives-architecture.md`: - **build-time artifact production** (`scripts/build-native.ts`) - **embedded addon manifest generation** (`scripts/embed-native.ts`) - **runtime addon loading** (`native/index.js`, `native/loader"
+      },
+      "signal_score": 60,
+      "noise_score": 30,
+      "signal_noise_ratio": 2.0,
+      "initial_label": "high_signal",
+      "heading_count": 38,
+      "keyword_hits": 30,
+      "noise_hits": 34,
+      "line_count": 294,
+      "char_count": 20482
+    },
+    {
+      "id": "d3a97a3e1789",
+      "root": "repo",
+      "path": "docs/natives-shell-pty-process.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Natives Shell, PTY, Process, and Key Internals",
+          "Implementation files",
+          "Layer ownership",
+          "Shell subsystem (`shell`)",
+          "API model"
+        ],
+        "excerpt": "# Natives Shell, PTY, Process, and Key Internals This document covers execution/process/terminal primitives in `@pk-nerdsaver-ai/pi-natives`: `shell`, `pty`, `ps`, and `keys`, using the architecture terms from `docs/natives-architecture.md`. ## Implementation files - `crates/pi-natives/src/shell.rs` - `crates/pi-shell/src/shell.rs` - `crates/pi-shell/src/fixup.rs` - `crates/pi-shell/src/windows.rs` (Windows-only PATH enrichment) - `crates/pi-shell/src/process.rs` - `crates/pi-natives/src/pty.rs`"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 27,
+      "keyword_hits": 46,
+      "noise_hits": 1,
+      "line_count": 282,
+      "char_count": 15304
+    },
+    {
+      "id": "37b18e286680",
+      "root": "repo",
+      "path": "docs/non-compaction-retry-policy.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Non-compaction auto-retry policy",
+          "Implementation files",
+          "Scope boundary vs compaction",
+          "Retry classification",
+          "Retry lifecycle and state transitions"
+        ],
+        "excerpt": "# Non-compaction auto-retry policy This document describes the standard API-error retry path in `AgentSession`. It explicitly excludes context-overflow recovery via auto-compaction. Overflow is handled by compaction logic and is documented separately in [`compaction.md`](../docs/compaction.md). ## Implementation files - [`../src/session/agent-session.ts`](../packages/coding-agent/src/session/agent-session.ts) - [`../src/config/settings-schema.ts`](../packages/coding-agent/src/config/settings-sch"
+      },
+      "signal_score": 60,
+      "noise_score": 0,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 18,
+      "keyword_hits": 42,
+      "noise_hits": 0,
+      "line_count": 238,
+      "char_count": 12291
+    },
+    {
+      "id": "0c3afba21066",
+      "root": "repo",
+      "path": "docs/plans/2026-06-21-001-fix-verifier-extension-robustness-gaps-plan.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Fix verifier-extension robustness gaps",
+          "Summary",
+          "Problem Frame",
+          "Requirements",
+          "Key Technical Decisions"
+        ],
+        "excerpt": "--- title: Fix verifier-extension robustness gaps status: completed type: fix --- # Fix verifier-extension robustness gaps ## Summary Close the remaining behavioural and robustness gaps in the freshly ported `packages/verifier-extension` so the Pi-native `llm_as_verifier` tool and its smoke commands behave identically to the upstream Pi extension under real-world model registry, Python runner, and user-input conditions. ## Problem Frame `packages/verifier-extension` was copied from the local `pi"
+      },
+      "signal_score": 60,
+      "noise_score": 12,
+      "signal_noise_ratio": 5.0,
+      "initial_label": "high_signal",
+      "heading_count": 20,
+      "keyword_hits": 50,
+      "noise_hits": 12,
+      "line_count": 229,
+      "char_count": 11827
+    },
+    {
+      "id": "21b323e2677b",
+      "root": "repo",
+      "path": "docs/plugin-manager-installer-plumbing.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Plugin manager and installer plumbing",
+          "Scope and architecture",
+          "Lifecycle: from CLI invocation to runtime availability",
+          "Command entrypoints",
+          "On-disk model"
+        ],
+        "excerpt": "# Plugin manager and installer plumbing This document describes how `omp plugin` npm/git/link operations mutate plugin state on disk and how installed npm/git/link plugins become runtime capabilities (tools and extensions today, hooks/commands path resolution available). Marketplace installs use separate marketplace registries and cache plumbing; see `docs/marketplace.md`. ## Scope and architecture There are two plugin-management implementations in the codebase: 1. **Active path used by CLI comm"
+      },
+      "signal_score": 60,
+      "noise_score": 13,
+      "signal_noise_ratio": 4.615,
+      "initial_label": "high_signal",
+      "heading_count": 26,
+      "keyword_hits": 40,
+      "noise_hits": 13,
+      "line_count": 287,
+      "char_count": 15838
+    },
+    {
+      "id": "a4cf5fab677b",
+      "root": "repo",
+      "path": "docs/porting-from-pi-mono.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Porting From pi-mono: A Practical Merge Guide",
+          "Last Sync Point (historical upstream marker)",
+          "0) Define the scope",
+          "1) Bring code over safely",
+          "2) Match import extension conventions"
+        ],
+        "excerpt": "# Porting From pi-mono: A Practical Merge Guide This guide is a repeatable checklist for porting changes from pi-mono into this repo. Use it for any merge: single file, feature branch, or full release sync. ## Last Sync Point (historical upstream marker) **Commit:** `b21b42d032919de2f2e6920a76fa9a37c3920c0a` **Date:** 2026-03-22 Update this section after each sync; do not reuse the previous range. This commit is an upstream pi-mono marker and may not exist in this repo's local object database. W"
+      },
+      "signal_score": 60,
+      "noise_score": 15,
+      "signal_noise_ratio": 4.0,
+      "initial_label": "high_signal",
+      "heading_count": 34,
+      "keyword_hits": 67,
+      "noise_hits": 15,
+      "line_count": 387,
+      "char_count": 21898
+    },
+    {
+      "id": "c20a8f46f01e",
+      "root": "repo",
+      "path": "docs/provider-endpoint-constraints.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Provider endpoint constraints",
+          "Baseline rules",
+          "1. Choose the endpoint family first",
+          "OpenAI Chat Completions compatible",
+          "OpenAI Responses compatible"
+        ],
+        "excerpt": "# Provider endpoint constraints Provider integrations are not interchangeable just because they speak an OpenAI-shaped HTTP protocol. A request is shaped by four layers at once: 1. endpoint family: `openai-completions`, `openai-responses`, `openai-codex-responses`, `anthropic-messages`, etc. 2. gateway/auth surface: OpenRouter, Vercel AI Gateway, Azure OpenAI, Copilot, Alibaba Coding Plan, Kimi Code, Fireworks/Firepass, and similar hosts 3. model metadata and `compat` overrides 4. request contex"
+      },
+      "signal_score": 60,
+      "noise_score": 6,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "high_signal",
+      "heading_count": 39,
+      "keyword_hits": 82,
+      "noise_hits": 6,
+      "line_count": 395,
+      "char_count": 16629
+    },
+    {
+      "id": "99f01fac3f9d",
+      "root": "repo",
+      "path": "docs/provider-streaming-internals.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Provider streaming internals",
+          "End-to-end flow",
+          "Unified stream contract in `@pk-nerdsaver-ai/pi-ai`",
+          "Delta throttling behavior",
+          "Provider normalization details"
+        ],
+        "excerpt": "# Provider streaming internals This document explains how token/tool streaming is normalized in `@pk-nerdsaver-ai/pi-ai`, then propagated through `@pk-nerdsaver-ai/pi-agent-core` and `coding-agent` session events. ## End-to-end flow 1. `streamSimple()` (`packages/ai/src/stream.ts`) maps generic options and dispatches to a provider stream function. 2. Provider stream functions translate provider-native stream events into the unified `AssistantMessageEvent` sequence. Current built-ins include Anth"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 16,
+      "keyword_hits": 46,
+      "noise_hits": 1,
+      "line_count": 217,
+      "char_count": 13414
+    },
+    {
+      "id": "8b5d0bf13bf0",
+      "root": "repo",
+      "path": "docs/providers.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Providers",
+          "How `omp` decides a provider is available",
+          "Credentials and precedence",
+          "OAuth vs API key, and provider-scoped logins",
+          "Pinning a key in `models.yml`"
+        ],
+        "excerpt": "# Providers Providers are the model backends `omp` can route requests to: Anthropic, OpenAI, Google Gemini, Groq, OpenRouter, Mistral, xAI, local engines like Ollama, hosted gateways, custom `models.yml` providers, and providers registered by extensions. A **provider** is the account or backend namespace, such as `anthropic`, `openai`, `google`, or `ollama`. A **model** is a concrete model under that provider, selected as `provider/model-id`, such as `anthropic/claude-opus-4-6`. Disabling a prov"
+      },
+      "signal_score": 60,
+      "noise_score": 4,
+      "signal_noise_ratio": 15.0,
+      "initial_label": "high_signal",
+      "heading_count": 22,
+      "keyword_hits": 59,
+      "noise_hits": 4,
+      "line_count": 353,
+      "char_count": 19568
+    },
+    {
+      "id": "1a356f6f68f2",
+      "root": "repo",
+      "path": "docs/python-repl.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Eval Tool Python Backend",
+          "Scope and Key Files",
+          "What eval's Python backend is",
+          "Kernel lifecycle",
+          "Wire protocol (NDJSON, host ↔ runner)"
+        ],
+        "excerpt": "# Eval Tool Python Backend This document describes the Python execution stack in `packages/coding-agent`. It covers tool behavior, runner lifecycle, environment handling, execution semantics, output rendering, supported magics, and operational failure modes. ## Scope and Key Files - Tool surface: `src/tools/eval.ts` - Session/per-call kernel orchestration: `src/eval/py/executor.ts` - Subprocess kernel client: `src/eval/py/kernel.ts` - Python wrapper / NDJSON server: `src/eval/py/runner.py` - Pre"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 21,
+      "keyword_hits": 35,
+      "noise_hits": 1,
+      "line_count": 245,
+      "char_count": 15616
+    },
+    {
+      "id": "85c7a84db124",
+      "root": "repo",
+      "path": "docs/rpc.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "RPC Protocol Reference",
+          "Startup",
+          "Transport and Framing",
+          "Outbound frame categories (stdout)",
+          "Inbound frame categories (stdin)"
+        ],
+        "excerpt": "# RPC Protocol Reference RPC mode runs the coding agent as a newline-delimited JSON protocol over stdio. - **stdin**: commands (`RpcCommand`), extension UI responses, and host-tool updates/results - **stdout**: a ready frame, command responses (`RpcResponse`), session/agent events, extension UI requests, host-tool requests/cancellations Primary implementation: - `src/modes/rpc/rpc-mode.ts` - `src/modes/rpc/rpc-types.ts` - `src/session/agent-session.ts` - `packages/agent/src/agent.ts` - `packages"
+      },
+      "signal_score": 60,
+      "noise_score": 3,
+      "signal_noise_ratio": 20.0,
+      "initial_label": "high_signal",
+      "heading_count": 49,
+      "keyword_hits": 67,
+      "noise_hits": 3,
+      "line_count": 677,
+      "char_count": 18910
+    },
+    {
+      "id": "4212b7d83534",
+      "root": "repo",
+      "path": "docs/rulebook-matching-pipeline.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Rulebook Matching Pipeline",
+          "Implementation files",
+          "1. Canonical rule shape",
+          "2. Discovery sources and normalization",
+          "Native provider (`builtin.ts`)"
+        ],
+        "excerpt": "# Rulebook Matching Pipeline This document describes how coding-agent discovers rules from supported config formats, normalizes them into a single `Rule` shape, resolves precedence conflicts, and splits the result into: - **Rulebook rules** (available to the model via system prompt + `rule://` URLs) - **TTSR rules** (Time Traveling Stream Rules) It reflects the current implementation, including partial semantics and metadata that is parsed but not enforced. ## Implementation files - [`packages/c"
+      },
+      "signal_score": 60,
+      "noise_score": 6,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "high_signal",
+      "heading_count": 23,
+      "keyword_hits": 116,
+      "noise_hits": 6,
+      "line_count": 268,
+      "char_count": 14641
+    },
+    {
+      "id": "d836091e92ed",
+      "root": "repo",
+      "path": "docs/sdk.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "SDK",
+          "Installation",
+          "Entry points",
+          "Quick start (auto-discovery defaults)",
+          "What `createAgentSession()` discovers by default"
+        ],
+        "excerpt": "# SDK The SDK is the in-process integration surface for `@pk-nerdsaver-ai/pi-coding-agent`. Use it when you want direct access to agent state, event streaming, tool wiring, and session control from your own Bun/Node process. If you need cross-language/process isolation, use RPC mode instead. ## Installation ```bash bun add @pk-nerdsaver-ai/pi-coding-agent ``` ## Entry points `@pk-nerdsaver-ai/pi-coding-agent` exports the SDK APIs from the package root (and also via `@pk-nerdsaver-ai/pi-coding-ag"
+      },
+      "signal_score": 60,
+      "noise_score": 3,
+      "signal_noise_ratio": 20.0,
+      "initial_label": "high_signal",
+      "heading_count": 25,
+      "keyword_hits": 46,
+      "noise_hits": 3,
+      "line_count": 367,
+      "char_count": 12724
+    },
+    {
+      "id": "990d533d892d",
+      "root": "repo",
+      "path": "docs/session-operations-export-share-fork-resume.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Session Operations: export, dump, share, fresh, fork, resume/continue",
+          "Implementation files",
+          "Operation matrix",
+          "Export and dump",
+          "`/export [outputPath]` (interactive)"
+        ],
+        "excerpt": "# Session Operations: export, dump, share, fresh, fork, resume/continue This document describes operator-visible behavior for session export/share/fork/resume operations as currently implemented. ## Implementation files - [`../src/modes/controllers/command-controller.ts`](../packages/coding-agent/src/modes/controllers/command-controller.ts) - [`../src/session/agent-session.ts`](../packages/coding-agent/src/session/agent-session.ts) - [`../src/session/session-manager.ts`](../packages/coding-agent"
+      },
+      "signal_score": 60,
+      "noise_score": 6,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "high_signal",
+      "heading_count": 28,
+      "keyword_hits": 68,
+      "noise_hits": 6,
+      "line_count": 328,
+      "char_count": 19209
+    },
+    {
+      "id": "d71cbab0eb9e",
+      "root": "repo",
+      "path": "docs/session-switching-and-recent-listing.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Session switching and recent session listing",
+          "Implementation files",
+          "Recent-session discovery",
+          "Directory scope",
+          "Two listing paths with different payloads"
+        ],
+        "excerpt": "# Session switching and recent session listing This document describes how coding-agent discovers recent sessions, resolves `--resume` targets, presents session pickers, and switches the active runtime session. It focuses on current implementation behavior, including fallback paths and caveats. ## Implementation files - [`../src/session/session-manager.ts`](../packages/coding-agent/src/session/session-manager.ts) - [`../src/session/session-listing.ts`](../packages/coding-agent/src/session/sessio"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 26,
+      "keyword_hits": 39,
+      "noise_hits": 1,
+      "line_count": 250,
+      "char_count": 13668
+    },
+    {
+      "id": "8fbf8b0bd724",
+      "root": "repo",
+      "path": "docs/session-tree-plan.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Session tree architecture (current)",
+          "What this subsystem is",
+          "Tree data model in `SessionManager`",
+          "Leaf movement semantics",
+          "`/tree` navigation behavior (same session file)"
+        ],
+        "excerpt": "# Session tree architecture (current) Reference: [session.md](../docs/session.md) This document describes how session tree navigation works today: in-memory tree model, leaf movement rules, branching behavior, and extension/event integration. ## What this subsystem is The session is stored as an append-only entry log, but runtime behavior is tree-based: - Every non-header entry has `id` and `parentId`. - The active position is `leafId` in `SessionManager`. - Appending an entry always creates a c"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 12,
+      "keyword_hits": 38,
+      "noise_hits": 1,
+      "line_count": 224,
+      "char_count": 10621
+    },
+    {
+      "id": "f67296db8d05",
+      "root": "repo",
+      "path": "docs/session.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Session Storage and Entry Model",
+          "Scope",
+          "Implementation Files",
+          "On-Disk Layout",
+          "File Format"
+        ],
+        "excerpt": "# Session Storage and Entry Model This document is the source of truth for how coding-agent sessions are represented, persisted, migrated, and reconstructed at runtime. ## Scope Covers: - Session JSONL format and versioning - Entry taxonomy and tree semantics (`id`/`parentId` + leaf pointer) - Migration/compatibility behavior when loading old or malformed files - Context reconstruction (`buildSessionContext`) - Persistence guarantees, failure behavior, truncation/blob externalization - Storage a"
+      },
+      "signal_score": 60,
+      "noise_score": 10,
+      "signal_noise_ratio": 6.0,
+      "initial_label": "high_signal",
+      "heading_count": 37,
+      "keyword_hits": 36,
+      "noise_hits": 10,
+      "line_count": 498,
+      "char_count": 17466
+    },
+    {
+      "id": "e96e872f38ed",
+      "root": "repo",
+      "path": "docs/settings.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Settings",
+          "Where settings live",
+          "Config file formats",
+          "Reading and writing settings",
+          "Subcommands"
+        ],
+        "excerpt": "# Settings `omp` resolves settings from built-in defaults, a persistent global config file, optional project-local config, one-shot CLI overlays, and in-memory runtime overrides. Reach for project settings when one repository needs a different provider set, model role, tool policy, memory backend, or UI behavior than your global defaults — without touching your machine-wide configuration. Settings are stored as plain YAML mappings. Every key, its type, default, and enum values come from the sett"
+      },
+      "signal_score": 60,
+      "noise_score": 13,
+      "signal_noise_ratio": 4.615,
+      "initial_label": "high_signal",
+      "heading_count": 47,
+      "keyword_hits": 105,
+      "noise_hits": 13,
+      "line_count": 727,
+      "char_count": 37654
+    },
+    {
+      "id": "aa472470740c",
+      "root": "repo",
+      "path": "docs/skills.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Skills",
+          "What a skill is in this codebase",
+          "Required layout and SKILL.md expectations",
+          "Directory layout",
+          "`SKILL.md` frontmatter"
+        ],
+        "excerpt": "# Skills Skills are file-backed capability packs discovered at startup and exposed to the model as: - lightweight metadata in the system prompt (name + description) - on-demand content via the `read` tool against `skill://...` - optional interactive `/skill:<name>` commands This document covers current runtime behavior in `src/extensibility/skills.ts`, `src/discovery/builtin.ts`, `src/internal-urls/skill-protocol.ts`, and `src/discovery/agents-md.ts`. ## What a skill is in this codebase A discov"
+      },
+      "signal_score": 60,
+      "noise_score": 2,
+      "signal_noise_ratio": 30.0,
+      "initial_label": "high_signal",
+      "heading_count": 19,
+      "keyword_hits": 86,
+      "noise_hits": 2,
+      "line_count": 228,
+      "char_count": 9752
+    },
+    {
+      "id": "0808e15dc6af",
+      "root": "repo",
+      "path": "docs/slash-command-internals.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Slash command internals",
+          "Implementation files",
+          "1) Discovery model",
+          "Provider precedence",
+          "Name-collision behavior"
+        ],
+        "excerpt": "# Slash command internals This document describes how slash commands are discovered, deduplicated, surfaced in interactive mode, and expanded at prompt time in `coding-agent`. ## Implementation files - [`src/extensibility/slash-commands.ts`](../packages/coding-agent/src/extensibility/slash-commands.ts) - [`src/capability/slash-command.ts`](../packages/coding-agent/src/capability/slash-command.ts) - [`src/discovery/builtin.ts`](../packages/coding-agent/src/discovery/builtin.ts) - [`src/discovery/"
+      },
+      "signal_score": 60,
+      "noise_score": 10,
+      "signal_noise_ratio": 6.0,
+      "initial_label": "high_signal",
+      "heading_count": 27,
+      "keyword_hits": 69,
+      "noise_hits": 10,
+      "line_count": 254,
+      "char_count": 13437
+    },
+    {
+      "id": "e4d5cb1e6c4e",
+      "root": "repo",
+      "path": "docs/system-prompt-customization.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "System Prompt Customization",
+          "1) Inputs",
+          "2) Replace vs. append",
+          "3) Templating contract",
+          "4) Recommended patterns"
+        ],
+        "excerpt": "# System Prompt Customization How the coding-agent assembles the system prompt sent to the model, and what users can control via `SYSTEM.md`, `APPEND_SYSTEM.md`, and the matching CLI flags. Primary implementation: - `packages/coding-agent/src/system-prompt.ts` (`buildSystemPrompt`, `loadSystemPromptFiles`) - `packages/coding-agent/src/main.ts` (`discoverSystemPromptFile`, `discoverAppendSystemPromptFile`) - `packages/coding-agent/src/prompts/system/system-prompt.md` (default stable instruction t"
+      },
+      "signal_score": 60,
+      "noise_score": 14,
+      "signal_noise_ratio": 4.286,
+      "initial_label": "high_signal",
+      "heading_count": 17,
+      "keyword_hits": 47,
+      "noise_hits": 14,
+      "line_count": 183,
+      "char_count": 12840
+    },
+    {
+      "id": "8855c472431a",
+      "root": "repo",
+      "path": "docs/task-agent-discovery.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Task Agent Discovery and Selection",
+          "Implementation files",
+          "Agent definition shape",
+          "Bundled agents",
+          "Filesystem and plugin discovery"
+        ],
+        "excerpt": "# Task Agent Discovery and Selection This document describes how the task subsystem discovers agent definitions, merges multiple sources, and resolves a requested agent at execution time. It covers runtime behavior as implemented today, including precedence, invalid-definition handling, and spawn/depth constraints that can make an agent effectively unavailable. ## Implementation files - [`src/task/discovery.ts`](../packages/coding-agent/src/task/discovery.ts) - [`src/task/agents.ts`](../packages"
+      },
+      "signal_score": 60,
+      "noise_score": 0,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 19,
+      "keyword_hits": 64,
+      "noise_hits": 0,
+      "line_count": 189,
+      "char_count": 8882
+    },
+    {
+      "id": "8903cc9de558",
+      "root": "repo",
+      "path": "docs/toolconv/anthropic.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Anthropic Claude tool use (Messages API content blocks)",
+          "Content-block types & stop reasons",
+          "Legacy XML tags (prompt-based, pre-Messages-API)",
+          "Roles / channels / turn structure",
+          "Tool definitions"
+        ],
+        "excerpt": "# Anthropic Claude tool use (Messages API content blocks) Anthropic's Claude is a closed, hosted model family; there are no released weights and therefore no `--tool-call-parser` flag to set. The canonical tool-calling convention is the **Messages API** (`POST /v1/messages`, header `anthropic-version: 2023-06-01`): tools are advertised in a top-level `tools` array, the model returns structured `tool_use` **content blocks** with `stop_reason: \"tool_use\"`, and you feed results back as `tool_result"
+      },
+      "signal_score": 60,
+      "noise_score": 5,
+      "signal_noise_ratio": 12.0,
+      "initial_label": "high_signal",
+      "heading_count": 16,
+      "keyword_hits": 141,
+      "noise_hits": 5,
+      "line_count": 631,
+      "char_count": 30827
+    },
+    {
+      "id": "29971c946c9f",
+      "root": "repo",
+      "path": "docs/toolconv/deepseek.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "DeepSeek tool-calling wire format",
+          "A note on the unusual Unicode (do not substitute ASCII)",
+          "Special tokens",
+          "Roles / channels / turn structure",
+          "Tool definitions"
+        ],
+        "excerpt": "# DeepSeek tool-calling wire format DeepSeek's chat models (DeepSeek-V3, V3-0324, R1, R1-0528, and DeepSeek-V3.1) share a single tokenizer family and a distinctive envelope built from **fullwidth-pipe** special tokens such as `<｜begin▁of▁sentence｜>` and `<｜User｜>`. Tool calling is emitted as a run of dedicated special tokens (`<｜tool▁calls▁begin｜>` … `<｜tool▁calls▁end｜>`) rather than JSON-in-text or XML. This document centers on **DeepSeek-V3.1** (the current hybrid thinking/non-thinking model) "
+      },
+      "signal_score": 60,
+      "noise_score": 30,
+      "signal_noise_ratio": 2.0,
+      "initial_label": "high_signal",
+      "heading_count": 18,
+      "keyword_hits": 217,
+      "noise_hits": 31,
+      "line_count": 384,
+      "char_count": 23550
+    },
+    {
+      "id": "0b6e95209c00",
+      "root": "repo",
+      "path": "docs/toolconv/gemini.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Gemini Pythonic tool-calling format (`tool_code` / `default_api`)",
+          "\"Special\" tokens",
+          "Roles / turn structure",
+          "Tool definitions",
+          "Tool-call format"
+        ],
+        "excerpt": "# Gemini Pythonic tool-calling format (`tool_code` / `default_api`) Tool-calling convention of Google's hosted **Gemini** models (current generation, incl. `gemini-3.5-flash` / `*-pro` / `*-preview`) and the **Gemma 3** open-weights family. Both drive tool use **entirely through prompt engineering** — there are **no dedicated special tokens**. The model emits each invocation as **Python source**: a call `default_api.<function_name>(<kwargs>)`, conventionally wrapped in `print(...)` and placed in"
+      },
+      "signal_score": 60,
+      "noise_score": 5,
+      "signal_noise_ratio": 12.0,
+      "initial_label": "high_signal",
+      "heading_count": 11,
+      "keyword_hits": 35,
+      "noise_hits": 5,
+      "line_count": 148,
+      "char_count": 10726
+    },
+    {
+      "id": "3ae2a579e5c5",
+      "root": "repo",
+      "path": "docs/toolconv/glm-4.5.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "GLM-4.5 / GLM-4.6 tool-calling format",
+          "Special tokens",
+          "Roles / channels / turn structure",
+          "Tool definitions",
+          "Tools"
+        ],
+        "excerpt": "# GLM-4.5 / GLM-4.6 tool-calling format Native tool-calling convention of Zhipu AI / Z.ai's **GLM-4.5** family (`zai-org/GLM-4.5` 355B-A32B and `zai-org/GLM-4.5-Air` 106B-A12B, `model_type: \"glm4_moe\"`), shared byte-for-byte by **GLM-4.6**. Unlike the JSON-in-a-tag conventions used by most families, GLM emits each tool call as an **XML-like** block: `<tool_call>{name}` followed by alternating `<arg_key>`/`<arg_value>` element pairs, closed by `</tool_call>`. The prompt is a GLM-style sequence op"
+      },
+      "signal_score": 60,
+      "noise_score": 17,
+      "signal_noise_ratio": 3.529,
+      "initial_label": "high_signal",
+      "heading_count": 14,
+      "keyword_hits": 73,
+      "noise_hits": 17,
+      "line_count": 297,
+      "char_count": 24536
+    },
+    {
+      "id": "c36a429500a8",
+      "root": "repo",
+      "path": "docs/toolconv/harmony.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "OpenAI Harmony response format",
+          "Special tokens",
+          "Roles / channels / turn structure",
+          "Tool definitions",
+          "Tools"
+        ],
+        "excerpt": "# OpenAI Harmony response format Harmony is the response format OpenAI trained its open-weight `gpt-oss` models on (`gpt-oss-20b`, `gpt-oss-120b`, released August 2025). It defines the conversation envelope, the multi-channel reasoning/answer separation, and the function-calling wire syntax. The models will not work correctly if prompted without it. The format deliberately mirrors the OpenAI *Responses* API (roles, channels, recipients) rather than the older Chat Completions shape. Tokens are pr"
+      },
+      "signal_score": 60,
+      "noise_score": 8,
+      "signal_noise_ratio": 7.5,
+      "initial_label": "high_signal",
+      "heading_count": 16,
+      "keyword_hits": 65,
+      "noise_hits": 8,
+      "line_count": 225,
+      "char_count": 18645
+    },
+    {
+      "id": "378f1321ce90",
+      "root": "repo",
+      "path": "docs/toolconv/kimi-k2.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Kimi K2 tool-calling format",
+          "Special tokens",
+          "Roles / channels / turn structure",
+          "Tool definitions",
+          "Tool-call format"
+        ],
+        "excerpt": "# Kimi K2 tool-calling format Native tool-calling convention of Moonshot AI's **Kimi K2** family (`moonshotai/Kimi-K2-Instruct` and `-Base`, `model_type: \"kimi_k2\"`, 1T-param MoE). It is a ChatML-like envelope built on a TikToken tokenizer (160K vocab): every turn is `<|im_{class}|>{name}<|im_middle|>{body}<|im_end|>`, and tool calls are emitted inside the assistant turn wrapped by a dedicated `<|tool_calls_section_begin|>…<|tool_calls_section_end|>` block. All control tokens are plain ASCII `<|"
+      },
+      "signal_score": 60,
+      "noise_score": 12,
+      "signal_noise_ratio": 5.0,
+      "initial_label": "high_signal",
+      "heading_count": 11,
+      "keyword_hits": 72,
+      "noise_hits": 12,
+      "line_count": 183,
+      "char_count": 17425
+    },
+    {
+      "id": "228fc4316c4b",
+      "root": "repo",
+      "path": "docs/toolconv/pi-native.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "pi-native tool-call format",
+          "Structural tags",
+          "Tool-call forms",
+          "1. Element form (canonical, fully general)",
+          "2. Attribute form (compact scalars)"
+        ],
+        "excerpt": "# pi-native tool-call format The **pi-native** format is the tool-call serialization used by the omp / pi coding agent. Unlike the JSON-in-a-tag conventions (Hermes/Qwen, Harmony) and unlike the fully separate JSON content-block channel (Anthropic Messages API), pi-native serializes each call as an **XML-flavored block** whose tag carries the tool name — `<call:NAME>…</call:NAME>` — and whose arguments are child elements named after the parameters. It is **schema-driven**: the tool's JSON Schema"
+      },
+      "signal_score": 60,
+      "noise_score": 2,
+      "signal_noise_ratio": 30.0,
+      "initial_label": "high_signal",
+      "heading_count": 20,
+      "keyword_hits": 115,
+      "noise_hits": 2,
+      "line_count": 277,
+      "char_count": 19998
+    },
+    {
+      "id": "e699ab0c2a3d",
+      "root": "repo",
+      "path": "docs/toolconv/qwen3.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Qwen3 tool-calling format (Hermes convention)",
+          "Special tokens",
+          "Roles / channels / turn structure",
+          "Tool definitions",
+          "Tools"
+        ],
+        "excerpt": "# Qwen3 tool-calling format (Hermes convention) Tool-calling convention of Alibaba's **Qwen3** family (`Qwen/Qwen3-*`: dense `0.6B–32B` and MoE `30B-A3B`/`235B-A22B`; same template line as `Qwen2.5-*` and `QwQ-32B`). It is the **Hermes** convention — the XML+JSON format originated by NousResearch's Hermes 2 Pro and adopted verbatim by Qwen, plus a long tail of community fine-tunes. The envelope is **ChatML**: every turn is `<|im_start|>{role}\\n{body}<|im_end|>\\n`. Available tools are advertised "
+      },
+      "signal_score": 60,
+      "noise_score": 21,
+      "signal_noise_ratio": 2.857,
+      "initial_label": "high_signal",
+      "heading_count": 13,
+      "keyword_hits": 66,
+      "noise_hits": 21,
+      "line_count": 207,
+      "char_count": 17917
+    },
+    {
+      "id": "07513032288f",
+      "root": "repo",
+      "path": "docs/tools/ask.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "ask",
+          "Source",
+          "Inputs",
+          "`Question`",
+          "Outputs"
+        ],
+        "excerpt": "# ask > Prompts the interactive user for one or more option-picker or free-form answers. ## Source - Entry: `packages/coding-agent/src/tools/ask.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/ask.md` - Key collaborators: - `packages/coding-agent/src/config/settings-schema.ts` — `ask.timeout` / `ask.notify` defaults - `packages/coding-agent/src/modes/theme/theme.ts` — checkbox and radio glyphs for TUI rendering - `packages/coding-agent/src/tui/index.ts` — status-line renderin"
+      },
+      "signal_score": 60,
+      "noise_score": 0,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 11,
+      "keyword_hits": 35,
+      "noise_hits": 0,
+      "line_count": 87,
+      "char_count": 6021
+    },
+    {
+      "id": "77ce091d208c",
+      "root": "repo",
+      "path": "docs/tools/bash.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "bash",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# bash > Execute a shell command in the session workspace, with optional PTY or background-job handling. ## Source - Entry: `packages/coding-agent/src/tools/bash.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/bash.md` - Key collaborators: - `packages/coding-agent/src/tools/bash-interactive.ts` — PTY/TUI execution path. - `packages/coding-agent/src/tools/bash-interceptor.ts` — blocks tool-better shell patterns. - `packages/coding-agent/src/tools/bash-skill-urls.ts` — expands "
+      },
+      "signal_score": 60,
+      "noise_score": 0,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 81,
+      "noise_hits": 0,
+      "line_count": 165,
+      "char_count": 15721
+    },
+    {
+      "id": "57d775916e64",
+      "root": "repo",
+      "path": "docs/tools/browser.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "browser",
+          "Source",
+          "Inputs",
+          "Shared fields",
+          "`action: \"open\"`"
+        ],
+        "excerpt": "# browser > Open, reuse, close, and script browser tabs against headless Chromium, CDP-attached apps, or cmux surfaces. ## Source - Entry: `packages/coding-agent/src/tools/browser.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/browser.md` - Key collaborators: - `packages/coding-agent/src/tools/browser/tab-supervisor.ts` — global tab registry; worker lifecycle; run/close coordination. - `packages/coding-agent/src/tools/browser/tab-worker.ts` — executes `run` code; implements "
+      },
+      "signal_score": 60,
+      "noise_score": 5,
+      "signal_noise_ratio": 12.0,
+      "initial_label": "high_signal",
+      "heading_count": 14,
+      "keyword_hits": 85,
+      "noise_hits": 5,
+      "line_count": 238,
+      "char_count": 24698
+    },
+    {
+      "id": "7d6439784246",
+      "root": "repo",
+      "path": "docs/tools/checkpoint.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "checkpoint",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# checkpoint > Mark the current top-level conversation state so later `rewind` can collapse exploratory context into a report. ## Source - Entry: `packages/coding-agent/src/tools/checkpoint.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/checkpoint.md` - Key collaborators: - `packages/coding-agent/src/session/agent-session.ts` — captures the active checkpoint after tool success. - `packages/coding-agent/src/session/session-manager.ts` — persists the normal session entry strea"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 9,
+      "keyword_hits": 37,
+      "noise_hits": 1,
+      "line_count": 84,
+      "char_count": 4921
+    },
+    {
+      "id": "8d3f15a44dce",
+      "root": "repo",
+      "path": "docs/tools/debug.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "debug",
+          "Source",
+          "Inputs",
+          "Action-specific requirements",
+          "Interactive selector values"
+        ],
+        "excerpt": "# debug > Drive one DAP debug session; adjacent debug UI code reuses the same subsystem for logs, raw SSE capture, reports, profiling, and system diagnostics. ## Source - Entry: `packages/coding-agent/src/tools/debug.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/debug.md` - Key collaborators: - `packages/coding-agent/src/dap/session.ts` — session lifecycle, breakpoint/state cache - `packages/coding-agent/src/dap/client.ts` — adapter process/socket transport, DAP message loo"
+      },
+      "signal_score": 60,
+      "noise_score": 10,
+      "signal_noise_ratio": 6.0,
+      "initial_label": "high_signal",
+      "heading_count": 12,
+      "keyword_hits": 82,
+      "noise_hits": 10,
+      "line_count": 299,
+      "char_count": 26912
+    },
+    {
+      "id": "65e7c1494f99",
+      "root": "repo",
+      "path": "docs/tools/eval.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "eval",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# eval > Execute Python or JavaScript code in persistent cell-based runtimes. > **Notice:** Do not shell out to `python -c`/`python -e`, `bun -e`, or `node -e` via the `bash` tool for ad-hoc code execution. Use this tool instead — it gives you persistent state across cells, structured `display()` output, image/JSON capture, and proper cancellation/timeout handling that one-shot `-e`/`-c` invocations cannot provide. ## Source - Entry: `packages/coding-agent/src/tools/eval.ts` - Model-facing promp"
+      },
+      "signal_score": 60,
+      "noise_score": 6,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "high_signal",
+      "heading_count": 17,
+      "keyword_hits": 130,
+      "noise_hits": 6,
+      "line_count": 289,
+      "char_count": 25980
+    },
+    {
+      "id": "6c06becd6857",
+      "root": "repo",
+      "path": "docs/tools/find.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "find",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# find > Find filesystem paths by glob; use `search` when you need content matches instead of path matches. ## Source - Entry: `packages/coding-agent/src/tools/find.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/find.md` - Key collaborators: - `packages/coding-agent/src/tools/path-utils.ts` — normalize inputs; split base path vs glob. - `packages/coding-agent/src/tools/list-limit.ts` — apply result-count caps. - `packages/coding-agent/src/session/streaming-output.ts` — trunc"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 32,
+      "noise_hits": 1,
+      "line_count": 111,
+      "char_count": 11303
+    },
+    {
+      "id": "f4261113a675",
+      "root": "repo",
+      "path": "docs/tools/github.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "github",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# github > Dispatch GitHub CLI operations for repositories, issues, pull requests, search, and Actions run watching. ## Source - Entry: `packages/coding-agent/src/tools/gh.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/github.md` - Key collaborators: - `packages/coding-agent/src/tools/gh-format.ts` — shorten commit SHAs for summaries. - `packages/coding-agent/src/tools/gh-renderer.ts` — TUI rendering, especially `run_watch` live/result views. - `packages/coding-agent/src/uti"
+      },
+      "signal_score": 60,
+      "noise_score": 6,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "high_signal",
+      "heading_count": 20,
+      "keyword_hits": 73,
+      "noise_hits": 6,
+      "line_count": 286,
+      "char_count": 24492
+    },
+    {
+      "id": "6ccf923711e4",
+      "root": "repo",
+      "path": "docs/tools/inspect_image.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "inspect_image",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# inspect_image > Send a local image file to a vision-capable model and return text analysis. ## Source - Entry: `packages/coding-agent/src/tools/inspect-image.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/inspect-image.md` - Key collaborators: - `packages/coding-agent/src/tools/inspect-image-renderer.ts` — TUI call/result rendering. - `packages/coding-agent/src/utils/image-loading.ts` — path resolution, type detection, size gate, optional resize. - `packages/coding-agent/s"
+      },
+      "signal_score": 60,
+      "noise_score": 0,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 32,
+      "noise_hits": 0,
+      "line_count": 123,
+      "char_count": 9852
+    },
+    {
+      "id": "0306d839a5de",
+      "root": "repo",
+      "path": "docs/tools/irc.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "irc",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# irc > Send and receive messages between agents over a process-global mailbox bus. ## Source - Entry: `packages/coding-agent/src/tools/irc.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/irc.md` - Key collaborators: - `packages/coding-agent/src/irc/bus.ts` — process-global `IrcBus`: per-agent mailboxes, delivery, waiter matching. - `packages/coding-agent/src/registry/agent-registry.ts` — process-global agent directory and status. - `packages/coding-agent/src/registry/agent-l"
+      },
+      "signal_score": 60,
+      "noise_score": 2,
+      "signal_noise_ratio": 30.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 43,
+      "noise_hits": 2,
+      "line_count": 101,
+      "char_count": 9785
+    },
+    {
+      "id": "64aa2c77568c",
+      "root": "repo",
+      "path": "docs/tools/job.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "job",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# job > Wait for or cancel background jobs managed by the session async runtime. ## Source - Entry: `packages/coding-agent/src/tools/job.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/job.md` - Key collaborators: - `packages/coding-agent/src/async/job-manager.ts` — job registry, cancellation, delivery suppression. - `packages/coding-agent/src/tools/bash.ts` — explicit async bash and auto-backgrounded bash jobs. - `packages/coding-agent/src/task/index.ts` — async task-job sch"
+      },
+      "signal_score": 60,
+      "noise_score": 2,
+      "signal_noise_ratio": 30.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 46,
+      "noise_hits": 2,
+      "line_count": 142,
+      "char_count": 11428
+    },
+    {
+      "id": "96580a33df63",
+      "root": "repo",
+      "path": "docs/tools/lsp.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "lsp",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# lsp > Query language servers for diagnostics, navigation, symbols, renames, code actions, capabilities, and raw requests. ## Source - Entry: `packages/coding-agent/src/lsp/index.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/lsp.md` - Key collaborators: - `packages/coding-agent/src/lsp/client.ts` — client process lifecycle and JSON-RPC - `packages/coding-agent/src/lsp/config.ts` — config loading, auto-detect, server selection - `packages/coding-agent/src/lsp/lspmux.ts` — o"
+      },
+      "signal_score": 60,
+      "noise_score": 2,
+      "signal_noise_ratio": 30.0,
+      "initial_label": "high_signal",
+      "heading_count": 25,
+      "keyword_hits": 60,
+      "noise_hits": 2,
+      "line_count": 317,
+      "char_count": 23349
+    },
+    {
+      "id": "6accfb62d875",
+      "root": "repo",
+      "path": "docs/tools/read.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "read",
+          "Source",
+          "Inputs",
+          "Selector grammar",
+          "Outputs"
+        ],
+        "excerpt": "# read > Read files, directories, archives, SQLite databases, internal resources, images, documents, and URLs through one `path` string. ## Source - Entry: `packages/coding-agent/src/tools/read.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/read.md` - Key collaborators: - `packages/coding-agent/src/tools/path-utils.ts` — split `path` from trailing selectors; normalize local paths. - `packages/coding-agent/src/utils/zip.ts` — the unified ZIP/tar wrapper: detect `archive.ext:i"
+      },
+      "signal_score": 60,
+      "noise_score": 21,
+      "signal_noise_ratio": 2.857,
+      "initial_label": "high_signal",
+      "heading_count": 26,
+      "keyword_hits": 66,
+      "noise_hits": 21,
+      "line_count": 303,
+      "char_count": 22647
+    },
+    {
+      "id": "053020890001",
+      "root": "repo",
+      "path": "docs/tools/reflect.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "reflect",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# reflect > Synthesize an answer over the active long-term memory backend. ## Source - Entry: `packages/coding-agent/src/tools/memory-reflect.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/reflect.md` - Hindsight collaborators: - `packages/coding-agent/src/hindsight/bank.ts` — best-effort first-use bank/mission setup (`ensureBankExists`). - `packages/coding-agent/src/hindsight/state.ts` — session state, shared bank scope, recall/reflect config. - `packages/coding-agent/src/h"
+      },
+      "signal_score": 60,
+      "noise_score": 0,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 35,
+      "noise_hits": 0,
+      "line_count": 98,
+      "char_count": 6749
+    },
+    {
+      "id": "dbb8fba611e2",
+      "root": "repo",
+      "path": "docs/tools/retain.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "retain",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# retain > Store durable facts through the active long-term memory backend. ## Source - Entry: `packages/coding-agent/src/tools/memory-retain.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/retain.md` - Hindsight collaborators: - `packages/coding-agent/src/hindsight/state.ts` — per-session queue, flush, auto-retain. - `packages/coding-agent/src/hindsight/backend.ts` — session bootstrap, prompt injection, subagent aliasing. - `packages/coding-agent/src/hindsight/bank.ts` — ban"
+      },
+      "signal_score": 60,
+      "noise_score": 4,
+      "signal_noise_ratio": 15.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 42,
+      "noise_hits": 4,
+      "line_count": 125,
+      "char_count": 9864
+    },
+    {
+      "id": "cffcc3017c1d",
+      "root": "repo",
+      "path": "docs/tools/rewind.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "rewind",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# rewind > End an active checkpoint by pruning exploratory context and retaining a concise report. ## Source - Entry: `packages/coding-agent/src/tools/checkpoint.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/rewind.md` - Key collaborators: - `packages/coding-agent/src/session/agent-session.ts` — validates pending rewind state, applies the actual rewind, and injects the retained report. - `packages/coding-agent/src/session/session-manager.ts` — branches the persisted session"
+      },
+      "signal_score": 60,
+      "noise_score": 2,
+      "signal_noise_ratio": 30.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 44,
+      "noise_hits": 2,
+      "line_count": 96,
+      "char_count": 7667
+    },
+    {
+      "id": "24f8f33c0ce4",
+      "root": "repo",
+      "path": "docs/tools/search.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "search",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# search > Search file contents with a regex across files, directories, globs, and internal URLs. ## Source - Entry: `packages/coding-agent/src/tools/search.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/search.md` - Key collaborators: - `packages/coding-agent/src/tools/match-line-format.ts` — model-facing anchor formatting. - `packages/coding-agent/src/tools/path-utils.ts` — path normalization, glob splitting, internal URL resolution. - `packages/coding-agent/src/tools/file"
+      },
+      "signal_score": 60,
+      "noise_score": 16,
+      "signal_noise_ratio": 3.75,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 35,
+      "noise_hits": 16,
+      "line_count": 165,
+      "char_count": 15851
+    },
+    {
+      "id": "6baa6eff07da",
+      "root": "repo",
+      "path": "docs/tools/search_tool_bm25.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "search_tool_bm25",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# search_tool_bm25 > Search the hidden tool-discovery index and activate the top matches for the current session. ## Source - Entry: `packages/coding-agent/src/tools/search-tool-bm25.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/search-tool-bm25.md` - Key collaborators: - `packages/coding-agent/src/tool-discovery/tool-index.ts` — discoverable-tool metadata and BM25 index/search. - `packages/coding-agent/src/session/agent-session.ts` — session discovery mode, corpus assembly"
+      },
+      "signal_score": 60,
+      "noise_score": 0,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 56,
+      "noise_hits": 0,
+      "line_count": 119,
+      "char_count": 9120
+    },
+    {
+      "id": "2cfb6952052f",
+      "root": "repo",
+      "path": "docs/tools/ssh.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "ssh",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# ssh > Execute one remote command on a discovered SSH host. ## Source - Entry: `packages/coding-agent/src/tools/ssh.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/ssh.md` - Key collaborators: - `packages/coding-agent/src/ssh/ssh-executor.ts` — runs `ssh`, captures output - `packages/coding-agent/src/ssh/connection-manager.ts` — master-connection reuse, host probing - `packages/coding-agent/src/ssh/sshfs-mount.ts` — optional `sshfs` mount side effect - `packages/coding-agent"
+      },
+      "signal_score": 60,
+      "noise_score": 2,
+      "signal_noise_ratio": 30.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 72,
+      "noise_hits": 2,
+      "line_count": 128,
+      "char_count": 10511
+    },
+    {
+      "id": "8ade756f07a2",
+      "root": "repo",
+      "path": "docs/tools/task.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "task",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# task > Spawn subagents — one per call, or a `tasks[]` batch per call (`task.batch`, default on). With `async.enabled=true`, spawns run in the background; otherwise the call blocks until they finish. ## Source - Entry: `packages/coding-agent/src/task/index.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/task.md` - Key collaborators: - `packages/coding-agent/src/task/types.ts` — dynamic schema, progress/result types, output caps. - `packages/coding-agent/src/task/discovery.ts"
+      },
+      "signal_score": 60,
+      "noise_score": 10,
+      "signal_noise_ratio": 6.0,
+      "initial_label": "high_signal",
+      "heading_count": 11,
+      "keyword_hits": 143,
+      "noise_hits": 10,
+      "line_count": 174,
+      "char_count": 22358
+    },
+    {
+      "id": "9ce88a61528b",
+      "root": "repo",
+      "path": "docs/tools/todo.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "todo",
+          "Source",
+          "Inputs",
+          "`TodoOpEntry`",
+          "Fields used inside ops"
+        ],
+        "excerpt": "# todo > Applies ordered mutations to the session todo list and returns a text summary plus the full phase/task state. ## Source - Entry: `packages/coding-agent/src/tools/todo.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/todo.md` - Key collaborators: - `packages/coding-agent/src/tools/index.ts` — registers tool, exposes session hooks, gates availability. - `packages/coding-agent/src/modes/controllers/event-controller.ts` — updates the visible todo UI on tool completion. - "
+      },
+      "signal_score": 60,
+      "noise_score": 15,
+      "signal_noise_ratio": 4.0,
+      "initial_label": "high_signal",
+      "heading_count": 15,
+      "keyword_hits": 46,
+      "noise_hits": 15,
+      "line_count": 159,
+      "char_count": 13135
+    },
+    {
+      "id": "368052f8fcd2",
+      "root": "repo",
+      "path": "docs/tools/web_search.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "web_search",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# web_search > Run one web query through the first available search provider and return LLM-formatted answer, source URLs, and optional citations. ## Source - Entry: `packages/coding-agent/src/web/search/index.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/web-search.md` - Key collaborators: - `packages/coding-agent/src/web/search/provider.ts` — lazy provider registry; availability chain. - `packages/coding-agent/src/web/search/types.ts` — unified `SearchResponse` / `SearchP"
+      },
+      "signal_score": 60,
+      "noise_score": 1,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 141,
+      "noise_hits": 1,
+      "line_count": 229,
+      "char_count": 23529
+    },
+    {
+      "id": "85259e37ad11",
+      "root": "repo",
+      "path": "docs/tools/write.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "write",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# write > Create or overwrite a file, writable internal resource, archive entry, SQLite row, or merge-conflict resolution. ## Source - Entry: `packages/coding-agent/src/tools/write.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/write.md` - Key collaborators: - `packages/coding-agent/src/utils/zip.ts` — the unified ZIP/tar wrapper: parse `archive.ext:entry` selectors and rewrite the archive whole. - `packages/coding-agent/src/tools/sqlite-reader.ts` — detect SQLite paths and "
+      },
+      "signal_score": 60,
+      "noise_score": 30,
+      "signal_noise_ratio": 2.0,
+      "initial_label": "high_signal",
+      "heading_count": 14,
+      "keyword_hits": 39,
+      "noise_hits": 58,
+      "line_count": 189,
+      "char_count": 13051
+    },
+    {
+      "id": "958933af2acd",
+      "root": "repo",
+      "path": "docs/ttsr-injection-lifecycle.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "TTSR Injection Lifecycle",
+          "Implementation files",
+          "1. Discovery feed and rule registration",
+          "Pre-registration dedupe behavior",
+          "`TtsrManager.addRule()` behavior"
+        ],
+        "excerpt": "# TTSR Injection Lifecycle This document covers the current Time Traveling Stream Rules (TTSR) runtime path from rule discovery to stream interruption, retry injection, extension notifications, and session-state handling. ## Implementation files - [`../src/sdk.ts`](../packages/coding-agent/src/sdk.ts) - [`../src/export/ttsr.ts`](../packages/coding-agent/src/export/ttsr.ts) - [`../src/session/agent-session.ts`](../packages/coding-agent/src/session/agent-session.ts) - [`../src/session/session-mana"
+      },
+      "signal_score": 60,
+      "noise_score": 7,
+      "signal_noise_ratio": 8.571,
+      "initial_label": "high_signal",
+      "heading_count": 30,
+      "keyword_hits": 98,
+      "noise_hits": 7,
+      "line_count": 239,
+      "char_count": 13900
+    },
+    {
+      "id": "00b8de24dfe4",
+      "root": "repo",
+      "path": "docs/tui-core-renderer.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "TUI core renderer — the append-only contract",
+          "1. The one thing to understand first",
+          "What this costs (the accepted tradeoffs)",
+          "2. The frame pipeline (what you are editing)",
+          "The commit-boundary seam (the load-bearing app contract)"
+        ],
+        "excerpt": "# TUI core renderer — the append-only contract What you are dealing with before you touch the rendering engine. This is the companion to [`tui-runtime-internals.md`](./tui-runtime-internals.md): that doc maps the *flow* (input → component tree → render); this doc explains the **render contract, why it is shaped this way, and the invariants you must not violate**. Scope is the core engine only: - [`packages/tui/src/tui.ts`](../packages/tui/src/tui.ts) — frame pipeline, commit ledger, window math,"
+      },
+      "signal_score": 60,
+      "noise_score": 11,
+      "signal_noise_ratio": 5.455,
+      "initial_label": "high_signal",
+      "heading_count": 13,
+      "keyword_hits": 76,
+      "noise_hits": 11,
+      "line_count": 376,
+      "char_count": 21195
+    },
+    {
+      "id": "5ba46aa8f875",
+      "root": "repo",
+      "path": "docs/tui-runtime-internals.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "TUI runtime internals",
+          "Runtime layers and ownership",
+          "Implementation files",
+          "Boot and component tree assembly",
+          "Terminal lifecycle and stdin normalization"
+        ],
+        "excerpt": "# TUI runtime internals This document maps the non-theme runtime path from terminal input to rendered output in interactive mode. It focuses on behavior in `packages/tui` and its integration from `packages/coding-agent` controllers. > **Editing the rendering engine itself?** Read > [`tui-core-renderer.md`](./tui-core-renderer.md) first — it documents the > failure modes (yank / corruption / flash / width crashes) and the invariants > the render planner, native-scrollback bookkeeping, and capabil"
+      },
+      "signal_score": 60,
+      "noise_score": 3,
+      "signal_noise_ratio": 20.0,
+      "initial_label": "high_signal",
+      "heading_count": 18,
+      "keyword_hits": 36,
+      "noise_hits": 3,
+      "line_count": 225,
+      "char_count": 13836
+    },
+    {
+      "id": "d9887a57f676",
+      "root": "repo",
+      "path": "docs/tui.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "TUI integration for extensions and custom tools",
+          "What this subsystem is",
+          "Runtime behavior by mode",
+          "Core component contract (`@pk-nerdsaver-ai/pi-tui`)",
+          "Rendering constraints (terminal safety)"
+        ],
+        "excerpt": "# TUI integration for extensions and custom tools This document covers the **current** TUI contract used by `packages/coding-agent` and `packages/tui` for extension UI, custom tool UI, and custom renderers. ## What this subsystem is The runtime has two layers: - **Rendering engine (`packages/tui`)**: differential terminal renderer, input dispatch, focus, overlays, cursor placement. - **Integration layer (`packages/coding-agent`)**: mounts extension/custom-tool components, wires keybindings/theme"
+      },
+      "signal_score": 60,
+      "noise_score": 2,
+      "signal_noise_ratio": 30.0,
+      "initial_label": "high_signal",
+      "heading_count": 17,
+      "keyword_hits": 35,
+      "noise_hits": 2,
+      "line_count": 270,
+      "char_count": 10167
+    },
+    {
+      "id": "46a49e1b1d4e",
+      "root": "repo",
+      "path": "infra/docs/01-host-and-cluster.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "01 — Host preparation & single-node k3s cluster",
+          "1. Host prerequisites",
+          "1.1 Hardware virtualization / KVM",
+          "CPU supports virtualization? (non-zero count = yes)",
+          "which flavor"
+        ],
+        "excerpt": "# 01 — Host preparation & single-node k3s cluster This guide takes a fresh Linux host from bare OS to a **working single-node [k3s](https://k3s.io) cluster** that is ready to run Kata-isolated CI runners. It covers host prerequisites (hardware virtualization, kernel modules, time sync, the nginx port constraint), the exact k3s install, kubeconfig setup, cluster networking (Flannel CNI, CIDRs, CoreDNS), and pod-to-internet egress via host firewalld NAT. Read [README.md](README.md) first for the o"
+      },
+      "signal_score": 60,
+      "noise_score": 13,
+      "signal_noise_ratio": 4.615,
+      "initial_label": "high_signal",
+      "heading_count": 26,
+      "keyword_hits": 38,
+      "noise_hits": 13,
+      "line_count": 449,
+      "char_count": 18780
+    },
+    {
+      "id": "d117809ca3dd",
+      "root": "repo",
+      "path": "infra/docs/03-runner-image.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "03 - Preloaded runner image",
+          "1. Why a preloaded image",
+          "Stay in sync with `setup-system-deps`",
+          "2. The Dockerfile",
+          "syntax=docker/dockerfile:1"
+        ],
+        "excerpt": "# 03 - Preloaded runner image Each ephemeral CI job boots a fresh Kata microVM and runs inside a single runner container. To keep that cold microVM **warm** (no per-job dependency fetches), the container does not use the stock GitHub Actions runner image directly: it uses a locally built image that bakes every dependency CI installs on every job into the snapshot. This document covers building that image, importing it into k3s containerd, pointing ARC at it, and verifying it. Navigation: previou"
+      },
+      "signal_score": 60,
+      "noise_score": 30,
+      "signal_noise_ratio": 2.0,
+      "initial_label": "high_signal",
+      "heading_count": 43,
+      "keyword_hits": 63,
+      "noise_hits": 44,
+      "line_count": 467,
+      "char_count": 22795
+    },
+    {
+      "id": "8fc2918110db",
+      "root": "repo",
+      "path": "infra/docs/04-arc-and-caching.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "04 - ARC runners, shared caches, and egress policy",
+          "1. GitHub App and the `arc-github` secret",
+          "github_app_id",
+          "github_app_installation_id",
+          "github_app_private_key"
+        ],
+        "excerpt": "# 04 - ARC runners, shared caches, and egress policy This is the last setup step. By now the node runs k3s with the `kata-qemu` RuntimeClass ([02-kata-runtime.md](02-kata-runtime.md)) and the preloaded runner image has been imported into the cluster containerd ([03-runner-image.md](03-runner-image.md)). Here we install **actions-runner-controller (ARC)**, register an ephemeral **scale set** whose pods each boot inside their own Kata microVM, stand up the in-cluster **RustFS (S3)** `sccache` back"
+      },
+      "signal_score": 60,
+      "noise_score": 18,
+      "signal_noise_ratio": 3.333,
+      "initial_label": "high_signal",
+      "heading_count": 36,
+      "keyword_hits": 53,
+      "noise_hits": 18,
+      "line_count": 769,
+      "char_count": 30922
+    },
+    {
+      "id": "0fa20891cf15",
+      "root": "repo",
+      "path": "packages/agent/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/pi-agent",
+          "Installation",
+          "Quick Start",
+          "Core Concepts",
+          "AgentMessage vs LLM Message"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/pi-agent Stateful agent with tool execution and event streaming. Built on `@pk-nerdsaver-ai/pi-ai`. ## Installation ```bash npm install @pk-nerdsaver-ai/pi-agent ``` ## Quick Start ```typescript import { Agent } from \"@pk-nerdsaver-ai/pi-agent\"; import { getModel } from \"@pk-nerdsaver-ai/pi-ai\"; const agent = new Agent({ initialState: { systemPrompt: [\"You are a helpful assistant.\"], model: getModel(\"anthropic\", \"claude-sonnet-4-20250514\"), }, }); agent.subscribe((event) => { "
+      },
+      "signal_score": 60,
+      "noise_score": 0,
+      "signal_noise_ratio": 60.0,
+      "initial_label": "high_signal",
+      "heading_count": 31,
+      "keyword_hits": 97,
+      "noise_hits": 0,
+      "line_count": 474,
+      "char_count": 13394
+    },
+    {
+      "id": "78d275159118",
+      "root": "repo",
+      "path": "packages/ai/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/pi-ai",
+          "Table of Contents",
+          "Supported Providers",
+          "Installation",
+          "Quick Start"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/pi-ai Unified LLM API with automatic model discovery, provider configuration, token and cost tracking, and simple context persistence and hand-off to other models mid-session. **Note**: This library only includes models that support tool calling (function calling), as this is essential for agentic workflows. ## Table of Contents - [Supported Providers](#supported-providers) - [Installation](#installation) - [Quick Start](#quick-start) - [Tools](#tools) - [Defining Tools](#defi"
+      },
+      "signal_score": 60,
+      "noise_score": 15,
+      "signal_noise_ratio": 4.0,
+      "initial_label": "high_signal",
+      "heading_count": 45,
+      "keyword_hits": 213,
+      "noise_hits": 15,
+      "line_count": 1189,
+      "char_count": 44260
+    },
+    {
+      "id": "bac80c08323c",
+      "root": "repo",
+      "path": "packages/swarm-extension/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Swarm Extension",
+          "Setup",
+          "Running",
+          "Standalone (recommended for long-running work)",
+          "Foreground — runs until complete, no timeout:"
+        ],
+        "excerpt": "# Swarm Extension Multi-agent orchestration for oh-my-pi. Define agent workflows in YAML — pipelines, parallel fan-outs, sequential chains, or any DAG — and run them unattended until completion. Each agent is a full oh-my-pi subagent with access to every tool: bash, python, read, write, edit, grep, find, fetch, web_search, browser. The orchestrator manages lifecycle and ordering; agents communicate through the shared workspace filesystem. Use it for anything: research pipelines, code generation,"
+      },
+      "signal_score": 60,
+      "noise_score": 6,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "high_signal",
+      "heading_count": 27,
+      "keyword_hits": 52,
+      "noise_hits": 6,
+      "line_count": 473,
+      "char_count": 15053
+    },
+    {
+      "id": "de117145d69b",
+      "root": "repo",
+      "path": "python/fugu/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "pi-llm-as-verifier",
+          "Fusion Meta-Harness",
+          "Fugu orchestrator",
+          "Budget candidates + a strong synthesizer",
+          "Independent cross-model verifier"
+        ],
+        "excerpt": "# pi-llm-as-verifier **pi-llm-as-verifier** is a fusion meta-harness that uses LLMs as structured judges to evaluate and compare AI-generated candidate answers. It runs multiple candidate solutions through a rubric-scored pipeline, then applies a hardened pairwise comparison mode — running every A vs B pair in both orderings (swap-and-aggregate) to cancel position bias, requiring 3 concrete evidence observations before any score, and forcing a `tie` when the vote margin falls below 70% — produci"
+      },
+      "signal_score": 60,
+      "noise_score": 6,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "high_signal",
+      "heading_count": 32,
+      "keyword_hits": 47,
+      "noise_hits": 6,
+      "line_count": 464,
+      "char_count": 20725
+    },
+    {
+      "id": "1c38025264a6",
+      "root": "repo",
+      "path": "docs/ai-schema-normalize.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "AI tool-schema normalization",
+          "Entry points",
+          "Dispatcher mapping",
+          "Walk semantics",
+          "OpenAI strict-mode pipeline"
+        ],
+        "excerpt": "# AI tool-schema normalization `@pk-nerdsaver-ai/pi-ai` exposes one unified schema normalizer that providers consume before tools are sent on the wire. All walkers live in `packages/ai/src/utils/schema/normalize.ts`; the operational contract is `packages/ai/src/utils/schema/CONSTRAINTS.md`. There is no separate `strict-mode.ts` module any more — OpenAI strict-mode sanitization, OpenAI Responses `oneOf` rewriting, Google/Vertex/Gemini-CLI sanitization, Cloud Code Assist Claude sanitization, and M"
+      },
+      "signal_score": 59,
+      "noise_score": 5,
+      "signal_noise_ratio": 11.8,
+      "initial_label": "high_signal",
+      "heading_count": 8,
+      "keyword_hits": 29,
+      "noise_hits": 5,
+      "line_count": 174,
+      "char_count": 9552
+    },
+    {
+      "id": "e991ea71b531",
+      "root": "repo",
+      "path": "docs/tree.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "`/tree` Command Reference",
+          "What `/tree` does",
+          "How to open it",
+          "Tree UI model",
+          "Keybindings inside tree selector"
+        ],
+        "excerpt": "# `/tree` Command Reference `/tree` opens the interactive **Session Tree** navigator. It lets you jump to any entry in the current session file and continue from that point. This is an in-file leaf move, not a new session export. ## What `/tree` does - Builds a tree from current session entries (`SessionManager.getTree()`) - Opens `TreeSelectorComponent` with keyboard navigation, filters, and search - On selection, calls `AgentSession.navigateTree(targetId, { summarize, customInstructions })` - "
+      },
+      "signal_score": 59,
+      "noise_score": 1,
+      "signal_noise_ratio": 59.0,
+      "initial_label": "high_signal",
+      "heading_count": 26,
+      "keyword_hits": 29,
+      "noise_hits": 1,
+      "line_count": 248,
+      "char_count": 8990
+    },
+    {
+      "id": "bac5a6c42eff",
+      "root": "repo",
+      "path": "python/robomp/docs/pr-review-handoff.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Handoff: incoming-PR review feature",
+          "1. How the existing flows work (the substrate to mirror)",
+          "2. Routing (`src/github_events.py`)",
+          "2a. New entry: incoming PR opened",
+          "2b. Gate incoming-PR comments (\"don't run on comments unless I ask\")"
+        ],
+        "excerpt": "# Handoff: incoming-PR review feature Wire robomp to **review pull requests opened by contributors** (and other bots), in two phases: (1) classify + rank, (2) a real line-by-line review posted as one GitHub review. robomp **never merges, closes, approves, or pushes** — the rank label is the verdict; the maintainer acts on it. Confirmed decisions: - **COMMENT-only.** `submit_pr_review` always uses `event=\"COMMENT\"`. Never `APPROVE` / `REQUEST_CHANGES` (those gate merge — the maintainer's call). -"
+      },
+      "signal_score": 58,
+      "noise_score": 9,
+      "signal_noise_ratio": 6.444,
+      "initial_label": "high_signal",
+      "heading_count": 19,
+      "keyword_hits": 28,
+      "noise_hits": 9,
+      "line_count": 374,
+      "char_count": 19606
+    },
+    {
+      "id": "04a491b48ceb",
+      "root": "repo",
+      "path": "docs/collab.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Collab: Live Session Sharing",
+          "Quick start",
+          "Commands",
+          "Link format",
+          "End-to-end encryption"
+        ],
+        "excerpt": "# Collab: Live Session Sharing `/collab` shares your running session with other omp instances in real time. Guests render the **same session natively in their own TUI** — streaming assistant text, tool-call cards, footer state (cwd, model, context %, cost), ctrl+o expansion, `/dump` — no terminal mirroring. Guests can prompt and interrupt the agent; the host machine runs the agent and all tools. ## Quick start Host: ``` /collab ``` prints ``` Collab session started! • Join from another terminal:"
+      },
+      "signal_score": 57,
+      "noise_score": 21,
+      "signal_noise_ratio": 2.714,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 27,
+      "noise_hits": 21,
+      "line_count": 139,
+      "char_count": 10530
+    },
+    {
+      "id": "410e946eac3c",
+      "root": "repo",
+      "path": "docs/resolve-tool-runtime.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Resolve tool runtime internals",
+          "Scope and key files",
+          "What `resolve` does",
+          "Pending previews use a non-forcing soft tool requirement",
+          "Built-in producer example (`ast_edit`)"
+        ],
+        "excerpt": "# Resolve tool runtime internals This document explains how preview/apply workflows are modeled in coding-agent and how built-in or custom tools can participate via the pending-invoker registry and `pushPendingAction`. (Pending previews live in a separate non-forcing registry inside `ToolChoiceQueue`; only genuine hard forces use the consuming directive queue.) ## Scope and key files - [`src/tools/resolve.ts`](../packages/coding-agent/src/tools/resolve.ts) - [`src/tools/ast-edit.ts`](../packages"
+      },
+      "signal_score": 56,
+      "noise_score": 2,
+      "signal_noise_ratio": 28.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 26,
+      "noise_hits": 2,
+      "line_count": 146,
+      "char_count": 7217
+    },
+    {
+      "id": "bdbc3230cb68",
+      "root": "repo",
+      "path": "docs/tools/recall.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "recall",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# recall > Search the active long-term memory backend and return matching memories. ## Source - Entry: `packages/coding-agent/src/tools/memory-recall.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/recall.md` - Hindsight collaborators: - `packages/coding-agent/src/hindsight/state.ts` — session state, recall query defaults, prompt-side auto-recall. - `packages/coding-agent/src/hindsight/content.ts` — result formatting and UTC timestamp formatting. - `packages/coding-agent/src/"
+      },
+      "signal_score": 56,
+      "noise_score": 0,
+      "signal_noise_ratio": 56.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 26,
+      "noise_hits": 0,
+      "line_count": 104,
+      "char_count": 6825
+    },
+    {
+      "id": "a996e46ef124",
+      "root": "repo",
+      "path": "infra/docs/02-kata-runtime.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "02 — Kata Containers runtime for k3s",
+          "Step 1 — Install the Kata static release into `/opt/kata`",
+          "amd64 host; pin the exact version so the kernel/image/QEMU triple is reproducible.",
+          "The archive is rooted at ./opt/kata, so extracting at / lands everything in /opt/kata.",
+          "Inspect the install layout"
+        ],
+        "excerpt": "# 02 — Kata Containers runtime for k3s This guide installs **Kata Containers 3.31.0** and wires it into the k3s-bundled containerd as a named runtime, `kata-qemu`, so that any pod carrying `runtimeClassName: kata-qemu` boots inside its own QEMU/KVM microVM with a **separate guest kernel** from the host. - **Previous:** [`01-host-and-cluster.md`](./01-host-and-cluster.md) — host prep, k3s install, networking. You need a working single-node k3s, KVM enabled (`/dev/kvm` present), and nested-virt of"
+      },
+      "signal_score": 56,
+      "noise_score": 22,
+      "signal_noise_ratio": 2.545,
+      "initial_label": "high_signal",
+      "heading_count": 25,
+      "keyword_hits": 26,
+      "noise_hits": 22,
+      "line_count": 472,
+      "char_count": 19691
+    },
+    {
+      "id": "00486f0d1b7f",
+      "root": "repo",
+      "path": "docs/mcp-protocol-transports.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "MCP Protocol and Transport Internals",
+          "Scope",
+          "Implementation files",
+          "Layer boundaries",
+          "Protocol layer (JSON-RPC + MCP methods)"
+        ],
+        "excerpt": "# MCP Protocol and Transport Internals This document describes how coding-agent implements MCP JSON-RPC messaging and how protocol concerns are split from transport concerns. ## Scope Covers: - JSON-RPC request/response and notification flow - Server-to-client request handling (`ping`, `roots/list`) - Request correlation and lifecycle for stdio and HTTP/SSE transports - Timeout, cancellation, and auth-refresh behavior - Error propagation and malformed payload handling - Transport selection bound"
+      },
+      "signal_score": 55,
+      "noise_score": 1,
+      "signal_noise_ratio": 55.0,
+      "initial_label": "high_signal",
+      "heading_count": 32,
+      "keyword_hits": 25,
+      "noise_hits": 1,
+      "line_count": 270,
+      "char_count": 12613
+    },
+    {
+      "id": "bbda45e657dc",
+      "root": "repo",
+      "path": "docs/tools/resolve.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "resolve",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# resolve > Finalizes a pending action by applying or discarding it. ## Source - Entry: `packages/coding-agent/src/tools/resolve.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/resolve.md` - Key collaborators: - `docs/resolve-tool-runtime.md` — preview/apply runtime reference - `packages/coding-agent/src/extensibility/custom-tools/loader.ts` — forwards custom pending actions into the queue - `packages/coding-agent/src/tools/ast-edit.ts` — built-in preview producer example - `"
+      },
+      "signal_score": 55,
+      "noise_score": 1,
+      "signal_noise_ratio": 55.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 25,
+      "noise_hits": 1,
+      "line_count": 91,
+      "char_count": 7642
+    },
+    {
+      "id": "b9b77e14b6b4",
+      "root": "repo",
+      "path": "docs/theme.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Theming Reference",
+          "What the theme system controls",
+          "Theme JSON shape",
+          "Required color tokens (current)",
+          "Core text and borders (11)"
+        ],
+        "excerpt": "# Theming Reference This document describes how theming works in the coding-agent today: schema, loading, runtime behavior, and failure modes. ## What the theme system controls The theme system drives: - foreground/background color tokens used across the TUI - markdown styling adapters (`getMarkdownTheme()`) - selector/editor/settings list adapters (`getSelectListTheme()`, `getEditorTheme()`, `getSettingsListTheme()`) - symbol preset + symbol overrides (`unicode`, `nerd`, `ascii`) - syntax highl"
+      },
+      "signal_score": 54,
+      "noise_score": 0,
+      "signal_noise_ratio": 54.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 28,
+      "keyword_hits": 24,
+      "noise_hits": 0,
+      "line_count": 358,
+      "char_count": 12067
+    },
+    {
+      "id": "5a8702dc14fe",
+      "root": "repo",
+      "path": "docs/tools/ast-edit.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "ast_edit",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# ast_edit > Preview and apply structural rewrites over source files via native ast-grep. ## Source - Entry: `packages/coding-agent/src/tools/ast-edit.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/ast-edit.md` - Key collaborators: - `crates/pi-natives/src/ast.rs` — native rewrite planning and file mutation - `crates/pi-ast/src/language/mod.rs` — language aliases and extension inference used by the native wrapper. - `packages/coding-agent/src/tools/path-utils.ts` — path/glob"
+      },
+      "signal_score": 54,
+      "noise_score": 4,
+      "signal_noise_ratio": 13.5,
+      "initial_label": "mixed_signal",
+      "heading_count": 10,
+      "keyword_hits": 24,
+      "noise_hits": 4,
+      "line_count": 121,
+      "char_count": 10942
+    },
+    {
+      "id": "89be54248fd6",
+      "root": "repo",
+      "path": "python/robomp/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "roboomp",
+          "Architecture",
+          "Setup",
+          "Public URL",
+          "GitHub webhook"
+        ],
+        "excerpt": "# roboomp Self-hosted GitHub triage bot. Drives [`omp --mode rpc`](https://github.com/can1357/oh-my-pi) as a subprocess against a per-issue git worktree, then writes back to GitHub through a sidecar that holds the PAT. On `issues.opened` in an allowlisted repo it classifies the issue, labels it, and branches: - `bug` / `documentation` → reproduce, fix on a fresh branch, open a PR whose body has `## Repro` / `## Cause` / `## Fix` / `## Verification` and `Fixes #N`. - `question` → one comment, suf"
+      },
+      "signal_score": 54,
+      "noise_score": 4,
+      "signal_noise_ratio": 13.5,
+      "initial_label": "mixed_signal",
+      "heading_count": 13,
+      "keyword_hits": 24,
+      "noise_hits": 4,
+      "line_count": 218,
+      "char_count": 10478
+    },
+    {
+      "id": "7dc01fd70461",
+      "root": "repo",
+      "path": "docs/arktype-guide.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "ArkType Guide (for migrating Zod → ArkType in this repo)",
+          "The detection contract (don't break it)",
+          "Core translation table (Zod → ArkType)",
+          "FOOTGUNS (these caused real breakage — avoid them)",
+          "Validating with a schema (replacing `.parse` / `.safeParse`)"
+        ],
+        "excerpt": "# ArkType Guide (for migrating Zod → ArkType in this repo) Pinned to **arktype 2.2.0** (installed). Verified against the installed `.d.ts` and runtime this session. Author types with `import { type } from \"arktype\"`. > **Scope rule (READ FIRST).** Zod stays supported at the **external boundary** — `Tool.parameters` > accepts Zod *or* ArkType *or* JSON Schema, and the public `pi.zod` extension API + the Zod-backed > `typebox` shim are untouched. Migrate **internal** schemas to ArkType. If a file "
+      },
+      "signal_score": 53,
+      "noise_score": 1,
+      "signal_noise_ratio": 53.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 12,
+      "keyword_hits": 23,
+      "noise_hits": 1,
+      "line_count": 132,
+      "char_count": 7456
+    },
+    {
+      "id": "fe99c304a8ce",
+      "root": "repo",
+      "path": "docs/macos-signing-notarization.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "macOS signing & notarization",
+          "How it works",
+          "Why the entitlements are mandatory",
+          "Stapling limitation (important)",
+          "Required GitHub secrets"
+        ],
+        "excerpt": "# macOS signing & notarization The compiled macOS `omp` binaries distributed via the install endpoint (a Cloudflare Worker fronting a private Hugging Face repo) are signed with a **Developer ID Application** certificate and **notarized** by Apple. This makes them Gatekeeper-acceptable and is the prerequisite for an official Homebrew submission (see [#776](https://github.com/can1357/oh-my-pi/issues/776)). Signing happens in CI, in the `release_binary` job's darwin matrix legs (`.github/workflows/"
+      },
+      "signal_score": 53,
+      "noise_score": 1,
+      "signal_noise_ratio": 53.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 10,
+      "keyword_hits": 23,
+      "noise_hits": 1,
+      "line_count": 126,
+      "char_count": 6366
+    },
+    {
+      "id": "1bd34ec317fb",
+      "root": "repo",
+      "path": "docs/natives-text-search-pipeline.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Natives Text/Search Pipeline",
+          "Implementation files",
+          "JS API ↔ Rust export mapping",
+          "Pipeline overview by subsystem",
+          "1) Regex search (`grep`, `search`, `hasMatch`)"
+        ],
+        "excerpt": "# Natives Text/Search Pipeline This document maps the `@pk-nerdsaver-ai/pi-natives` text/search/code surface from generated JS/TS exports to Rust N-API modules and back to JS result objects. Terminology follows `docs/natives-architecture.md`: - **Generated binding**: public API in `packages/natives/native/index.d.ts`. - **Rust module layer**: N-API exports in `crates/pi-natives/src/*`. - **Shared scan cache**: `fs_cache`-backed directory-entry cache used by discovery/search flows. ## Implementat"
+      },
+      "signal_score": 53,
+      "noise_score": 12,
+      "signal_noise_ratio": 4.417,
+      "initial_label": "mixed_signal",
+      "heading_count": 30,
+      "keyword_hits": 23,
+      "noise_hits": 12,
+      "line_count": 268,
+      "char_count": 15926
+    },
+    {
+      "id": "dbe04bc25aea",
+      "root": "repo",
+      "path": "python/omp-rpc/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "omp-rpc",
+          "Basic Usage",
+          "Host-Owned Custom Tools",
+          "Host-Owned URI Schemes",
+          "Extension UI Requests"
+        ],
+        "excerpt": "# omp-rpc Typed Python bindings for the `omp --mode rpc` protocol used by the coding agent. This package wraps the newline-delimited JSON RPC transport exposed by the CLI and provides: - typed command methods for the stable RPC surface - typed startup options for common `omp --mode rpc` flags such as thinking level, tool selection, prompt appends, provider session IDs, and headless session toggles - typed protocol models for state, bash results, compaction, and session stats - a process-backed c"
+      },
+      "signal_score": 53,
+      "noise_score": 0,
+      "signal_noise_ratio": 53.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 8,
+      "keyword_hits": 23,
+      "noise_hits": 0,
+      "line_count": 264,
+      "char_count": 8200
+    },
+    {
+      "id": "4a12b6f55004",
+      "root": "repo",
+      "path": "docs/RELEASING-FORK.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Releasing this fork (no GitHub Actions)",
+          "What changes vs. the upstream flow",
+          "Distribution model",
+          "Prerequisites",
+          "One command"
+        ],
+        "excerpt": "# Releasing this fork (no GitHub Actions) This fork **disables every GitHub Actions workflow** (commit `f9a213a93`, \"no Actions dependency, no billing\" — the files are renamed `*.yml.disabled`). Upstream relies on CI to build binaries and publish npm when a `v*` tag is pushed; here that never runs, so releasing is a **local** procedure. ## What changes vs. the upstream flow | Step | Upstream (CI) | This fork (local) | |---|---|---| | Version bump + changelog + commit + tag + push | `bun run rele"
+      },
+      "signal_score": 52,
+      "noise_score": 17,
+      "signal_noise_ratio": 3.059,
+      "initial_label": "mixed_signal",
+      "heading_count": 22,
+      "keyword_hits": 22,
+      "noise_hits": 17,
+      "line_count": 137,
+      "char_count": 7020
+    },
+    {
+      "id": "4497cae43ddd",
+      "root": "repo",
+      "path": "docs/natives-architecture.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Natives Architecture",
+          "Implementation files",
+          "Package entrypoint and public surface",
+          "Loader layer",
+          "Candidate resolution model"
+        ],
+        "excerpt": "# Natives Architecture `@pk-nerdsaver-ai/pi-natives` is a two-layer package around an ESM loader: 1. **ESM loader/package entrypoint** resolves and loads the correct `.node` addon with `createRequire`, validates the release sentinel outside workspace-dev loads, and re-exports generated classes/functions plus enum runtime objects as explicit named ESM exports. 2. **Rust N-API module layer** implements the exported functions/classes and emits the generated TypeScript declarations. This document is"
+      },
+      "signal_score": 52,
+      "noise_score": 29,
+      "signal_noise_ratio": 1.793,
+      "initial_label": "mixed_signal",
+      "heading_count": 12,
+      "keyword_hits": 22,
+      "noise_hits": 29,
+      "line_count": 172,
+      "char_count": 9458
+    },
+    {
+      "id": "1c43cef1d08a",
+      "root": "repo",
+      "path": "docs/natives-binding-contract.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Natives Binding Contract (JavaScript/TypeScript Side)",
+          "Implementation files",
+          "Contract model",
+          "Public export surface organization",
+          "JS API ↔ native export mapping (representative)"
+        ],
+        "excerpt": "# Natives Binding Contract (JavaScript/TypeScript Side) This document defines the JS/TS contract between `@pk-nerdsaver-ai/pi-natives` callers and the loaded N-API addon. Current package shape is direct-to-native: there is no `packages/natives/src/<module>` TypeScript wrapper layer. The public API is the generated `packages/natives/native/index.d.ts` declaration file, the ESM loader/export wrapper in `packages/natives/native/index.js`, and the Rust `#[napi]` exports in `crates/pi-natives/src`. #"
+      },
+      "signal_score": 52,
+      "noise_score": 12,
+      "signal_noise_ratio": 4.333,
+      "initial_label": "mixed_signal",
+      "heading_count": 11,
+      "keyword_hits": 22,
+      "noise_hits": 12,
+      "line_count": 138,
+      "char_count": 10517
+    },
+    {
+      "id": "839a92339b15",
+      "root": "repo",
+      "path": "docs/notebook-tool-runtime.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Notebook file runtime internals",
+          "Implementation files",
+          "1) Runtime boundary: editing vs executing",
+          "`.ipynb` file conversion (`src/edit/notebook.ts`)",
+          "Kernel-backed execution path (`src/tools/eval.ts` + `src/eval/py/*`)"
+        ],
+        "excerpt": "# Notebook file runtime internals This document describes current `.ipynb` handling in `coding-agent` and its relationship to the kernel-backed Python runtime. The critical distinction: **notebook support is file conversion/editing, not notebook execution**. `.ipynb` files are exposed as editable cell-marked text through `read` and the edit pipeline; no notebook-specific tool starts or talks to a Python kernel. ## Implementation files - [`src/edit/notebook.ts`](../packages/coding-agent/src/edit/"
+      },
+      "signal_score": 52,
+      "noise_score": 2,
+      "signal_noise_ratio": 26.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 20,
+      "keyword_hits": 22,
+      "noise_hits": 2,
+      "line_count": 188,
+      "char_count": 7936
+    },
+    {
+      "id": "a6f7df1d2250",
+      "root": "repo",
+      "path": "docs/toolconv/gemma.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Gemma 4 tool-calling format (token-delimited `call:NAME{…}`)",
+          "Special tokens",
+          "Roles / turn structure",
+          "Tool definitions",
+          "Tool-call format"
+        ],
+        "excerpt": "# Gemma 4 tool-calling format (token-delimited `call:NAME{…}`) Tool-calling convention of Google's **Gemma 4** open-weights family (`google/gemma-4-*-it`). It is a clean break from the prompt-engineered Pythonic `tool_code` form used by Gemma 3 and hosted Gemini (see `gemini.md`): Gemma 4 introduces **dedicated special tokens** and a compact **token-delimited brace syntax**. Calls and responses each get their own paired markers, and every string value is wrapped in a `<|\"|>` token rather than AS"
+      },
+      "signal_score": 52,
+      "noise_score": 5,
+      "signal_noise_ratio": 10.4,
+      "initial_label": "mixed_signal",
+      "heading_count": 10,
+      "keyword_hits": 22,
+      "noise_hits": 5,
+      "line_count": 104,
+      "char_count": 8192
+    },
+    {
+      "id": "661426f80313",
+      "root": "repo",
+      "path": "docs/tools/edit.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "edit",
+          "Source",
+          "Inputs",
+          "Hashline mode (default)",
+          "Tolerated input shapes (lenient parsing)"
+        ],
+        "excerpt": "# edit > Applies source edits; default mode is the hashline patch language consumed from a single `input` string. ## Source - Entry: `packages/coding-agent/src/edit/index.ts` - Model-facing prompt: `packages/hashline/src/prompt.md` - Key collaborators: - `packages/coding-agent/src/utils/edit-mode.ts` — selects active edit mode - `packages/hashline/src/grammar.lark` — canonical constrained-decoding grammar - `packages/hashline/src/format.ts` — sigils and header constants (`[`, `]`, `#`, `+`, `SWA"
+      },
+      "signal_score": 52,
+      "noise_score": 2,
+      "signal_noise_ratio": 26.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 10,
+      "keyword_hits": 22,
+      "noise_hits": 2,
+      "line_count": 198,
+      "char_count": 13194
+    },
+    {
+      "id": "bd9e8e757ca9",
+      "root": "repo",
+      "path": "python/fugu/docs/model-options-reference.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Built-in Dynamic Router Profile",
+          "Spawning Subagents with Different Models"
+        ],
+        "excerpt": "# Subagent Model Options Reference Map ## Overview This document maps every available model tier for dynamic subagent spawning in the harness. Use it to pick the right backend for a task based on capability, cost, latency, and availability. **Last updated:** 2026-06-18 --- ## Model Tiers ### 1. Mock / Local (Zero Cost, Instant) | Backend | Model | Cost | Latency | Use Case | |---------|-------|------|---------|----------| | `mock` | `mock` | $0 | ~0ms | Unit tests, CI, schema validation, prompt "
+      },
+      "signal_score": 52,
+      "noise_score": 1,
+      "signal_noise_ratio": 52.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 2,
+      "keyword_hits": 36,
+      "noise_hits": 1,
+      "line_count": 352,
+      "char_count": 12929
+    },
+    {
+      "id": "9885eaf29702",
+      "root": "repo",
+      "path": "docs/natives-rust-task-cancellation.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Native Rust task execution and cancellation (`pi-natives`)",
+          "Implementation files",
+          "Core primitives (`task.rs`)",
+          "`blocking` vs `future`: execution model and selection",
+          "Use `task::blocking`"
+        ],
+        "excerpt": "# Native Rust task execution and cancellation (`pi-natives`) This document describes how `crates/pi-natives` schedules native work and how cancellation flows from JS options (`timeoutMs`, `AbortSignal`) into Rust execution. ## Implementation files - `crates/pi-natives/src/task.rs` - `crates/pi-natives/src/grep.rs` - `crates/pi-natives/src/glob.rs` - `crates/pi-natives/src/fd.rs` - `crates/pi-natives/src/ast.rs` - `crates/pi-natives/src/workspace.rs` - `crates/pi-natives/src/shell.rs` - `crates/p"
+      },
+      "signal_score": 51,
+      "noise_score": 0,
+      "signal_noise_ratio": 51.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 17,
+      "keyword_hits": 21,
+      "noise_hits": 0,
+      "line_count": 218,
+      "char_count": 11803
+    },
+    {
+      "id": "825796c17ba2",
+      "root": "repo",
+      "path": "docs/gemini-manifest-extensions.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Gemini Manifest Extensions (`gemini-extension.json`)",
+          "Implementation files",
+          "What gets discovered",
+          "Directory scan rules",
+          "Hidden directories"
+        ],
+        "excerpt": "# Gemini Manifest Extensions (`gemini-extension.json`) This document covers how the coding-agent discovers and parses Gemini-style manifest extensions (`gemini-extension.json`) into the `extensions` capability. It does **not** cover TypeScript/JavaScript extension module loading (`extensions/*.ts`, `index.ts`, `package.json omp.extensions`), which is documented in `extension-loading.md`. ## Implementation files - [`packages/coding-agent/src/discovery/gemini.ts`](../packages/coding-agent/src/disc"
+      },
+      "signal_score": 50,
+      "noise_score": 5,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 17,
+      "keyword_hits": 20,
+      "noise_hits": 5,
+      "line_count": 180,
+      "char_count": 6283
+    },
+    {
+      "id": "2442765ac141",
+      "root": "repo",
+      "path": "packages/collab-web/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/collab-web",
+          "Quick start",
+          "dev server (Bun HTML dev server with HMR) — http://localhost:3000",
+          "offline demo: local relay + scripted mock host; prints a ws://localhost link",
+          "Build & deploy"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/collab-web Web client for [omp collab sessions](../../docs/collab.md). Paste a `/collab` link into the browser and you get the same live session guests see in the TUI: streaming transcript, tool-call cards, subagent panel with live transcripts, and a composer that prompts (or interrupts) the host agent. ## Quick start ```sh # dev server (Bun HTML dev server with HMR) — http://localhost:3000 bun run dev # offline demo: local relay + scripted mock host; prints a ws://localhost l"
+      },
+      "signal_score": 50,
+      "noise_score": 5,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 6,
+      "keyword_hits": 20,
+      "noise_hits": 5,
+      "line_count": 38,
+      "char_count": 3060
+    },
+    {
+      "id": "9b37bbf1abe6",
+      "root": "repo",
+      "path": "python/fugu/evals/agentic/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Agentic long-horizon headroom probe (tau-bench)",
+          "Why tau-bench",
+          "The staged plan",
+          "Results (airline)",
+          "Final unified law"
+        ],
+        "excerpt": "# Agentic long-horizon headroom probe (tau-bench) The pro-model audit pinned the one regime our verdict does **not** cover: **long-horizon verifiable tasks** where models fail at *different stages*, so oracle headroom could be 10–20pp instead of the 2–4pp we measured on MC. This is the test for that regime — on a task with **objective, executable ground truth** (no LLM judge). ## Why tau-bench [tau-bench](https://github.com/sierra-research/tau-bench) is a self-contained tool-agent benchmark (ret"
+      },
+      "signal_score": 49,
+      "noise_score": 6,
+      "signal_noise_ratio": 8.167,
+      "initial_label": "mixed_signal",
+      "heading_count": 6,
+      "keyword_hits": 19,
+      "noise_hits": 6,
+      "line_count": 140,
+      "char_count": 10118
+    },
+    {
+      "id": "10eac9ee5e78",
+      "root": "repo",
+      "path": "python/fugu/docs/fold-proposal-deepen-meta-optimizer.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Fold proposal: deepen the `meta/` optimizer layer",
+          "Why this exists",
+          "Invariants preserved (do not break)",
+          "Change 1 — `harness/meta/proposer.py`",
+          "Change 2 — `harness/meta/candidate_manager.py`"
+        ],
+        "excerpt": "# Fold proposal: deepen the `meta/` optimizer layer **Author:** external review (Preston's session) **Date:** 2026-06-14 **Branch marker:** `fold/deepen-meta-optimizer` (empty; no code changed yet) **Status:** proposal for your engineers to apply / adapt ## Why this exists A second, standalone implementation of the same Fusion Meta-Harness spec was built (`C:\\Users\\prest\\Desktop\\fusion-meta-harness`). On comparison, **this repo (`pi-llm-as-verifier`) is the more complete and the one to keep** — "
+      },
+      "signal_score": 48,
+      "noise_score": 5,
+      "signal_noise_ratio": 9.6,
+      "initial_label": "mixed_signal",
+      "heading_count": 13,
+      "keyword_hits": 18,
+      "noise_hits": 5,
+      "line_count": 493,
+      "char_count": 20271
+    },
+    {
+      "id": "600f3eec3f2b",
+      "root": "repo",
+      "path": "docs/secrets.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Secret Obfuscation",
+          "Enabling",
+          "How it works",
+          "secrets.yml",
+          "Schema"
+        ],
+        "excerpt": "# Secret Obfuscation Prevents sensitive values (API keys, tokens, passwords) from being sent to LLM providers. When enabled, secrets are replaced before outbound text content leaves the process. Reversible obfuscation placeholders are restored when session context is rebuilt for display or resume. ## Enabling Disabled by default. Toggle via `/settings` UI or directly in `config.yml`: ```yaml secrets: enabled: true ``` ## How it works 1. On session startup, secrets are collected from two sources:"
+      },
+      "signal_score": 47,
+      "noise_score": 2,
+      "signal_noise_ratio": 23.5,
+      "initial_label": "mixed_signal",
+      "heading_count": 18,
+      "keyword_hits": 17,
+      "noise_hits": 2,
+      "line_count": 113,
+      "char_count": 4996
+    },
+    {
+      "id": "231c62c981cd",
+      "root": "repo",
+      "path": "docs/tools/ast-grep.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "ast_grep",
+          "Source",
+          "Inputs",
+          "Outputs",
+          "Flow"
+        ],
+        "excerpt": "# ast_grep > Structural code search over supported source files via native ast-grep. ## Source - Entry: `packages/coding-agent/src/tools/ast-grep.ts` - Model-facing prompt: `packages/coding-agent/src/prompts/tools/ast-grep.md` - Key collaborators: - `crates/pi-natives/src/ast.rs` — native scan, parse, match engine - `crates/pi-ast/src/language/mod.rs` — language aliases and extension inference used by the native wrapper. - `packages/coding-agent/src/tools/path-utils.ts` — path/glob parsing and m"
+      },
+      "signal_score": 47,
+      "noise_score": 2,
+      "signal_noise_ratio": 23.5,
+      "initial_label": "mixed_signal",
+      "heading_count": 10,
+      "keyword_hits": 17,
+      "noise_hits": 2,
+      "line_count": 109,
+      "char_count": 9802
+    },
+    {
+      "id": "ead3be9d01cc",
+      "root": "repo",
+      "path": "docs/memory.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Autonomous Memory",
+          "Usage",
+          "What gets injected",
+          "Reading memory artifacts",
+          "`/memory` slash command"
+        ],
+        "excerpt": "# Autonomous Memory When the local memory backend is enabled, the agent automatically extracts durable knowledge from past sessions and injects a compact summary into future sessions for the same project. Over time it builds a project-scoped memory store — technical decisions, recurring workflows, pitfalls — that carries forward without manual effort. Disabled by default. Enable the local summary pipeline via `/settings` or `config.yml`: ```yaml memory: backend: local ``` ## Usage ### What gets "
+      },
+      "signal_score": 46,
+      "noise_score": 3,
+      "signal_noise_ratio": 15.333,
+      "initial_label": "mixed_signal",
+      "heading_count": 10,
+      "keyword_hits": 16,
+      "noise_hits": 3,
+      "line_count": 99,
+      "char_count": 7297
+    },
+    {
+      "id": "7ce4d09225fb",
+      "root": "repo",
+      "path": "infra/docs/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Self-hosted Kata CI",
+          "Architecture",
+          "End-to-end job lifecycle",
+          "Component map (bill of materials)",
+          "Prerequisites"
+        ],
+        "excerpt": "# Self-hosted Kata CI This is a self-hosted GitHub Actions setup where **every CI job on the self-hosted `omp-kata` label runs inside its own throwaway Kata Containers QEMU/KVM microVM**. A single bare-metal Linux host runs a one-node [k3s](https://k3s.io) cluster; [actions-runner-controller (ARC)](https://github.com/actions/actions-runner-controller) watches GitHub for queued jobs and, for each one, creates a just-in-time ephemeral runner pod that boots a fresh microVM (its own guest kernel, is"
+      },
+      "signal_score": 46,
+      "noise_score": 4,
+      "signal_noise_ratio": 11.5,
+      "initial_label": "mixed_signal",
+      "heading_count": 7,
+      "keyword_hits": 16,
+      "noise_hits": 4,
+      "line_count": 113,
+      "char_count": 9387
+    },
+    {
+      "id": "3e3a495c100f",
+      "root": "repo",
+      "path": "docs/adding-a-provider.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Adding a provider",
+          "Shape",
+          "Field reference",
+          "Conventions"
+        ],
+        "excerpt": "# Adding a provider A provider is described in two halves: - **Catalog half** (`packages/catalog`): one entry in the `CATALOG_PROVIDERS` table (`packages/catalog/src/provider-models/descriptors.ts`) carrying the `id`, `defaultModel`, runtime model-discovery factory, and catalog-generation wiring. `KnownProvider`, `PROVIDER_DESCRIPTORS`, and `DEFAULT_MODEL_PER_PROVIDER` are derived from this table. - **Auth half** (`packages/ai`): one declarative `ProviderDefinition` in the registry carrying env-"
+      },
+      "signal_score": 45,
+      "noise_score": 0,
+      "signal_noise_ratio": 45.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 4,
+      "keyword_hits": 19,
+      "noise_hits": 0,
+      "line_count": 109,
+      "char_count": 6377
+    },
+    {
+      "id": "db595fd95802",
+      "root": "repo",
+      "path": "docs/natives-media-system-utils.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Natives media + system utilities",
+          "Implementation files",
+          "JS API ↔ Rust export/module mapping",
+          "Data format boundaries and conversions",
+          "SIXEL image encoding (`sixel`)"
+        ],
+        "excerpt": "# Natives media + system utilities This document covers the media/system/conversion exports currently present in `@pk-nerdsaver-ai/pi-natives`: terminal SIXEL image encoding, HTML conversion, clipboard access, token counting, macOS appearance/power helpers, and work profiling. ## Implementation files - `crates/pi-natives/src/sixel.rs` - `crates/pi-natives/src/html.rs` - `crates/pi-natives/src/clipboard.rs` - `crates/pi-natives/src/tokens.rs` - `crates/pi-natives/src/appearance.rs` - `crates/pi-n"
+      },
+      "signal_score": 45,
+      "noise_score": 3,
+      "signal_noise_ratio": 15.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 21,
+      "keyword_hits": 15,
+      "noise_hits": 3,
+      "line_count": 159,
+      "char_count": 8510
+    },
+    {
+      "id": "0f57056893d4",
+      "root": "repo",
+      "path": "scripts/session-stats/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "session-stats",
+          "Layout",
+          "One-time prep",
+          "Sync",
+          "Schema"
+        ],
+        "excerpt": "# session-stats Ad-hoc analyses over the local agent session corpus (`~/.omp/agent/sessions/`). SQLite-backed; data is synced once into the same `~/.omp/stats.db` that `packages/stats` uses, then queried by short Python scripts. ## Layout ``` scripts/session-stats/ sync.py # walks ~/.omp/agent/sessions/ and populates ss_* tables analyze.py # tools | edits | followups subcommands over the synced db audit.ts # LLM-assisted token-usage audit (no sync needed) audit-prompt.md # system prompt for the "
+      },
+      "signal_score": 45,
+      "noise_score": 1,
+      "signal_noise_ratio": 45.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 7,
+      "keyword_hits": 15,
+      "noise_hits": 1,
+      "line_count": 115,
+      "char_count": 5164
+    },
+    {
+      "id": "286572beb516",
+      "root": "repo",
+      "path": "docs/extension-loading.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Extension Loading (TypeScript/JavaScript Modules)",
+          "What this subsystem does",
+          "Primary implementation files",
+          "Inputs to extension loading",
+          "1) Auto-discovered native extension modules"
+        ],
+        "excerpt": "# Extension Loading (TypeScript/JavaScript Modules) This document covers how the coding agent discovers and loads **extension modules** (`.ts`/`.js`) at startup. It does **not** cover `gemini-extension.json` manifest extensions (documented separately). ## What this subsystem does Extension loading builds a list of module entry files, imports each module with Bun, executes its factory, and returns: - loaded extension definitions - per-path load errors (without aborting the whole load) - a shared "
+      },
+      "signal_score": 44,
+      "noise_score": 2,
+      "signal_noise_ratio": 22.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 26,
+      "keyword_hits": 14,
+      "noise_hits": 2,
+      "line_count": 272,
+      "char_count": 8312
+    },
+    {
+      "id": "6e5c2cbf0ab6",
+      "root": "repo",
+      "path": "docs/fugu-router-beats-frontier.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Fugu Router: Beating Frontier on Real Benchmarks",
+          "TL;DR",
+          "Why \"the router\" is the whole game",
+          "Model router: deterministic verifier-guided fusion",
+          "Agent router: cheap-model difficulty-aware harness (`router_harness.py`)"
+        ],
+        "excerpt": "# Fugu Router: Beating Frontier on Real Benchmarks **Scope.** All numbers below come from **real LLM lanes** (routed through 9router on `localhost:20128`) answering **real benchmark questions** (GPQA-Diamond MC, MMLU-Pro). No mocks. Cached lane outputs are reused only for *offline policy evaluation* (the same real answers, scored under different selection policies). Lanes (the model pool): `cx/gpt-5.5` (frontier / strongest), `kimi/kimi-k2.6`, `minimax/MiniMax-M3`, `ag/gemini-3.5-flash-low`. \"Fr"
+      },
+      "signal_score": 44,
+      "noise_score": 0,
+      "signal_noise_ratio": 44.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 9,
+      "keyword_hits": 14,
+      "noise_hits": 0,
+      "line_count": 157,
+      "char_count": 11417
+    },
+    {
+      "id": "ea534171b327",
+      "root": "repo",
+      "path": "docs/marketplace.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Marketplace plugin system",
+          "Quick start",
+          "Concepts",
+          "Commands",
+          "Interactive mode"
+        ],
+        "excerpt": "# Marketplace plugin system The marketplace system lets you discover, install, and manage plugins from Git, local, or direct-catalog sources. It is compatible with the Claude Code plugin registry format. ## Quick start ``` /marketplace add anthropics/claude-plugins-official /marketplace install wordpress.com@claude-plugins-official ``` In the TUI, `/marketplace` with no arguments opens the interactive plugin browser. In non-TUI command handling, `/marketplace` lists configured marketplaces; use "
+      },
+      "signal_score": 44,
+      "noise_score": 14,
+      "signal_noise_ratio": 3.143,
+      "initial_label": "mixed_signal",
+      "heading_count": 15,
+      "keyword_hits": 14,
+      "noise_hits": 14,
+      "line_count": 232,
+      "char_count": 11844
+    },
+    {
+      "id": "73af7adf5da3",
+      "root": "repo",
+      "path": "packages/coding-agent/examples/sdk/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "SDK Examples",
+          "Examples",
+          "Running",
+          "Quick Reference",
+          "Resolve preview workflow (AST edit apply/discard)"
+        ],
+        "excerpt": "# SDK Examples Programmatic usage of omp-coding-agent via `createAgentSession()`. ## Examples | File | Description | | -------------------------- | ---------------------------------------------- | | `01-minimal.ts` | Simplest usage with all defaults | | `02-custom-model.ts` | Select model and thinking level | | `03-custom-prompt.ts` | Replace or modify system prompt | | `04-skills.ts` | Discover, filter, or replace skills | | `05-tools.ts` | Built-in tools, custom tools | | `06-hooks.ts` | Loggi"
+      },
+      "signal_score": 44,
+      "noise_score": 0,
+      "signal_noise_ratio": 44.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 7,
+      "keyword_hits": 14,
+      "noise_hits": 0,
+      "line_count": 173,
+      "char_count": 6577
+    },
+    {
+      "id": "9de07fdb7916",
+      "root": "repo",
+      "path": "python/fugu/docs/dynamic-workflow-execution-map.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Dynamic Workflow Execution Map",
+          "Goal",
+          "Current execution flow",
+          "Backend registry",
+          "Model resolution"
+        ],
+        "excerpt": "# Dynamic Workflow Execution Map ## Goal Define how the harness selects subagent models, runs candidates in parallel, and synthesizes the final result. This is the implementation reference for dynamic workflows. ## Current execution flow `Supervisor.run_task()` in `harness/core/lifecycle.py` owns the end-to-end pipeline: 1. Create run workspace. 2. Scan task input for prompt-injection patterns. 3. Route candidate plans through `StaticRouter(profile=...)`. 4. Write `router_decision.json`. 5. Run "
+      },
+      "signal_score": 44,
+      "noise_score": 0,
+      "signal_noise_ratio": 44.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 19,
+      "keyword_hits": 14,
+      "noise_hits": 0,
+      "line_count": 233,
+      "char_count": 7068
+    },
+    {
+      "id": "d4929f99f0e6",
+      "root": "repo",
+      "path": "docs/mnemosyne-memory-backend.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Mnemopi memory backend",
+          "Settings",
+          "Scoping",
+          "LLM and embeddings",
+          "Operational notes"
+        ],
+        "excerpt": "# Mnemopi memory backend Oh My Pi can use `@pk-nerdsaver-ai/pi-mnemopi` as a local long-term memory backend. Set: ```yaml memory: backend: mnemopi ``` Example: ```yaml memory: backend: mnemopi mnemopi: scoping: per-project-tagged ``` With this backend enabled, the coding agent: 1. Opens one or more local Mnemopi SQLite databases according to the configured bank scoping. 2. Recalls relevant memories into a `<memories>` block for the first model turn of a session and refreshes the base prompt if r"
+      },
+      "signal_score": 43,
+      "noise_score": 2,
+      "signal_noise_ratio": 21.5,
+      "initial_label": "mixed_signal",
+      "heading_count": 5,
+      "keyword_hits": 15,
+      "noise_hits": 2,
+      "line_count": 161,
+      "char_count": 10580
+    },
+    {
+      "id": "1c86a9b09f2f",
+      "root": "repo",
+      "path": "packages/coding-agent/examples/extensions/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Extension Examples",
+          "Usage",
+          "Load an extension with --extension flag",
+          "Or copy to extensions directory for auto-discovery",
+          "Examples"
+        ],
+        "excerpt": "# Extension Examples Example extensions for pi-coding-agent. ## Usage ```bash # Load an extension with --extension flag pi --extension examples/extensions/permission-gate.ts # Or copy to extensions directory for auto-discovery cp permission-gate.ts ~/.omp/agent/extensions/ ``` ## Examples ### Lifecycle & Safety | Extension | Description | | ------------------------ | ---------------------------------------------------------------------------- | | `permission-gate.ts` | Prompts for confirmation b"
+      },
+      "signal_score": 43,
+      "noise_score": 3,
+      "signal_noise_ratio": 14.333,
+      "initial_label": "mixed_signal",
+      "heading_count": 13,
+      "keyword_hits": 13,
+      "noise_hits": 3,
+      "line_count": 143,
+      "char_count": 5705
+    },
+    {
+      "id": "62d6ee6c4dad",
+      "root": "repo",
+      "path": "python/fugu/docs/p3b-optimizer-realism-plan.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Plan: P3b — make the meta-optimizer evaluate the candidate's *edited* code",
+          "Implementation notes (as built)",
+          "Problem",
+          "Goal",
+          "Constraints / invariants to preserve"
+        ],
+        "excerpt": "# Plan: P3b — make the meta-optimizer evaluate the candidate's *edited* code **Status:** implemented — overlay + subprocess eval landed in `harness/meta/evaluator.py` **Part of:** Fusion hardening plan, P3 (P0 #8, P1 #9, P2 #10, P3a #11 are merged) **Owner:** TBD ## Implementation notes (as built) - `Optimizer._isolated_pass_rate(suite, candidate_dir, source_root=Path(\".\"))` builds an ephemeral `tempfile.mkdtemp` overlay (`shutil.copytree` with `_OVERLAY_IGNORE`), overlays the candidate's `_COPY"
+      },
+      "signal_score": 43,
+      "noise_score": 8,
+      "signal_noise_ratio": 5.375,
+      "initial_label": "mixed_signal",
+      "heading_count": 11,
+      "keyword_hits": 13,
+      "noise_hits": 8,
+      "line_count": 155,
+      "char_count": 8992
+    },
+    {
+      "id": "f60f602b0ef3",
+      "root": "repo",
+      "path": "docs/lsp-config.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "LSP configuration in OMP",
+          "Auto-detection",
+          "Config file locations",
+          "File shape",
+          "ServerConfig fields"
+        ],
+        "excerpt": "# LSP configuration in OMP This guide explains how to configure language servers for the OMP coding agent. Source of truth in code: - Server config type: `packages/coding-agent/src/lsp/types.ts` (`ServerConfig`) - Config loader: `packages/coding-agent/src/lsp/config.ts` - Built-in server definitions: `packages/coding-agent/src/lsp/defaults.json` ## Auto-detection When no LSP config file is present, OMP auto-detects servers by intersecting two conditions: 1. The project directory contains at leas"
+      },
+      "signal_score": 42,
+      "noise_score": 0,
+      "signal_noise_ratio": 42.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 13,
+      "keyword_hits": 12,
+      "noise_hits": 0,
+      "line_count": 242,
+      "char_count": 12743
+    },
+    {
+      "id": "4f74e5e50b57",
+      "root": "repo",
+      "path": "docs/porting-to-natives.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Porting to pi-natives (N-API) — Field Notes",
+          "When to port",
+          "Current package shape",
+          "Anatomy of a native export",
+          "Porting checklist"
+        ],
+        "excerpt": "# Porting to pi-natives (N-API) — Field Notes This is a practical guide for moving hot paths into `crates/pi-natives` and wiring them through the generated native package entrypoint. It exists to avoid the same failures happening twice. ## When to port Port when any of these are true: - The hot path runs in render loops, tight UI updates, or large batches. - JS allocations dominate (string churn, regex backtracking, large arrays). - You already have a JS baseline and can benchmark both versions "
+      },
+      "signal_score": 41,
+      "noise_score": 22,
+      "signal_noise_ratio": 1.864,
+      "initial_label": "mixed_signal",
+      "heading_count": 14,
+      "keyword_hits": 11,
+      "noise_hits": 22,
+      "line_count": 174,
+      "char_count": 9603
+    },
+    {
+      "id": "8e0b8f6e359b",
+      "root": "repo",
+      "path": "packages/coding-agent/examples/custom-tools/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Custom Tools Examples",
+          "Examples",
+          "hello/",
+          "todo/",
+          "Usage"
+        ],
+        "excerpt": "# Custom Tools Examples Example custom tools for omp-coding-agent. ## Examples Each example uses the `subdirectory/index.ts` structure required for tool discovery. ### hello/ Minimal example showing the basic structure of a custom tool. ### todo/ Full-featured example demonstrating: - `onSession` for state reconstruction from session history - Custom `renderCall` and `renderResult` - Proper branching support via details storage - State management without external files ## Usage ```bash # Test di"
+      },
+      "signal_score": 41,
+      "noise_score": 5,
+      "signal_noise_ratio": 8.2,
+      "initial_label": "mixed_signal",
+      "heading_count": 9,
+      "keyword_hits": 11,
+      "noise_hits": 5,
+      "line_count": 105,
+      "char_count": 2151
+    },
+    {
+      "id": "23326cee309f",
+      "root": "repo",
+      "path": "crates/brush-builtins-vendored/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "At a glance",
+          "Quick start:",
+          "✨ Features",
+          "🐚 `bash` Compatibility",
+          "⌨️ User Experience"
+        ],
+        "excerpt": "<div align=\"center\"> <img src=\"https://github.com/user-attachments/assets/266b83a6-bacb-408c-afb7-2a2ddf37b272\"/> </div> <br/> <!-- Primary badges --> <p align=\"center\"> <!-- crates.io version badge --> <a href=\"https://crates.io/crates/brush-shell\"><img src=\"https://img.shields.io/crates/v/brush-shell?style=flat-square\"/></a> <!-- msrv badge --> <img src=\"https://img.shields.io/crates/msrv/brush-shell\"/> <!-- license badge --> <img src=\"https://img.shields.io/badge/license-MIT-blue?style=flat-s"
+      },
+      "signal_score": 40,
+      "noise_score": 4,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 8,
+      "keyword_hits": 10,
+      "noise_hits": 4,
+      "line_count": 205,
+      "char_count": 8203
+    },
+    {
+      "id": "7cccb552fe2d",
+      "root": "repo",
+      "path": "crates/brush-core-vendored/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "At a glance",
+          "Quick start:",
+          "✨ Features",
+          "🐚 `bash` Compatibility",
+          "⌨️ User Experience"
+        ],
+        "excerpt": "<div align=\"center\"> <img src=\"https://github.com/user-attachments/assets/266b83a6-bacb-408c-afb7-2a2ddf37b272\"/> </div> <br/> <!-- Primary badges --> <p align=\"center\"> <!-- crates.io version badge --> <a href=\"https://crates.io/crates/brush-shell\"><img src=\"https://img.shields.io/crates/v/brush-shell?style=flat-square\"/></a> <!-- msrv badge --> <img src=\"https://img.shields.io/crates/msrv/brush-shell\"/> <!-- license badge --> <img src=\"https://img.shields.io/badge/license-MIT-blue?style=flat-s"
+      },
+      "signal_score": 40,
+      "noise_score": 4,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 8,
+      "keyword_hits": 10,
+      "noise_hits": 4,
+      "line_count": 205,
+      "char_count": 8203
+    },
+    {
+      "id": "8b5f3d98d994",
+      "root": "repo",
+      "path": "docs/ethereal-workspaces.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Ethereal Workspaces",
+          "Quick usage",
+          "One-shot prompt",
+          "Full interactive session: the TUI session runs inside the workspace until you quit",
+          "Preserve the workspace for inspection after the session exits"
+        ],
+        "excerpt": "# Ethereal Workspaces Ethereal Workspaces run `omp` inside an isolated workspace instead of mutating the source checkout. The workspace is active for the whole agent session: every prompt, tool call, shell command, edit, test, and follow-up turn sees the workspace as the project root until the session exits. They are useful for both one-shot prompts and full interactive sessions. ## Quick usage ```sh # One-shot prompt omp -p \"fix failing tests\" --ethereal --workspace-mode auto # Full interactive"
+      },
+      "signal_score": 40,
+      "noise_score": 13,
+      "signal_noise_ratio": 3.077,
+      "initial_label": "mixed_signal",
+      "heading_count": 12,
+      "keyword_hits": 10,
+      "noise_hits": 13,
+      "line_count": 101,
+      "char_count": 3901
+    },
+    {
+      "id": "6971b24ba207",
+      "root": "repo",
+      "path": "docs/install-id.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Install ID",
+          "API",
+          "Storage",
+          "Generation and lifecycle",
+          "Consumers"
+        ],
+        "excerpt": "# Install ID A persistent per-install UUID that identifies a single oh-my-pi installation across sessions. Used as a stable correlation key for server-side dedup of telemetry-style pushes (currently the auto-QA grievance flush from `report_tool_issue`). ## API Exported from `@pk-nerdsaver-ai/pi-utils` (`packages/utils/src/dirs.ts`): | Symbol | Purpose | | --------------------------------------- | ----------------------------------------------------------------------------------------------------"
+      },
+      "signal_score": 40,
+      "noise_score": 2,
+      "signal_noise_ratio": 20.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 6,
+      "keyword_hits": 10,
+      "noise_hits": 2,
+      "line_count": 42,
+      "char_count": 3607
+    },
+    {
+      "id": "ef67297a6148",
+      "root": "repo",
+      "path": "packages/snapcompact/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/snapcompact",
+          "How it works",
+          "Install",
+          "Usage",
+          "API surface"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/snapcompact Bitmap-frame context compression for vision-capable LLMs. Instead of asking an LLM to summarize discarded conversation history, snapcompact serializes it and renders the text into dense PNG frames of pixel-font glyphs that vision models read back directly. The whole pass is local and deterministic — no LLM call, no API key, no latency beyond rendering. Rasterization and PNG encoding happen in native code (`@pk-nerdsaver-ai/pi-natives`). Built for [oh-my-pi](https:/"
+      },
+      "signal_score": 40,
+      "noise_score": 3,
+      "signal_noise_ratio": 13.333,
+      "initial_label": "mixed_signal",
+      "heading_count": 6,
+      "keyword_hits": 10,
+      "noise_hits": 3,
+      "line_count": 71,
+      "char_count": 3731
+    },
+    {
+      "id": "8d7b6cbaa01c",
+      "root": "repo",
+      "path": "python/fugu/docs/p4-proposer-changed-paths-fidelity-plan.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Plan: P4 — faithful `changed_paths` detection for the proposer safety gate",
+          "Implementation notes (as built)",
+          "Problem",
+          "Goal",
+          "Constraints / invariants to preserve"
+        ],
+        "excerpt": "# Plan: P4 — faithful `changed_paths` detection for the proposer safety gate **Status:** implemented — content-hash snapshots landed in `harness/meta/proposer.py` **Part of:** Fusion hardening plan, P4 (P0 #8, P1 #9, P2 #10, P3a #11, P3b #13 are merged) **Owner:** TBD ## Implementation notes (as built) - `_file_digest(path)` chunked (64 KiB) `hashlib.sha256`; `_snapshot_tree` now maps each file to `(sha256_hex, size)`; `_changed_paths` keeps its signature/semantics (added or modified; deletions "
+      },
+      "signal_score": 40,
+      "noise_score": 0,
+      "signal_noise_ratio": 40.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 11,
+      "keyword_hits": 10,
+      "noise_hits": 0,
+      "line_count": 145,
+      "char_count": 8465
+    },
+    {
+      "id": "ea5e55097589",
+      "root": "repo",
+      "path": "python/fugu/docs/proposer-sandbox-verification.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "ClaudeProposer sandbox — live verification",
+          "Test 1 — in-scope edit succeeds",
+          "Test 2 — out-of-scope writes denied",
+          "Conclusion"
+        ],
+        "excerpt": "# ClaudeProposer sandbox — live verification Record of the live test of the tightened `ClaudeProposer` command (see PR #4) against a real `claude` CLI, confirming the `dontAsk` allowlist enforces the editable-surface boundary **during the run**, not just via the post-hoc `check_paths` gate. - **Date:** 2026-06-15 - **claude version:** 2.1.177 (Claude Code) - **Command under test** (`ClaudeProposer.build_command()`): ``` claude -p --permission-mode dontAsk \\ --allowedTools \"Read,Glob,Grep,Edit(ha"
+      },
+      "signal_score": 40,
+      "noise_score": 2,
+      "signal_noise_ratio": 20.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 4,
+      "keyword_hits": 14,
+      "noise_hits": 2,
+      "line_count": 54,
+      "char_count": 2380
+    },
+    {
+      "id": "a3f795752f0a",
+      "root": "repo",
+      "path": "python/fugu/evals/synthesizer/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Synthesis benchmark",
+          "Contents",
+          "How it works",
+          "Metrics",
+          "Reference results"
+        ],
+        "excerpt": "# Synthesis benchmark Measures the step that matters most: **synthesis**. The harness fans out diverse candidate lanes, but ~75% of fusion's quality lift comes from *fusing* those lanes into one answer (OpenRouter's finding), not from the fan-out or winner-selection. This benchmark quantifies that lift and compares synthesizer models. The headline metric is **lift = synthesis_coverage − best_lane_coverage**: how much the single synthesizer adds over simply taking the strongest individual lane. #"
+      },
+      "signal_score": 40,
+      "noise_score": 0,
+      "signal_noise_ratio": 40.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 7,
+      "keyword_hits": 10,
+      "noise_hits": 0,
+      "line_count": 147,
+      "char_count": 8254
+    },
+    {
+      "id": "eebfed60c2f0",
+      "root": "repo",
+      "path": "python/fugu/evals/thesis/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Thesis experiments: non-saturated benchmark + fusion vs frontier",
+          "1. A non-saturated benchmark: JudgeBench",
+          "raw_judgebench_gpt4o.jsonl + judgebench_slice.jsonl are produced by a fetch+convert step",
+          "2. Fusion vs frontier on MMLU-Pro (`fusion_vs_frontier.py` + `climb.py`)",
+          "Honest finding"
+        ],
+        "excerpt": "# Thesis experiments: non-saturated benchmark + fusion vs frontier Two experiments testing the repo's central thesis — *multiple lanes, synthesized into one answer, can and should beat any single model* — on **non-saturated** ground (where frontier models are not already at ceiling), with honest results. ## 1. A non-saturated benchmark: JudgeBench Our authored verifier suites saturate (every strong model ~100% accuracy). **JudgeBench** ([2410.12784](https://arxiv.org/abs/2410.12784)) is an adver"
+      },
+      "signal_score": 40,
+      "noise_score": 0,
+      "signal_noise_ratio": 40.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 12,
+      "keyword_hits": 10,
+      "noise_hits": 0,
+      "line_count": 257,
+      "char_count": 16624
+    },
+    {
+      "id": "fa444fa2abb7",
+      "root": "repo",
+      "path": "docs/natives-addon-loader-runtime.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Natives Addon Loader Runtime",
+          "Implementation files",
+          "Scope and responsibility",
+          "Runtime inputs and derived state",
+          "Platform support and tag resolution"
+        ],
+        "excerpt": "# Natives Addon Loader Runtime This document covers the runtime loader shipped by `@pk-nerdsaver-ai/pi-natives`: how `native/index.js` decides which `.node` file to require, how compiled-binary embedded payloads are extracted, and what startup failures report. ## Implementation files - `packages/natives/native/index.js` - `packages/natives/native/loader-state.js` - `packages/natives/native/embedded-addon.js` - `packages/natives/scripts/embed-native.ts` - `packages/natives/package.json` ## Scope "
+      },
+      "signal_score": 38,
+      "noise_score": 16,
+      "signal_noise_ratio": 2.375,
+      "initial_label": "mixed_signal",
+      "heading_count": 19,
+      "keyword_hits": 8,
+      "noise_hits": 16,
+      "line_count": 204,
+      "char_count": 9105
+    },
+    {
+      "id": "f07326ee5ac8",
+      "root": "repo",
+      "path": "packages/stats/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/omp-stats",
+          "Features",
+          "Metrics Tracked",
+          "Usage",
+          "Via CLI"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/omp-stats Local observability dashboard for AI usage statistics. ## Features - **Session log parsing**: Reads JSONL session logs from `~/.omp/agent/sessions/` - **SQLite aggregation**: Efficient stats storage and querying using `bun:sqlite` - **Web dashboard**: Real-time metrics visualization with Chart.js - **Incremental sync**: Only processes new/modified log entries ## Metrics Tracked | Metric | Calculation | |--------|-------------| | Tokens/s | `output_tokens / (duration "
+      },
+      "signal_score": 38,
+      "noise_score": 0,
+      "signal_noise_ratio": 38.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 14,
+      "keyword_hits": 8,
+      "noise_hits": 0,
+      "line_count": 83,
+      "char_count": 2158
+    },
+    {
+      "id": "b3df9258ebd9",
+      "root": "repo",
+      "path": "packages/mnemopi/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/pi-mnemopi",
+          "Basic use",
+          "Configuration",
+          "Banks and host scoping",
+          "Commands"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/pi-mnemopi Local SQLite memory engine for Oh My Pi agents. This package is the Bun/TypeScript port of the Mnemosyne memory engine. It provides: - `Mnemopi`, a small facade for remember/recall/stats/sleep workflows. - `BeamMemory`, the lower-level working/episodic memory engine. - MCP tool definitions and a dispatcher for host integrations. - Optional local ONNX embeddings through `fastembed` and optional OpenAI-compatible embedding/LLM endpoints. The package does not bundle or"
+      },
+      "signal_score": 37,
+      "noise_score": 0,
+      "signal_noise_ratio": 37.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 6,
+      "keyword_hits": 7,
+      "noise_hits": 0,
+      "line_count": 108,
+      "char_count": 3652
+    },
+    {
+      "id": "ec3b0dd94133",
+      "root": "repo",
+      "path": "packages/tui/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/pi-tui",
+          "Features",
+          "Quick Start",
+          "Core API",
+          "TUI"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/pi-tui Minimal terminal UI framework with differential rendering and synchronized output for flicker-free interactive CLI applications. ## Features - **Differential Rendering**: Three-strategy rendering system that only updates what changed - **Synchronized Output**: Uses CSI 2026 for atomic screen updates (no flicker) - **Bracketed Paste Mode**: Handles large pastes correctly with markers for >10 line pastes - **Component-based**: Simple Component interface with render() meth"
+      },
+      "signal_score": 37,
+      "noise_score": 3,
+      "signal_noise_ratio": 12.333,
+      "initial_label": "mixed_signal",
+      "heading_count": 36,
+      "keyword_hits": 7,
+      "noise_hits": 3,
+      "line_count": 706,
+      "char_count": 18964
+    },
+    {
+      "id": "42ed031df8b2",
+      "root": "repo",
+      "path": "infra/install-redirect/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Distribution without GitHub Actions",
+          "One-time setup",
+          "Each release",
+          "How installs resolve"
+        ],
+        "excerpt": "# Distribution without GitHub Actions The fork distributes its CLI with **no GitHub Actions, no GitHub Releases, and no GitHub billing**. Binaries live in a **private Hugging Face repo** (free storage + egress); a **Cloudflare Worker** at `oh-my-pi.pkking.computer` holds the HF token as a secret and proxies downloads, so the repo stays private and the installer never sees a token. ``` build host(s) ── publish-binaries-hf.ts ──▶ private HF repo ──▶ CF Worker ──▶ install.sh / install.ps1 ──▶ user "
+      },
+      "signal_score": 36,
+      "noise_score": 5,
+      "signal_noise_ratio": 7.2,
+      "initial_label": "mixed_signal",
+      "heading_count": 4,
+      "keyword_hits": 10,
+      "noise_hits": 5,
+      "line_count": 71,
+      "char_count": 3622
+    },
+    {
+      "id": "49359fa4ff69",
+      "root": "repo",
+      "path": "python/fugu/distill/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Verifier distillation — small pairwise judge",
+          "Path A — Colab (recommended: less compute-constrained)",
+          "Path B — Local GPU (fallback)",
+          "2) the CPU torch build cannot train — install a CUDA wheel matching `nvidia-smi` (cu121/cu124/cu128).",
+          "NOTE: pip treats plain `torch` as already-satisfied, so FORCE the swap:"
+        ],
+        "excerpt": "# Verifier distillation — small pairwise judge Distil the frontier **swap-and-aggregate verifier** (0.902 on JudgeBench) into a cheap `gemma-2-2b` via QLoRA, so pairwise judging can run without a frontier API call. - **Train:** RewardBench (`allenai/reward-bench`, filtered) — high-quality (chosen, rejected) pairs, emitted in **both orderings** so the student learns order-invariance. ~5,970 examples. - **Eval:** the **JudgeBench** 350-pair held-out set (`ScalerLab/JudgeBench`, `gpt` split — no le"
+      },
+      "signal_score": 36,
+      "noise_score": 0,
+      "signal_noise_ratio": 36.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 8,
+      "keyword_hits": 6,
+      "noise_hits": 0,
+      "line_count": 78,
+      "char_count": 4658
+    },
+    {
+      "id": "2725f8e05782",
+      "root": "repo",
+      "path": "packages/coding-agent/examples/hooks/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Hooks Examples",
+          "Usage",
+          "Load a hook with --hook flag",
+          "Or copy to hooks directory for auto-discovery",
+          "Examples"
+        ],
+        "excerpt": "# Hooks Examples Example hooks for omp-coding-agent. ## Usage ```bash # Load a hook with --hook flag omp --hook examples/hooks/permission-gate.ts # Or copy to hooks directory for auto-discovery cp permission-gate.ts ~/.omp/agent/hooks/ ``` ## Examples | Hook | Description | | ------------------------ | ------------------------------------------------------------------------------ | | `permission-gate.ts` | Prompts for confirmation before dangerous bash commands (rm -rf, sudo, etc.) | | `git-chec"
+      },
+      "signal_score": 35,
+      "noise_score": 2,
+      "signal_noise_ratio": 17.5,
+      "initial_label": "mixed_signal",
+      "heading_count": 6,
+      "keyword_hits": 5,
+      "noise_hits": 2,
+      "line_count": 57,
+      "char_count": 2469
+    },
+    {
+      "id": "e9cc32a2661d",
+      "root": "repo",
+      "path": "packages/natives/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/pi-natives",
+          "What's Inside",
+          "Usage",
+          "Building",
+          "Build native addon from workspace root (requires Rust)"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/pi-natives Native Rust functionality via N-API. ## What's Inside - **Grep**: Regex-based search powered by ripgrep's engine with native file walking and matching - **Find**: Glob-based file/directory discovery with gitignore support (pure TypeScript via `globPaths`) - **SIXEL**: Terminal image encoding for SIXEL-capable terminals (decode, resize, encode in one pass) General-purpose image processing (decode/resize/encode for files and buffers) lives in [`Bun.Image`](https://bun"
+      },
+      "signal_score": 35,
+      "noise_score": 4,
+      "signal_noise_ratio": 8.75,
+      "initial_label": "mixed_signal",
+      "heading_count": 7,
+      "keyword_hits": 5,
+      "noise_hits": 4,
+      "line_count": 81,
+      "char_count": 2857
+    },
+    {
+      "id": "b293d81e5bce",
+      "root": "repo",
+      "path": "python/fugu/evals/verifier/labeled/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Labeled verifier benchmark",
+          "Contents",
+          "Running it",
+          "Deterministic mock floor (no API calls)",
+          "Grade a live model via 9router (needs 9ROUTER_API_KEY / NINEROUTER_API_KEY)"
+        ],
+        "excerpt": "# Labeled verifier benchmark A real **model-quality** benchmark for the fusion verifier: 28 labeled pairwise tasks where one candidate is objectively better, used to measure how reliably a given model picks the right answer and how much it is swayed by ordering, verbosity, and judge-manipulation. This complements the tiny mock-only reliability fixtures (`../search`, `../validation`, `../holdout`), which test the harness *plumbing*. This suite tests real *selection quality* and is meant to be run"
+      },
+      "signal_score": 35,
+      "noise_score": 0,
+      "signal_noise_ratio": 35.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 8,
+      "keyword_hits": 5,
+      "noise_hits": 0,
+      "line_count": 108,
+      "char_count": 5321
+    },
+    {
+      "id": "cd6fe6dfd4a4",
+      "root": "repo",
+      "path": "packages/coding-agent/examples/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Examples",
+          "Directories",
+          "[sdk/](sdk/)",
+          "[hooks/](hooks/)",
+          "[custom-tools/](custom-tools/)"
+        ],
+        "excerpt": "# Examples Example code for omp-coding-agent SDK, hooks, and custom tools. ## Directories ### [sdk/](sdk/) Programmatic usage via `createAgentSession()`. Shows how to customize models, prompts, tools, hooks, and session management. ### [hooks/](hooks/) Example hooks for intercepting tool calls, adding safety gates, and integrating with external systems. ### [custom-tools/](custom-tools/) Example custom tools that extend the agent's capabilities. ## Documentation - [SDK Reference](sdk/README.md) "
+      },
+      "signal_score": 33,
+      "noise_score": 3,
+      "signal_noise_ratio": 11.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 6,
+      "keyword_hits": 3,
+      "noise_hits": 3,
+      "line_count": 22,
+      "char_count": 649
+    },
+    {
+      "id": "89b022251864",
+      "root": "repo",
+      "path": "packages/coding-agent/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/pi-coding-agent",
+          "Memory backends",
+          "Hindsight quickstart"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/pi-coding-agent Core implementation package for the `omp` coding agent in the `oh-my-pi` monorepo. For installation, setup, provider configuration, model roles, slash commands, and full CLI reference, see: - [Monorepo README (local)](../../README.md) - [Monorepo README (GitHub)](https://github.com/can1357/oh-my-pi#readme) Package-specific references: - [CHANGELOG](./CHANGELOG.md) - [MCP configuration guide](../../docs/mcp-config.md) - [MCP runtime lifecycle](../../docs/mcp-run"
+      },
+      "signal_score": 32,
+      "noise_score": 2,
+      "signal_noise_ratio": 16.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 3,
+      "keyword_hits": 8,
+      "noise_hits": 2,
+      "line_count": 37,
+      "char_count": 2199
+    },
+    {
+      "id": "6d682cf1ca38",
+      "root": "repo",
+      "path": "packages/hashline/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/hashline",
+          "Quick start",
+          "Format",
+          "Abstractions",
+          "`Filesystem`"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/hashline A compact, line-anchored patch language and applier. Hashline is a diff format designed for LLM-driven file edits. It binds every hunk to a file-content hash so stale anchors are rejected before they corrupt code, and it abstracts over the filesystem so the same patcher works on disk, in memory, over the network, or against any custom backend. ## Quick start ```ts import { Filesystem, InMemoryFilesystem, InMemorySnapshotStore, Patcher, Patch, } from \"@pk-nerdsaver-ai/"
+      },
+      "signal_score": 32,
+      "noise_score": 0,
+      "signal_noise_ratio": 32.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 7,
+      "keyword_hits": 2,
+      "noise_hits": 0,
+      "line_count": 81,
+      "char_count": 2918
+    },
+    {
+      "id": "e9eb075a3f27",
+      "root": "repo",
+      "path": "docs/local-models.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Embedded Local Tiny-Model Experiments",
+          "Runtime / environment findings",
+          "Task 1: Session title generation (`providers.tinyModel`)",
+          "Task 2: Mnemopi memory (`providers.memoryModel`)",
+          "Extraction findings"
+        ],
+        "excerpt": "# Embedded Local Tiny-Model Experiments This document summarizes the experiments behind the optional **local** tiny-model paths for session-title generation (`providers.tinyModel`), Mnemopi memory extraction/consolidation (`providers.memoryModel`), and the `auto` thinking-level difficulty classifier (`providers.autoThinkingModel`, which reuses the memory-model registry). It is a factual engineering record for maintainers: what we measured, which recipes won, and which models we shipped. All thre"
+      },
+      "signal_score": 31,
+      "noise_score": 4,
+      "signal_noise_ratio": 7.75,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 10,
+      "keyword_hits": 1,
+      "noise_hits": 4,
+      "line_count": 149,
+      "char_count": 8039
+    },
+    {
+      "id": "2566a94b95ed",
+      "root": "repo",
+      "path": "packages/clips-extension/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/clips-extension",
+          "What it adds",
+          "Configuration"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/clips-extension Oh My Pi client extension for **Clips** — agent-native screen recording (https://gopk.xyz/clip). This package is just the in-CLI integration. The Clips **service** (the Cloudflare Worker, storage, accounts, transcription) lives in its own standalone repository and is not part of the monorepo. ## What it adds - **`/record`** — opens the Clips recorder in your browser. - **`/clip <url|id>`** — fetches a clip's agent-readable briefing (transcript + timestamped scr"
+      },
+      "signal_score": 31,
+      "noise_score": 1,
+      "signal_noise_ratio": 31.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 3,
+      "keyword_hits": 7,
+      "noise_hits": 1,
+      "line_count": 17,
+      "char_count": 892
+    },
+    {
+      "id": "b0c12a5e7e75",
+      "root": "repo",
+      "path": ".github/workflows/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "GitHub Actions — disabled in this fork",
+          "Why",
+          "Releasing without Actions"
+        ],
+        "excerpt": "# GitHub Actions — disabled in this fork All workflows here are intentionally **disabled** (renamed to `*.yml.disabled`) so the fork has **zero dependency on GitHub Actions** and requires **no GitHub billing**. GitHub only executes `*.yml` / `*.yaml` files in this directory, so the `.disabled` files never run. They are kept for reference (they are the upstream CI) and can be re-enabled by renaming back to `*.yml` if a non-billed runner is ever wired up. ## Why The fork's GitHub account is not on"
+      },
+      "signal_score": 30,
+      "noise_score": 4,
+      "signal_noise_ratio": 7.5,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 3,
+      "keyword_hits": 6,
+      "noise_hits": 4,
+      "line_count": 38,
+      "char_count": 2050
+    },
+    {
+      "id": "52d9cbdf8aa5",
+      "root": "repo",
+      "path": "docs/keybindings.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Keybindings",
+          "Customize keybindings",
+          "Common action IDs"
+        ],
+        "excerpt": "# Keybindings Run `/hotkeys` inside an `omp` session to see the active chords for your current build. The list reflects any remaps loaded from disk and any bindings added by extensions. ## Customize keybindings User remaps live in `~/.omp/agent/keybindings.yml`. The file is a YAML mapping whose keys are keybinding action IDs and whose values are either one chord string or an array of chord strings. It is not read from `~/.omp/agent/config.yml`, and there is no nested `keybindings` object. ```yam"
+      },
+      "signal_score": 30,
+      "noise_score": 3,
+      "signal_noise_ratio": 10.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 3,
+      "keyword_hits": 6,
+      "noise_hits": 3,
+      "line_count": 51,
+      "char_count": 4832
+    },
+    {
+      "id": "f20fe5f67fe9",
+      "root": "repo",
+      "path": "packages/catalog/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/pi-catalog",
+          "What's inside",
+          "models.json is generated",
+          "Install",
+          "References"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/pi-catalog Model catalog for [oh-my-pi](https://github.com/can1357/oh-my-pi): bundled model database, provider discovery, model identity, classification, and equivalence. ## What's inside | Module | Purpose | | --- | --- | | `models.json` + `models` | Bundled model database (pricing, context windows, modalities, thinking support) | | `provider-models` | Provider catalog descriptors (`CATALOG_PROVIDERS`), per-provider model resolution rules | | `discovery` | Runtime model disco"
+      },
+      "signal_score": 30,
+      "noise_score": 5,
+      "signal_noise_ratio": 6.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 5,
+      "keyword_hits": 2,
+      "noise_hits": 5,
+      "line_count": 44,
+      "char_count": 2087
+    },
+    {
+      "id": "c02d5c07936d",
+      "root": "repo",
+      "path": "python/fugu/evals/rqgm_code/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "`rqgm_code` — verifiable executable coding suite",
+          "Splits",
+          "Reward semantics (read before interpreting a delta)",
+          "Fixture authoring rules"
+        ],
+        "excerpt": "# `rqgm_code` — verifiable executable coding suite Ground-truth reward for the Red Queen Gödel Machine evolver (`fmh rqgm evolve`). Each task is a tiny self-contained Python project: a `solution.py` stub plus a `test_solution.py`. The reward is **executable** — `success_commands` runs `python -m pytest -q` in the materialized workspace and the task passes iff the process exits 0. No LLM judge, no `bool(nonempty answer)`. ## Splits | Suite | Path | Role | |---|---|---| | search / validation | `ev"
+      },
+      "signal_score": 30,
+      "noise_score": 4,
+      "signal_noise_ratio": 7.5,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 4,
+      "keyword_hits": 4,
+      "noise_hits": 4,
+      "line_count": 48,
+      "char_count": 2569
+    },
+    {
+      "id": "a2b2902a3189",
+      "root": "repo",
+      "path": "packages/utils/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/pi-utils",
+          "Notable modules",
+          "Install",
+          "References"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/pi-utils Shared utilities for [oh-my-pi](https://github.com/can1357/oh-my-pi) packages. Zero ceremony, Bun-first. ## Notable modules | Module | Purpose | | --- | --- | | `logger` | Centralized logger writing to `~/.omp/logs/` with rotation (TUI-safe — never stdout) | | `prompt` | Handlebars-based prompt templating and formatting helpers | | `dirs` | Path helpers for omp config directories (`~/.omp`, XDG-aware on Linux) | | `stream` | `readStream` / `readLines` helpers over `Re"
+      },
+      "signal_score": 28,
+      "noise_score": 2,
+      "signal_noise_ratio": 14.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 4,
+      "keyword_hits": 2,
+      "noise_hits": 2,
+      "line_count": 37,
+      "char_count": 1594
+    },
+    {
+      "id": "59bcd6f20e13",
+      "root": "repo",
+      "path": "packages/wire/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/pi-wire",
+          "Exports",
+          "Protocol boundary"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/pi-wire Shared TypeScript wire contracts for omp collab live sessions. The package contains only JSON-safe protocol shapes and constants. It has no runtime dependencies and is consumed by both the host CLI (`@pk-nerdsaver-ai/pi-coding-agent`) and browser guest (`@pk-nerdsaver-ai/collab-web`). ## Exports ```ts import type { GuestFrame, HostFrame, SessionEntry } from \"@pk-nerdsaver-ai/pi-wire\"; import { COLLAB_PROTO, DEFAULT_RELAY_URL, ENVELOPE_HEADER_LENGTH } from \"@pk-nerdsave"
+      },
+      "signal_score": 28,
+      "noise_score": 1,
+      "signal_noise_ratio": 28.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 3,
+      "keyword_hits": 4,
+      "noise_hits": 1,
+      "line_count": 32,
+      "char_count": 1368
+    },
+    {
+      "id": "bcaf30c8bc97",
+      "root": "repo",
+      "path": "packages/coding-agent/test/fixtures/apply-patch/scenarios/README.md",
+      "selectors": [
+        "known_noise",
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Overview",
+          "Specification"
+        ],
+        "excerpt": "# Overview This directory is a collection of end to end tests for the apply-patch specification, meant to be easily portable to other languages or platforms. # Specification Each test case is one directory, composed of input state (input/), the patch operation (patch.txt), and the expected final state (expected/). This structure is designed to keep tests simple (i.e. test exactly one patch at a time) while still providing enough flexibility to test any given operation across files. Here's what t"
+      },
+      "signal_score": 27,
+      "noise_score": 43,
+      "signal_noise_ratio": 0.628,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 2,
+      "keyword_hits": 5,
+      "noise_hits": 0,
+      "line_count": 19,
+      "char_count": 669
+    },
+    {
+      "id": "80cf3dc2d290",
+      "root": "repo",
+      "path": "python/fugu/prompts/pro/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Pro-model prompts",
+          "Desktop Commander file-reader",
+          "Index"
+        ],
+        "excerpt": "# Pro-model prompts Ten self-contained, high-rigor prompts for a top-tier reasoning model (e.g. **GPT-5.5 Pro**), each targeting an open question from the fusion/verifier investigation. Paste one into the model and let it work. ## Desktop Commander file-reader Each prompt has a **\"Files to read (Desktop Commander)\"** section listing **absolute Windows paths** into this repo (root: `C:\\dev\\Desktop-Projects\\pi-llm-as-verifier`). Run the pro model with the [Desktop Commander](https://github.com/won"
+      },
+      "signal_score": 25,
+      "noise_score": 0,
+      "signal_noise_ratio": 25.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 3,
+      "keyword_hits": 1,
+      "noise_hits": 0,
+      "line_count": 30,
+      "char_count": 1573
+    }
+  ]
+}

@@ -1,0 +1,509 @@
+{
+  "shard": "vault_project_wikis",
+  "records": [
+    {
+      "id": "7100c10d50a8",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/README.md",
+      "selectors": [
+        "project_docs",
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "IX Dashboard 2026",
+          "Live Surfaces",
+          "Pages in This Folder",
+          "Imported from Repo Wiki",
+          "Repo Wiki Pointer"
+        ],
+        "excerpt": "﻿--- tags: [ix-dashboard, project-wiki, moc] updated: 2026-06-09 --- # IX Dashboard 2026 Map of content for the IX Dashboard 2026 project wiki. This folder holds durable architectural and operational knowledge. For automation-written files (log.md, sessions/, entities/) and per-project entity notes, see the repo wiki pointer at the bottom of this page. --- ## Live Surfaces | Surface | URL | What it is | |---|---|---| | Legacy Command Center | https://ix-dash.pkking.computer | Password-gated Pyth"
+      },
+      "signal_score": 67,
+      "noise_score": 3,
+      "signal_noise_ratio": 22.333,
+      "initial_label": "high_signal",
+      "heading_count": 5,
+      "keyword_hits": 17,
+      "noise_hits": 3,
+      "line_count": 62,
+      "char_count": 3374
+    },
+    {
+      "id": "e41615fcc348",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/Agent-Runtime.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "Agent Runtime",
+          "The omp CLI",
+          "The Text-Mode Bug",
+          "Model Pinning and Provider Syntax",
+          "The /ix-ui/actions/agent Endpoint"
+        ],
+        "excerpt": "--- tags: [ix-dashboard, project-wiki] updated: 2026-06-09 --- # Agent Runtime The IX Dashboard's agentic backend is built around the `omp` CLI (Oh My Pi). All agent-driven work routes through `omp` whether it originates from the hosted chat page, a slash command, or the React UI's action endpoint. This page covers how that works, why certain choices were made, and where the system is headed. See [[Architecture]] for the overall system topology and [[Decisions-Log]] for the reasoning behind spec"
+      },
+      "signal_score": 64,
+      "noise_score": 2,
+      "signal_noise_ratio": 32.0,
+      "initial_label": "high_signal",
+      "heading_count": 10,
+      "keyword_hits": 44,
+      "noise_hits": 2,
+      "line_count": 171,
+      "char_count": 9748
+    },
+    {
+      "id": "cc79ba835599",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/Architecture.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "IX Dashboard 2026 - Architecture",
+          "Public Surfaces",
+          "1. Legacy Command Center (ix-dash.pkking.computer)",
+          "2. React UI (interconnection-dash.pages.dev)",
+          "Cloudflare Tunnel"
+        ],
+        "excerpt": "--- tags: [ix-dashboard, project-wiki] updated: 2026-06-09 --- # IX Dashboard 2026 - Architecture This page describes the full system architecture: public surfaces, tunnel, Worker, D1 snapshot store, FastAPI backend, data layer, and the agentic runtime. For operational runbook details see [[Operations]]. For key decisions made on 2026-06-09 see [[Decisions-Log]]. For the agent runtime internals see [[Agent-Runtime]]. Start at [[README]] for orientation. --- ## Public Surfaces Two distinct applic"
+      },
+      "signal_score": 64,
+      "noise_score": 3,
+      "signal_noise_ratio": 21.333,
+      "initial_label": "high_signal",
+      "heading_count": 16,
+      "keyword_hits": 33,
+      "noise_hits": 3,
+      "line_count": 234,
+      "char_count": 9590
+    },
+    {
+      "id": "744ade32c94f",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/Decisions-Log.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "IX Dashboard 2026 - Decisions Log",
+          "Decision Table",
+          "Open Items",
+          "X-API-Key rotation",
+          "9router qwen3.7-plus combo credential broken"
+        ],
+        "excerpt": "--- tags: [ix-dashboard, project-wiki] updated: 2026-06-09 --- # IX Dashboard 2026 - Decisions Log Companion pages: [[Architecture]] | [[Agent-Runtime]] | [[Operations]] | [[README]] This page tracks every concrete decision made during the build-out of the IX Dashboard 2026 system. Entries include the rationale at the time and a signal for when to revisit. Open items are listed at the bottom. --- ## Decision Table | Date | Decision | Why | Revisit When | |---|---|---|---| | 2026-06-09 | Use prox"
+      },
+      "signal_score": 64,
+      "noise_score": 5,
+      "signal_noise_ratio": 12.8,
+      "initial_label": "high_signal",
+      "heading_count": 7,
+      "keyword_hits": 47,
+      "noise_hits": 5,
+      "line_count": 73,
+      "char_count": 10320
+    },
+    {
+      "id": "f6c9ebbac924",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/skill-g-stack-skill-boundary-triage.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "Problem",
+          "Trigger",
+          "Preconditions",
+          "Memory Role",
+          "Durable Facts"
+        ],
+        "excerpt": "--- id: skill-g-stack-skill-boundary-triage title: \"G-Stack Skill Boundary Triage\" status: active kind: workflow applies_to: - \"repo:C:/Users/prest/Desktop/SPWR-Daily/Interconnection-Dash-2026\" score: 0 helpful_count: 0 harmful_count: 0 skip_steps_estimate: 6 confidence: high pii_review: passed validation_status: validated validation_score: 32 http_candidate: false source_type: trajectory memory_scope: \"procedural\" memory_strategy: \"hierarchical\" update_strategy: \"merge_append\" durable_facts: [\""
+      },
+      "signal_score": 64,
+      "noise_score": 0,
+      "signal_noise_ratio": 64.0,
+      "initial_label": "high_signal",
+      "heading_count": 20,
+      "keyword_hits": 34,
+      "noise_hits": 0,
+      "line_count": 137,
+      "char_count": 4353
+    },
+    {
+      "id": "44b6143f4850",
+      "root": "vault",
+      "path": "vault:Projects/pi-speak-extension/OH_MY_PK_HARNESS_REBRAND.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "oh-my-pk Agent Harness Rebrand",
+          "Decision",
+          "Changed surfaces",
+          "Compatibility",
+          "Default Working Directory Context"
+        ],
+        "excerpt": "--- title: \"oh-my-pk Agent Harness Rebrand\" type: decision tags: [pi-speak-extension, oh-my-pk, ompk, android, gateway, agent-harness] status: active date: 2026-07-02 --- # oh-my-pk Agent Harness Rebrand ## Decision `oh-my-pk` / `ompk` is the canonical agent harness name for pi-speak-extension. The older `oh-my-pi` / `omp` names remain accepted compatibility aliases so existing setup links, env vars, and saved preferences do not break. ## Changed surfaces - Gateway/provider routing now canonical"
+      },
+      "signal_score": 63,
+      "noise_score": 4,
+      "signal_noise_ratio": 15.75,
+      "initial_label": "high_signal",
+      "heading_count": 7,
+      "keyword_hits": 29,
+      "noise_hits": 4,
+      "line_count": 79,
+      "char_count": 3684
+    },
+    {
+      "id": "d67d6c19155d",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/utility-pipeline.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "Seeded Project Knowledge: Utility Pipeline",
+          "Source-of-truth ordering",
+          "source_truth__action_grade_evidence",
+          "source_truth__source_precedence",
+          "source_truth__history_only_sources"
+        ],
+        "excerpt": "# Seeded Project Knowledge: Utility Pipeline Updated: 2026-06-06T20:30:57+00:00 This note captures operator-provided knowledge that may not be apparent from repo files. ## Source-of-truth ordering ### source_truth__action_grade_evidence Question id: `source_truth_03` Question: What evidence is strong enough to trigger customer-facing or utility-facing action? Answer: > Action-grade evidence rules: contacting a customer requires explicit human-in-the-loop permission for now. Preparing/submitting "
+      },
+      "signal_score": 62,
+      "noise_score": 1,
+      "signal_noise_ratio": 62.0,
+      "initial_label": "high_signal",
+      "heading_count": 25,
+      "keyword_hits": 28,
+      "noise_hits": 1,
+      "line_count": 162,
+      "char_count": 15116
+    },
+    {
+      "id": "ab60865125a6",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/Operations.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "IX Dashboard 2026 - Operations",
+          "Daily Data Refresh Flow",
+          "Phase 1 - Salesforce CSV Export (Mac)",
+          "Phase 2 - Refresh Local Pipeline",
+          "Phase 3 - Push Remote Snapshots"
+        ],
+        "excerpt": "--- tags: [ix-dashboard, project-wiki] updated: 2026-06-09 --- # IX Dashboard 2026 - Operations Day-to-day procedures for keeping the IX Dashboard running, data fresh, and services reachable. For how the pieces fit together see [[Architecture]]; for why things were built this way see [[Decisions-Log]]. --- ## Daily Data Refresh Flow The daily refresh is a two-phase operation: export from Salesforce, then push snapshots to the remote Worker. ### Phase 1 - Salesforce CSV Export (Mac) Salesforce CS"
+      },
+      "signal_score": 58,
+      "noise_score": 6,
+      "signal_noise_ratio": 9.667,
+      "initial_label": "high_signal",
+      "heading_count": 22,
+      "keyword_hits": 24,
+      "noise_hits": 6,
+      "line_count": 231,
+      "char_count": 10934
+    },
+    {
+      "id": "ce695a4965e2",
+      "root": "vault",
+      "path": "vault:Projects/pi-speak-extension/pi-speak-extension-overview.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "pi-speak-extension",
+          "Purpose",
+          "Core architecture",
+          "Extension runtime (`index.ts`, `control-server.ts`, `remote-turn-manager.ts`)",
+          "Voice path"
+        ],
+        "excerpt": "--- title: \"pi-speak-extension Overview\" type: synthesis tags: [pi-speak-extension, voice-control, remote-control, typescript, android] status: in-progress --- # pi-speak-extension ## Purpose A cross-platform voice + remote-control extension for `pi-coding-agent` with three main surfaces: - **Desktop extension core** (`index.ts` / TypeScript backend): command routing, session targeting, wake phrase handling, admin operations, logging, and control APIs. - **Android companion app** (`android-app/`"
+      },
+      "signal_score": 56,
+      "noise_score": 2,
+      "signal_noise_ratio": 28.0,
+      "initial_label": "high_signal",
+      "heading_count": 12,
+      "keyword_hits": 22,
+      "noise_hits": 2,
+      "line_count": 64,
+      "char_count": 3556
+    },
+    {
+      "id": "2b2c442c265b",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/skill-conversation-obsidian-capture-discipline.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "Problem",
+          "Trigger",
+          "Preconditions",
+          "Memory Role",
+          "Durable Facts"
+        ],
+        "excerpt": "--- id: skill-conversation-obsidian-capture-discipline title: \"Conversation Obsidian Capture Discipline\" status: active kind: workflow applies_to: - \"repo:C:/Users/prest/Desktop/SPWR-Daily/Interconnection-Dash-2026\" score: 0 helpful_count: 0 harmful_count: 0 skip_steps_estimate: 5 confidence: high pii_review: passed validation_status: validated validation_score: 33 http_candidate: false source_type: trajectory memory_scope: \"procedural\" memory_strategy: \"hierarchical\" update_strategy: \"merge_app"
+      },
+      "signal_score": 54,
+      "noise_score": 3,
+      "signal_noise_ratio": 18.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 20,
+      "keyword_hits": 20,
+      "noise_hits": 3,
+      "line_count": 134,
+      "char_count": 3909
+    },
+    {
+      "id": "ca51e4159094",
+      "root": "vault",
+      "path": "vault:Projects/pi-speak-extension/PROJECT_FILES_AND_ENTRYPOINTS.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "Project Files and Entrypoints",
+          "Main surfaces",
+          "Session routing",
+          "UI",
+          "Android app"
+        ],
+        "excerpt": "--- title: \"pi-speak-extension File Map\" type: concept tags: [pi-speak-extension, file-map, entrypoints, architecture] status: active --- # Project Files and Entrypoints ## Main surfaces - `index.ts` - extension entrypoint, command registration, and top-level orchestration. - `control-server.ts` - HTTP API and remote control server. - `remote-turn-manager.ts` - turn/session coordination for remote actions. - `tts.ts` - text-to-speech provider selection and playback. - `stt.ts` - speech-to-text i"
+      },
+      "signal_score": 48,
+      "noise_score": 0,
+      "signal_noise_ratio": 48.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 7,
+      "keyword_hits": 14,
+      "noise_hits": 0,
+      "line_count": 50,
+      "char_count": 2068
+    },
+    {
+      "id": "4381882e4321",
+      "root": "vault",
+      "path": "vault:Projects/pi-speak-extension/PR_13_ANDROID_GATEWAY_PARITY_COMPLETION.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "PR 13 Android Gateway Parity Completion",
+          "Outcome",
+          "What Was Achieved",
+          "Skipped Or Deferred",
+          "Validation"
+        ],
+        "excerpt": "--- title: \"PR 13 Android Gateway Parity Completion\" type: session tags: [pi-speak-extension, android, gateway, parity, pr13, agent-review] status: complete date: 2026-07-02 --- # PR 13 Android Gateway Parity Completion ## Outcome PR #13, \"feat: bring Android app to functional parity with the web remote\", was merged into `main` on 2026-07-02 at 06:56:17Z. Merge evidence: - PR: https://github.com/kingkillery/pk-speak-extension/pull/13 - Merge commit: `35fed0aeb79f332937085791e9bcaae304a13c0c` - L"
+      },
+      "signal_score": 45,
+      "noise_score": 5,
+      "signal_noise_ratio": 9.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 8,
+      "keyword_hits": 11,
+      "noise_hits": 5,
+      "line_count": 62,
+      "char_count": 3071
+    },
+    {
+      "id": "d64f25439682",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/skill-ix-dash-report-accuracy-fast-path.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "Problem",
+          "Trigger",
+          "Preconditions",
+          "Memory Role",
+          "Durable Facts"
+        ],
+        "excerpt": "--- id: skill-ix-dash-report-accuracy-fast-path title: \"IX Dash Report Accuracy Fast Path\" status: active kind: workflow applies_to: - \"repo:C:/Users/prest/Desktop/SPWR-Daily/Interconnection-Dash-2026\" score: 0 helpful_count: 0 harmful_count: 0 skip_steps_estimate: 8 confidence: high pii_review: passed validation_status: validated validation_score: 33 http_candidate: false source_type: trajectory memory_scope: \"procedural\" memory_strategy: \"hierarchical\" update_strategy: \"merge_append\" durable_f"
+      },
+      "signal_score": 43,
+      "noise_score": 0,
+      "signal_noise_ratio": 43.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 20,
+      "keyword_hits": 9,
+      "noise_hits": 0,
+      "line_count": 137,
+      "char_count": 4388
+    },
+    {
+      "id": "cb8017ea7908",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/knowledge-seeding.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "Knowledge Seeding Environment",
+          "Why this exists",
+          "Basic flow",
+          "1. Propose aspects/questions for a project or workflow",
+          "2. Create an interview sheet under .artifacts/knowledge_seeding/<project>/"
+        ],
+        "excerpt": "# Knowledge Seeding Environment Use `scripts/seed_project_knowledge.py` to extract operator knowledge that is not obvious in repo files, then turn it into wiki notes, skills, workflow examples, and fine-tuning/eval seeds. ## Why this exists Many IX mistakes come from hidden context: shorthand, source priority, exceptions, escalation rules, and human approval gates. The seeding flow asks targeted questions so that hidden context becomes durable and testable. ## Basic flow ```powershell # 1. Propo"
+      },
+      "signal_score": 42,
+      "noise_score": 1,
+      "signal_noise_ratio": 42.0,
+      "initial_label": "mixed_signal",
+      "heading_count": 10,
+      "keyword_hits": 8,
+      "noise_hits": 1,
+      "line_count": 48,
+      "char_count": 2347
+    },
+    {
+      "id": "88ee3449cdbf",
+      "root": "vault",
+      "path": "vault:Projects/IX-Dashboard-2026/Interconnection Dash Wiki 6-9/ix-active-holding-no-ixp2-date-2026-06-08.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "IX Active/Holding Projects With No IXP2 Date - 2026-06-08",
+          "Decision Signal",
+          "Canonical Account Rule",
+          "Population Counts",
+          "Largest States In The Canon"
+        ],
+        "excerpt": "--- title: IX Active/Holding Projects With No IXP2 Date - 2026-06-08 type: ix-synthesis scope: active-holding-no-ixp2-submitted-date as_of: 2026-06-08 sources: - General Salesforce Reports/All-Field-Open-Hold.csv - General Salesforce Reports/part1-all-open-hold.csv - General Salesforce Reports/All-Projects-All-Time.csv - reporting/tracking/ix_history.db - reporting/tracking/ready_to_submit_ix_summary_2026-06-08.json --- # IX Active/Holding Projects With No IXP2 Date - 2026-06-08 ## Decision Sign"
+      },
+      "signal_score": 38,
+      "noise_score": 4,
+      "signal_noise_ratio": 9.5,
+      "initial_label": "mixed_signal",
+      "heading_count": 8,
+      "keyword_hits": 4,
+      "noise_hits": 4,
+      "line_count": 100,
+      "char_count": 4350
+    },
+    {
+      "id": "0a44d22d1eb1",
+      "root": "vault",
+      "path": "vault:Projects/pi-speak-extension/REBASE_AND_CONFLICT_STATUS.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "Rebase and Conflict Status",
+          "Current state",
+          "Conflicted files",
+          "What happened",
+          "Practical next step"
+        ],
+        "excerpt": "--- title: \"pi-speak-extension Rebase Status\" type: decision tags: [pi-speak-extension, git, rebase, conflict] status: active --- # Rebase and Conflict Status ## Current state - A local sync commit exists on the repo worktree. - `origin/main` is ahead of the local branch by at least one commit. - A rebase attempt onto `origin/main` stopped on content conflicts. ## Conflicted files - `android-app/README.md` - `android-app/app/src/main/java/com/pkkidking/pispeak/data/repo/PiSpeakRepositoryImpl.kt`"
+      },
+      "signal_score": 33,
+      "noise_score": 0,
+      "signal_noise_ratio": 33.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 5,
+      "keyword_hits": 1,
+      "noise_hits": 0,
+      "line_count": 33,
+      "char_count": 1477
+    },
+    {
+      "id": "a6da2d5e4911",
+      "root": "vault",
+      "path": "vault:Projects/pi-speak-extension/log.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "pi-speak-extension Project Log",
+          "2026-07-02",
+          "2026-07-02"
+        ],
+        "excerpt": "--- title: \"pi-speak-extension Project Log\" type: session tags: [pi-speak-extension, project-log] status: active --- # pi-speak-extension Project Log ## 2026-07-02 - Added [[PR_13_ANDROID_GATEWAY_PARITY_COMPLETION]] for the PR #13 Android gateway parity merge and post-merge verifier run. - Updated [[pi-speak-extension-overview]] and this project index to point at the parity completion note. - Used direct filesystem writes because Obsidian MCP transport was not available in this session. ## 2026-"
+      },
+      "signal_score": 29,
+      "noise_score": 0,
+      "signal_noise_ratio": 29.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 3,
+      "keyword_hits": 1,
+      "noise_hits": 0,
+      "line_count": 19,
+      "char_count": 996
+    },
+    {
+      "id": "5982176a2877",
+      "root": "vault",
+      "path": "vault:Projects/pi-speak-extension/REPO_BACKLINK.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "Repo Backlink"
+        ],
+        "excerpt": "--- title: \"pi-speak-extension Vault Backlink\" type: note tags: [pi-speak-extension, backlink, obsidian] status: active --- # Repo Backlink This note corresponds to the repo summary written in: - `wiki/overview.md` Related vault notes: - [[Projects/pi-speak-extension/PROJECT_FILES_AND_ENTRYPOINTS]] - [[Projects/pi-speak-extension/REBASE_AND_CONFLICT_STATUS]] Source repo: - `C:\\dev\\Desktop-Projects\\pi-speak-extension`"
+      },
+      "signal_score": 24,
+      "noise_score": 0,
+      "signal_noise_ratio": 24.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 1,
+      "keyword_hits": 0,
+      "noise_hits": 0,
+      "line_count": 20,
+      "char_count": 426
+    },
+    {
+      "id": "2d11f3af7379",
+      "root": "vault",
+      "path": "vault:Projects/pi-speak-extension/index.md",
+      "selectors": [
+        "wikis"
+      ],
+      "evidence": {
+        "headings": [
+          "pi-speak-extension Project Index"
+        ],
+        "excerpt": "--- title: \"pi-speak-extension Project Index\" type: synthesis tags: [pi-speak-extension, project-index] status: active --- # pi-speak-extension Project Index - [[pi-speak-extension-overview]] - [[PROJECT_FILES_AND_ENTRYPOINTS]] - [[REBASE_AND_CONFLICT_STATUS]] - [[REPO_BACKLINK]] - [[OH_MY_PK_HARNESS_REBRAND]] - [[PR_13_ANDROID_GATEWAY_PARITY_COMPLETION]]"
+      },
+      "signal_score": 24,
+      "noise_score": 14,
+      "signal_noise_ratio": 1.714,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 1,
+      "keyword_hits": 0,
+      "noise_hits": 0,
+      "line_count": 16,
+      "char_count": 360
+    }
+  ]
+}

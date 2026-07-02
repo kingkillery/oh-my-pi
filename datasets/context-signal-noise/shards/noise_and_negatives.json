@@ -1,0 +1,1051 @@
+{
+  "shard": "noise_and_negatives",
+  "records": [
+    {
+      "id": "70fcd64230bd",
+      "root": "repo",
+      "path": "packages/agent/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.2.3] - 2026-07-02",
+          "Added",
+          "[16.1.5] - 2026-06-19"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.2.3] - 2026-07-02 ### Added - Added Mixture-of-Agents stream composition for read-only candidate lanes feeding private advice into a tool-capable synthesizer/verifier model. ## [16.1.5] - 2026-06-19 ### Fixed - Wire-encoded `normalizeTools` parameters unconditionally so tools whose `intent` resolves to `\"omit\"` (function intent or `intent: \"omit\"`, e.g. builtin `eval` / `resolve`) no longer leak raw arktype/zod schema objects in `parameters` ([#3074](https://gi"
+      },
+      "signal_score": 42,
+      "noise_score": 61,
+      "signal_noise_ratio": 0.689,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 240,
+      "keyword_hits": 292,
+      "noise_hits": 18,
+      "line_count": 911,
+      "char_count": 59329
+    },
+    {
+      "id": "a8e287fae949",
+      "root": "repo",
+      "path": "packages/ai/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.2.3] - 2026-07-02",
+          "Added",
+          "[16.1.4] - 2026-06-19"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.2.3] - 2026-07-02 ### Added - Added Cline account login (`/login cline`): a WorkOS device-authorization flow whose tokens are registered with `api.cline.bot`, persisting the Cline access/refresh credentials and refreshing them automatically via `https://api.cline.bot/api/v1/auth/refresh`. ## [16.1.4] - 2026-06-19 ### Added - Added bounded auto-retry for empty assistant completions specifically to the OpenAI Responses provider - Added bounded auto-retry for empt"
+      },
+      "signal_score": 42,
+      "noise_score": 81,
+      "signal_noise_ratio": 0.519,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 798,
+      "keyword_hits": 282,
+      "noise_hits": 28,
+      "line_count": 3971,
+      "char_count": 370698
+    },
+    {
+      "id": "46793d3dc172",
+      "root": "repo",
+      "path": "packages/catalog/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.2.3] - 2026-07-02",
+          "Added",
+          "[16.1.8] - 2026-06-20"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.2.3] - 2026-07-02 ### Added - Added the Cline gateway (`cline`) as an OpenAI-compatible model provider at `https://api.cline.bot/api/v1` with OpenRouter-style author-prefixed model ids and `CLINE_API_KEY` support. Cline is absent from models.dev and its `/v1/models` listing is auth-gated, so the bundle ships a small curated seed (default `anthropic/claude-sonnet-4-6`) that live discovery overlays after `/login cline`. ## [16.1.8] - 2026-06-20 ### Added - Added "
+      },
+      "signal_score": 42,
+      "noise_score": 58,
+      "signal_noise_ratio": 0.724,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 83,
+      "keyword_hits": 96,
+      "noise_hits": 15,
+      "line_count": 353,
+      "char_count": 38635
+    },
+    {
+      "id": "9c29d567dbe5",
+      "root": "repo",
+      "path": "packages/coding-agent/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.2.3] - 2026-07-02",
+          "Added",
+          "Fixed"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.2.3] - 2026-07-02 ### Added - Added `ompk` as a short launch alias alongside `oh-my-pk` and `omp` for package installs, published npm bins, and binary installers. - Added the `/rqgm` slash command, which runs the Red Queen Gödel Machine co-evolutionary search (arXiv:2606.26294) through the Fusion Meta-Harness (`fmh rqgm search`), backed by the standalone `red-queen-godel-machine` package. - Added Mixture-of-Agents settings, preset resolution, and status-line vi"
+      },
+      "signal_score": 42,
+      "noise_score": 83,
+      "signal_noise_ratio": 0.506,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 1930,
+      "keyword_hits": 261,
+      "noise_hits": 48,
+      "line_count": 12226,
+      "char_count": 1246062
+    },
+    {
+      "id": "288037e52e44",
+      "root": "repo",
+      "path": "packages/natives/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.0.11] - 2026-06-19",
+          "Fixed",
+          "[16.0.7] - 2026-06-18"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.0.11] - 2026-06-19 ### Fixed - Fixed native shell execution reporting `pi-natives:command: syntax error at end of input` for a valid `&&`/`;` chain whose later pipeline stage is a compound command, e.g. `echo x && git log | while read h; do …; done | head`. The output minimizer's segmented-chain runner rebuilds each chain segment from the brush-parser AST via `pipeline.to_string()` and re-executes that string, but `simple_segment` only validated the *first* pip"
+      },
+      "signal_score": 42,
+      "noise_score": 68,
+      "signal_noise_ratio": 0.618,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 199,
+      "keyword_hits": 82,
+      "noise_hits": 25,
+      "line_count": 835,
+      "char_count": 59072
+    },
+    {
+      "id": "dbd5a8aec556",
+      "root": "repo",
+      "path": "packages/tui/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.1.7] - 2026-06-20",
+          "Fixed",
+          "[16.1.0] - 2026-06-19"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.1.7] - 2026-06-20 ### Fixed - Fixed slash command autocomplete, inline hints, and Enter completion when the slash command is preceded by leading whitespace ([#3095](https://github.com/can1357/oh-my-pi/issues/3095)). - Fixed empty `/` autocomplete burying user skill commands below every built-in command, so installed skills appear in the initial slash popup ([#2875](https://github.com/can1357/oh-my-pi/issues/2875)). ## [16.1.0] - 2026-06-19 ### Added - `Box` now"
+      },
+      "signal_score": 42,
+      "noise_score": 83,
+      "signal_noise_ratio": 0.506,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 413,
+      "keyword_hits": 71,
+      "noise_hits": 54,
+      "line_count": 1760,
+      "char_count": 153811
+    },
+    {
+      "id": "ca39f992448e",
+      "root": "repo",
+      "path": "packages/snapcompact/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.1.0] - 2026-06-19",
+          "Added",
+          "Changed"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.1.0] - 2026-06-19 ### Added - Added `historyBlocks(archive)` to reconstruct ordered history blocks from archive data ### Changed - Refactored compaction to be text-sourced, re-rendering from unified `Archive.text` source - Implemented foveated archive layout (HQ edges, dense LQ middle) for optimized context usage - Raised `MAX_FRAMES_DEFAULT` to 80 and consolidated `PROVIDER_IMAGE_BUDGETS` - Updated OpenRouter to use standard 90-image budget - Updated prompt in"
+      },
+      "signal_score": 39,
+      "noise_score": 55,
+      "signal_noise_ratio": 0.709,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 30,
+      "keyword_hits": 27,
+      "noise_hits": 12,
+      "line_count": 135,
+      "char_count": 13882
+    },
+    {
+      "id": "330024c8ad4e",
+      "root": "repo",
+      "path": "packages/utils/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.1.3] - 2026-06-19",
+          "Changed",
+          "Fixed"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.1.3] - 2026-06-19 ### Changed - Expanded the `TempDir` Windows retry window from 4×10ms to 40×25ms (1s total) to accommodate SQLite WAL/SHM file handle release delays ### Fixed - Made EPIPE rejections from IPC `send()` to worker subprocesses (`syscall: \"send\"`) non-fatal: the global `unhandledRejection` handler now logs and continues instead of terminating the session when an optional subsystem's pipe breaks. A broken optional subsystem (TTS/STT/tiny-title/MCP)"
+      },
+      "signal_score": 37,
+      "noise_score": 46,
+      "signal_noise_ratio": 0.804,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 55,
+      "keyword_hits": 25,
+      "noise_hits": 3,
+      "line_count": 190,
+      "char_count": 13831
+    },
+    {
+      "id": "cd290502518e",
+      "root": "repo",
+      "path": "packages/collab-web/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.0.10] - 2026-06-18",
+          "Added",
+          "[16.0.5] - 2026-06-17"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.0.10] - 2026-06-18 ### Added - Added support for collab browser wrapper links whose web UI host differs from the relay host, so the connect screen joins the relay encoded in the URL fragment. ## [16.0.5] - 2026-06-17 ### Fixed - Preserved assistant soft line breaks and Markdown paragraph/list indentation in the collab web transcript renderer so tree-shaped prose no longer collapses into one paragraph. - Changed collab web transcript wrapping to keep Korean/CJK "
+      },
+      "signal_score": 34,
+      "noise_score": 55,
+      "signal_noise_ratio": 0.618,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 24,
+      "keyword_hits": 22,
+      "noise_hits": 12,
+      "line_count": 108,
+      "char_count": 7727
+    },
+    {
+      "id": "5fb5d76d06a1",
+      "root": "repo",
+      "path": "packages/mnemopi/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.1.3] - 2026-06-19",
+          "Added",
+          "Fixed"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.1.3] - 2026-06-19 ### Added - Exposed `setLocalModelInitializer` (and the `LocalEmbeddingModel`, `LocalModelInitializer`, `LocalModelInitOptions`, `StandardEmbeddingModel` types) so hosts can route fastembed loads through a dedicated subprocess and keep `onnxruntime-node`'s NAPI constructor + finalizer out of their own address space. Same wipe semantics as the existing `setLocalModelInitializerForTests` seam; the agent CLI uses it to crash-proof Windows when `m"
+      },
+      "signal_score": 34,
+      "noise_score": 51,
+      "signal_noise_ratio": 0.667,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 41,
+      "keyword_hits": 22,
+      "noise_hits": 8,
+      "line_count": 154,
+      "char_count": 15192
+    },
+    {
+      "id": "909ea0f88cad",
+      "root": "repo",
+      "path": "packages/hashline/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.1.2] - 2026-06-19",
+          "Changed",
+          "[16.0.2] - 2026-06-16"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.1.2] - 2026-06-19 ### Changed - Refined documentation and prompt instructions for clarity and brevity ## [16.0.2] - 2026-06-16 ### Fixed - Auto-repaired duplicated JSX/XML closing boundary lines at the end of single-line replacement expansions. ([#2705](https://github.com/can1357/oh-my-pi/issues/2705)) ## [16.0.1] - 2026-06-15 ### Fixed - Auto-repaired one-sided multi-line boundary echoes by dropping delimiter-neutral duplicated boundary lines and emitted a bou"
+      },
+      "signal_score": 32,
+      "noise_score": 50,
+      "signal_noise_ratio": 0.64,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 72,
+      "keyword_hits": 20,
+      "noise_hits": 7,
+      "line_count": 291,
+      "char_count": 19329
+    },
+    {
+      "id": "c7b003c9fd35",
+      "root": "repo",
+      "path": "packages/stats/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.0.10] - 2026-06-18",
+          "Changed",
+          "Fixed"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.0.10] - 2026-06-18 ### Changed - Updated description of moderated content categories to use more inclusive terminology ### Fixed - Wide data tables (Requests, Errors, Overview, Projects) overflowed the page horizontally at narrow-desktop widths (768-1023px): the `.stats-table-desktop-only` wrapper used for mobile-card tables lacked the `overflow-x: auto` containment that `.stats-table-container` already has. They now scroll within their own bounds instead of sp"
+      },
+      "signal_score": 21,
+      "noise_score": 48,
+      "signal_noise_ratio": 0.438,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 43,
+      "keyword_hits": 9,
+      "noise_hits": 5,
+      "line_count": 156,
+      "char_count": 8426
+    },
+    {
+      "id": "ec320a0b3dfe",
+      "root": "repo",
+      "path": "packages/clips-extension/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.1.10] - 2026-06-22",
+          "Added"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.1.10] - 2026-06-22 ### Added - Initial release of the Clips Oh My Pi extension — the in-CLI client for the Clips screen-recording service (https://gopk.xyz/clip). - `/record` opens the recorder; `/clip <url|id>` and the `clip_context` agent tool fetch a clip's agent-readable briefing (transcript + timestamped screenshot URLs) and feed it into the session so the agent can \"see and hear\" the recording. - Host resolves from `--clips-host` flag, then `GOPK_CLIPS_UR"
+      },
+      "signal_score": 15,
+      "noise_score": 45,
+      "signal_noise_ratio": 0.333,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 4,
+      "keyword_hits": 7,
+      "noise_hits": 2,
+      "line_count": 13,
+      "char_count": 736
+    },
+    {
+      "id": "c216c95789bd",
+      "root": "repo",
+      "path": "packages/wire/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[16.1.9] - 2026-06-20",
+          "Added",
+          "[15.12.4] - 2026-06-13"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [16.1.9] - 2026-06-20 ### Added - Added remote-control session list/load frames and per-agent cwd metadata to the collab wire contract. ## [15.12.4] - 2026-06-13 ### Changed - Changed `WireModel.contextWindow` and `ContextUsage.contextWindow` to `number | null` to allow representing unavailable context-window values ## [15.12.0] - 2026-06-12 ### Added - Added `readOnly` flags to participant and session payload types to indicate when a guest is connected via a read-"
+      },
+      "signal_score": 15,
+      "noise_score": 44,
+      "signal_noise_ratio": 0.341,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 10,
+      "keyword_hits": 3,
+      "noise_hits": 1,
+      "line_count": 31,
+      "char_count": 1034
+    },
+    {
+      "id": "22daefd09244",
+      "root": "repo",
+      "path": "packages/verifier-extension/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "@pk-nerdsaver-ai/verifier-extension",
+          "[16.1.10] - 2026-06-22",
+          "Added",
+          "Fixed"
+        ],
+        "excerpt": "# @pk-nerdsaver-ai/verifier-extension ## [16.1.10] - 2026-06-22 ### Added - Added the LLM-as-verifier extension package with the `llm_as_verifier` tool and smoke-test commands. - Added `groundTruthNote` tool parameter. - Added regression tests in `src/__tests__/verifier.test.ts`. - Added `subagent_orchestrator_plan` for deterministic Oh My Pi route planning. - Reworked the `pk-subagent-orchestrator` skill around OMP-native task batching, recursion caps, and verifier tiers. ### Fixed - Bundled Py"
+      },
+      "signal_score": 14,
+      "noise_score": 44,
+      "signal_noise_ratio": 0.318,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 4,
+      "keyword_hits": 6,
+      "noise_hits": 1,
+      "line_count": 21,
+      "char_count": 1003
+    },
+    {
+      "id": "21372fa4348c",
+      "root": "repo",
+      "path": "packages/coding-agent/test/marketplace/fixtures/valid-marketplace/plugins/hello-plugin/agents/reviewer.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [],
+        "excerpt": "--- name: reviewer description: A test code review agent --- Review the code for quality issues."
+      },
+      "signal_score": 10,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.175,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 0,
+      "keyword_hits": 2,
+      "noise_hits": 0,
+      "line_count": 7,
+      "char_count": 98
+    },
+    {
+      "id": "18e95d7661d6",
+      "root": "repo",
+      "path": "packages/coding-agent/test/marketplace/fixtures/valid-marketplace/plugins/hello-plugin/commands/hello.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [],
+        "excerpt": "--- name: hello description: Say hello --- Greet the user warmly."
+      },
+      "signal_score": 8,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.14,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 0,
+      "keyword_hits": 0,
+      "noise_hits": 0,
+      "line_count": 7,
+      "char_count": 67
+    },
+    {
+      "id": "fb9cf2db2136",
+      "root": "repo",
+      "path": "packages/swarm-extension/CHANGELOG.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "[15.9.0] - 2026-06-04",
+          "Fixed"
+        ],
+        "excerpt": "# Changelog ## [Unreleased] ## [15.9.0] - 2026-06-04 ### Fixed - Fixed swarm `/swarm run` failing with authStorage/modelRegistry identity error ([#1472](https://github.com/can1357/oh-my-pi/issues/1472))"
+      },
+      "signal_score": 8,
+      "noise_score": 58,
+      "signal_noise_ratio": 0.138,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 4,
+      "keyword_hits": 0,
+      "noise_hits": 1,
+      "line_count": 10,
+      "char_count": 207
+    },
+    {
+      "id": "ca5f6e26d460",
+      "root": "repo",
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "What",
+          "Why",
+          "Testing"
+        ],
+        "excerpt": "## What <!-- Brief description of the change --> ## Why <!-- Motivation, context, or link to issue (fixes #N) --> ## Testing <!-- How was this tested? --> --- - [ ] `bun check` passes - [ ] Tested locally - [ ] CHANGELOG updated (if user-facing)"
+      },
+      "signal_score": 7,
+      "noise_score": 58,
+      "signal_noise_ratio": 0.121,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 3,
+      "keyword_hits": 1,
+      "noise_hits": 1,
+      "line_count": 18,
+      "char_count": 253
+    },
+    {
+      "id": "94b2d1695a39",
+      "root": "repo",
+      "path": "packages/ai/src/dialect/prompt-template.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Tools"
+        ],
+        "excerpt": "# Tools You may call one or more functions to assist with the user query. Tool calls are emitted as text using the exact syntax below, not as native provider tool messages. Available functions are listed inside `<tools></tools>` as one JSON object per line: <tools> {{TOOLS}} </tools> {{DIALECT}}"
+      },
+      "signal_score": 4,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.07,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 1,
+      "keyword_hits": 2,
+      "noise_hits": 0,
+      "line_count": 13,
+      "char_count": 301
+    },
+    {
+      "id": "fe419223e74b",
+      "root": "repo",
+      "path": "packages/coding-agent/test/fixtures/apply-patch/scenarios/001_add_file/expected/bar.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [],
+        "excerpt": "This is a new file"
+      },
+      "signal_score": 0,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.0,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 0,
+      "keyword_hits": 0,
+      "noise_hits": 0,
+      "line_count": 2,
+      "char_count": 19
+    },
+    {
+      "id": "d967087384a0",
+      "root": "vault",
+      "path": "vault:pk-agent-templates/Template-pk-agent.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Agent prompt",
+          "Linear path (inline arrows)",
+          "Branching path (mermaid escape hatch)",
+          "Notes for the human reader"
+        ],
+        "excerpt": "--- name: research-and-summarize description: Demo agent that plans a research question, gathers sources, summarizes, and returns a cited report. tools: [explore, read, write] workflows: [research, summarize] positions: b_in: [40, 40] b_outline: [40, 150] b_research: [520, 40] b_hits: [760, 40] b_read: [1000, 40] b_notes: [1240, 40] b_summarize: [1480, 40] b_out: [1720, 40] b_out_: [40, 260] b_classify: [280, 40] b1097: [40, 370] b1111: [40, 480] b1129: [40, 590] v_new_var: [40, 700] var_types: "
+      },
+      "signal_score": 25,
+      "noise_score": 43,
+      "signal_noise_ratio": 0.581,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 4,
+      "keyword_hits": 9,
+      "noise_hits": 0,
+      "line_count": 59,
+      "char_count": 2124
+    },
+    {
+      "id": "7dcd0b104f12",
+      "root": "vault",
+      "path": "vault:Notes/README_v10.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "InsForge Knowledge",
+          "Current Work",
+          "Structure",
+          "Workflow",
+          "Naming"
+        ],
+        "excerpt": "# InsForge Knowledge This folder is the note-first working layer for InsForge inside Obsidian. ## Current Work - [[InsForge Knowledge/Inbox/2026-03-19 Backend Workbench]] ## Structure - [[InsForge Knowledge/Inbox/README|Inbox]] - [[InsForge Knowledge/Context/README|Context]] - [[InsForge Knowledge/Docs/README|Docs]] - [[InsForge Knowledge/Functions/README|Functions]] - [[InsForge Knowledge/Logs/README|Logs]] - [[InsForge Knowledge/Incidents/README|Incidents]] - [[InsForge Knowledge/Runbooks/READ"
+      },
+      "signal_score": 22,
+      "noise_score": 53,
+      "signal_noise_ratio": 0.415,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 7,
+      "keyword_hits": 10,
+      "noise_hits": 10,
+      "line_count": 55,
+      "char_count": 1873
+    },
+    {
+      "id": "29fd56249d35",
+      "root": "vault",
+      "path": "vault:Notes/README.md",
+      "selectors": [
+        "project_docs"
+      ],
+      "evidence": {
+        "headings": [
+          "Context"
+        ],
+        "excerpt": "# Context Captured notes and selections from active Obsidian work."
+      },
+      "signal_score": 21,
+      "noise_score": 14,
+      "signal_noise_ratio": 1.5,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 1,
+      "keyword_hits": 1,
+      "noise_hits": 0,
+      "line_count": 4,
+      "char_count": 68
+    },
+    {
+      "id": "f65909d1dc81",
+      "root": "vault",
+      "path": "vault:Notes/Context Template.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Context",
+          "Summary",
+          "Source",
+          "Selected Content",
+          "Full Note Context"
+        ],
+        "excerpt": "--- type: insforge-context source: insforge system: context status: draft tags: - insforge - context --- # Context ## Summary - ## Source - Note: - File path: - Captured at: - Source type: ## Selected Content ```text ``` ## Full Note Context ```text ``` ## Next Actions -"
+      },
+      "signal_score": 17,
+      "noise_score": 58,
+      "signal_noise_ratio": 0.293,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 6,
+      "keyword_hits": 5,
+      "noise_hits": 1,
+      "line_count": 39,
+      "char_count": 289
+    },
+    {
+      "id": "58b6a1dc96da",
+      "root": "vault",
+      "path": "vault:Notes/Daily Backend Workbench Template.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Daily Backend Workbench",
+          "Focus",
+          "Active Context",
+          "Pull From InsForge",
+          "Docs"
+        ],
+        "excerpt": "--- type: backend-workbench source: insforge system: operations status: draft tags: - insforge - workbench --- # Daily Backend Workbench ## Focus - ## Active Context - [[InsForge Knowledge/Context/README|Context]] - Current note: - Current selection: ## Pull From InsForge ### Docs - ### Logs - ### Functions - ## Decisions - ## Ship List 1. 2. 3. ## Promote To Knowledge Base - [[InsForge Knowledge/Runbooks/README|Runbooks]] - [[InsForge Knowledge/Projects/README|Projects]] - [[InsForge Knowledge/"
+      },
+      "signal_score": 15,
+      "noise_score": 44,
+      "signal_noise_ratio": 0.341,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 10,
+      "keyword_hits": 3,
+      "noise_hits": 1,
+      "line_count": 51,
+      "char_count": 558
+    },
+    {
+      "id": "a7888fff8377",
+      "root": "vault",
+      "path": "vault:Notes/Function Spec Template.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Function Spec",
+          "Goal",
+          "Trigger",
+          "Inputs",
+          "Outputs"
+        ],
+        "excerpt": "--- type: function-spec source: insforge system: functions status: draft tags: - insforge - function-spec --- # Function Spec ## Goal - ## Trigger - ## Inputs - ## Outputs - ## Auth And Permissions - ## Dependencies - Docs: - Existing functions: - Secrets: ## Observability - Required logs: - Success signal: - Failure signal: ## Rollback Plan - ## Draft Code Or Pseudocode ```ts ``` ## Plugin Workflow 1. Write or refine this spec in a normal note. 2. Capture the relevant note or selection into the"
+      },
+      "signal_score": 15,
+      "noise_score": 46,
+      "signal_noise_ratio": 0.326,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 11,
+      "keyword_hits": 3,
+      "noise_hits": 3,
+      "line_count": 60,
+      "char_count": 701
+    },
+    {
+      "id": "92eb6c14d4ca",
+      "root": "vault",
+      "path": "vault:Notes/Runbook Template.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Runbook",
+          "Purpose",
+          "Preconditions",
+          "Steps",
+          "Validation"
+        ],
+        "excerpt": "--- type: runbook source: insforge system: operations status: draft tags: - insforge - runbook --- # Runbook ## Purpose - ## Preconditions - ## Steps 1. 2. 3. ## Validation - ## Rollback - ## References - [[InsForge Knowledge/Docs]] - [[InsForge Knowledge/Functions]]"
+      },
+      "signal_score": 15,
+      "noise_score": 58,
+      "signal_noise_ratio": 0.259,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 7,
+      "keyword_hits": 3,
+      "noise_hits": 1,
+      "line_count": 39,
+      "char_count": 288
+    },
+    {
+      "id": "ed3647738cdc",
+      "root": "vault",
+      "path": "vault:Notes/Project Template.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Project",
+          "Goal",
+          "Scope",
+          "Backend Context",
+          "Decisions"
+        ],
+        "excerpt": "--- type: project source: insforge system: project status: draft tags: - insforge - project --- # Project ## Goal - ## Scope - ## Backend Context - Docs: - Functions: - Logs: ## Decisions - ## Open Questions - ## Next Actions -"
+      },
+      "signal_score": 13,
+      "noise_score": 58,
+      "signal_noise_ratio": 0.224,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 7,
+      "keyword_hits": 1,
+      "noise_hits": 1,
+      "line_count": 38,
+      "char_count": 248
+    },
+    {
+      "id": "29c896e3314e",
+      "root": "vault",
+      "path": "vault:Notes/Doc Template.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Document Title",
+          "Purpose",
+          "Source",
+          "Key Points",
+          "Content"
+        ],
+        "excerpt": "--- type: insforge-doc source: insforge system: docs status: draft tags: - insforge - docs --- # Document Title ## Purpose - ## Source - Endpoint: - Synced at: ## Key Points - ## Content ```md ``` ## Related - [[InsForge Knowledge/README]]"
+      },
+      "signal_score": 12,
+      "noise_score": 58,
+      "signal_noise_ratio": 0.207,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 6,
+      "keyword_hits": 0,
+      "noise_hits": 1,
+      "line_count": 35,
+      "char_count": 256
+    },
+    {
+      "id": "f3bcaf3a600b",
+      "root": "vault",
+      "path": "vault:Notes/Function Template.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Function Name",
+          "Metadata",
+          "Intent",
+          "Inputs",
+          "Outputs"
+        ],
+        "excerpt": "--- type: insforge-function source: insforge system: functions status: draft tags: - insforge - function --- # Function Name ## Metadata - Slug: - Runtime status: - Updated at: - Deployed at: ## Intent - ## Inputs - ## Outputs - ## Risks - ## Code ```ts ``` ## Related - [[InsForge Knowledge/Docs]] - [[InsForge Knowledge/Runbooks]]"
+      },
+      "signal_score": 12,
+      "noise_score": 58,
+      "signal_noise_ratio": 0.207,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 8,
+      "keyword_hits": 0,
+      "noise_hits": 1,
+      "line_count": 46,
+      "char_count": 353
+    },
+    {
+      "id": "fe49e8e0714c",
+      "root": "vault",
+      "path": "vault:Notes/Incident Template.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Incident",
+          "Summary",
+          "Impact",
+          "Current State",
+          "Evidence"
+        ],
+        "excerpt": "--- type: incident source: insforge system: unknown status: draft tags: - insforge - incident --- # Incident ## Summary - ## Impact - ## Current State - Status: - Started at: - Owner: ## Evidence - Logs: - Docs: - Functions: ## Timeline - ## Root Cause - ## Resolution - ## Follow-up Actions -"
+      },
+      "signal_score": 12,
+      "noise_score": 58,
+      "signal_noise_ratio": 0.207,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 9,
+      "keyword_hits": 0,
+      "noise_hits": 1,
+      "line_count": 48,
+      "char_count": 316
+    },
+    {
+      "id": "4b8647f5373c",
+      "root": "vault",
+      "path": "vault:Notes/Log Capture Template.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Log Capture",
+          "Search Context",
+          "Findings",
+          "Raw Logs",
+          "Follow-up"
+        ],
+        "excerpt": "--- type: insforge-log source: insforge system: logs status: draft tags: - insforge - logs --- # Log Capture ## Search Context - Source: - Query: - Saved at: ## Findings - ## Raw Logs ```text ``` ## Follow-up - [[InsForge Knowledge/Incidents]] - [[InsForge Knowledge/Runbooks]]"
+      },
+      "signal_score": 11,
+      "noise_score": 59,
+      "signal_noise_ratio": 0.186,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 5,
+      "keyword_hits": 1,
+      "noise_hits": 2,
+      "line_count": 33,
+      "char_count": 292
+    },
+    {
+      "id": "2b518bd46eb9",
+      "root": "vault",
+      "path": "vault:Notes/README_v3.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Incidents",
+          "Workflow"
+        ],
+        "excerpt": "# Incidents Investigation notes, timelines, root causes, and follow-up actions. ## Workflow - [[InsForge Knowledge/Incidents/Incident Workflow]]"
+      },
+      "signal_score": 6,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.105,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 2,
+      "keyword_hits": 2,
+      "noise_hits": 0,
+      "line_count": 8,
+      "char_count": 148
+    },
+    {
+      "id": "ee6cf154273b",
+      "root": "vault",
+      "path": "vault:Notes/README_v6.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Templates",
+          "Added Workflow Templates"
+        ],
+        "excerpt": "# Templates Starter notes for context captures, docs, logs, functions, incidents, runbooks, and project work. ## Added Workflow Templates - [[InsForge Knowledge/Templates/Daily Backend Workbench Template]] - [[InsForge Knowledge/Templates/Function Spec Template]]"
+      },
+      "signal_score": 6,
+      "noise_score": 59,
+      "signal_noise_ratio": 0.102,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 2,
+      "keyword_hits": 2,
+      "noise_hits": 2,
+      "line_count": 9,
+      "char_count": 267
+    },
+    {
+      "id": "a2f504cf9de1",
+      "root": "vault",
+      "path": "vault:Notes/README_v8.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Inbox",
+          "Active Workbench"
+        ],
+        "excerpt": "# Inbox Temporary landing area for quick captures that have not been organized yet. ## Active Workbench - [[InsForge Knowledge/Inbox/2026-03-19 Backend Workbench]]"
+      },
+      "signal_score": 4,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.07,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 2,
+      "keyword_hits": 0,
+      "noise_hits": 0,
+      "line_count": 8,
+      "char_count": 167
+    },
+    {
+      "id": "eac589e942d5",
+      "root": "vault",
+      "path": "vault:Notes/README_v2.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Functions"
+        ],
+        "excerpt": "# Functions Saved InsForge function definitions, notes, and implementation context."
+      },
+      "signal_score": 3,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.053,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 1,
+      "keyword_hits": 1,
+      "noise_hits": 0,
+      "line_count": 4,
+      "char_count": 85
+    },
+    {
+      "id": "c95285c8efe8",
+      "root": "vault",
+      "path": "vault:Notes/README_v4.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Projects"
+        ],
+        "excerpt": "# Projects Longer-lived project notes tied to backend work, implementation plans, and decisions."
+      },
+      "signal_score": 2,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.035,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 1,
+      "keyword_hits": 0,
+      "noise_hits": 0,
+      "line_count": 4,
+      "char_count": 98
+    },
+    {
+      "id": "a272538cbc63",
+      "root": "vault",
+      "path": "vault:Notes/README_v5.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Runbooks"
+        ],
+        "excerpt": "# Runbooks Stable operational procedures promoted out of one-off notes and incidents."
+      },
+      "signal_score": 2,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.035,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 1,
+      "keyword_hits": 0,
+      "noise_hits": 0,
+      "line_count": 4,
+      "char_count": 87
+    },
+    {
+      "id": "3b35e3dfabe1",
+      "root": "vault",
+      "path": "vault:Notes/README_v7.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Docs"
+        ],
+        "excerpt": "# Docs Curated or synced InsForge documentation stored as markdown for local reference."
+      },
+      "signal_score": 2,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.035,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 1,
+      "keyword_hits": 0,
+      "noise_hits": 0,
+      "line_count": 4,
+      "char_count": 89
+    },
+    {
+      "id": "bbd7b3652906",
+      "root": "vault",
+      "path": "vault:Notes/README_v9.md",
+      "selectors": [
+        "known_noise"
+      ],
+      "evidence": {
+        "headings": [
+          "Logs"
+        ],
+        "excerpt": "# Logs Saved log captures and search results that are worth keeping in the vault."
+      },
+      "signal_score": 2,
+      "noise_score": 57,
+      "signal_noise_ratio": 0.035,
+      "initial_label": "low_signal_or_noise",
+      "heading_count": 1,
+      "keyword_hits": 0,
+      "noise_hits": 0,
+      "line_count": 4,
+      "char_count": 83
+    }
+  ]
+}

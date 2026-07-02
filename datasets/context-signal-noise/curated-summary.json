@@ -1,0 +1,79 @@
+{
+  "generated_at": "2026-07-02T15:32:34.102618+00:00",
+  "methodology": "Agentic MapReduce: plan selectors, deterministic shard, parallel map workers, reduce labels/features, verify artifacts.",
+  "source_article": "https://devin.ai/blog/agentic-map-reduce",
+  "record_count": 300,
+  "initial_by_label": {
+    "high_signal": 138,
+    "mixed_signal": 92,
+    "low_signal_or_noise": 70
+  },
+  "curated_by_label": {
+    "high_signal": 146,
+    "mixed_signal": 100,
+    "low_signal_or_noise": 54
+  },
+  "by_path_role": {
+    "skill": 76,
+    "agent_rules": 2,
+    "readme": 25,
+    "top_doc": 59,
+    "session_doc": 5,
+    "mcp_doc": 4,
+    "native_doc": 8,
+    "toolconv_doc": 9,
+    "tool_doc": 28,
+    "other_context": 14,
+    "package_readme": 15,
+    "changelog": 16,
+    "test_fixture": 3,
+    "vault_project_note": 18,
+    "vault_note": 18
+  },
+  "duplicate_record_count": 8,
+  "shards": {
+    "agent_rules_and_skills.json": 78,
+    "noise_and_negatives.json": 41,
+    "repo_docs.json": 162,
+    "residual_context.json": 0,
+    "vault_project_wikis.json": 19
+  },
+  "map_workers": {
+    "agent_rules_and_skills": {
+      "sampled": "30+ / 78",
+      "result_source": "agent://MapAgentSkills"
+    },
+    "repo_docs": {
+      "sampled": "27 / 162",
+      "result_source": "agent://MapRepoDocs"
+    },
+    "vault_project_wikis": {
+      "sampled": "19 / 19",
+      "result_source": "agent://MapVaultWikis"
+    },
+    "noise_and_negatives": {
+      "sampled": "35 / 41 metadata + 12 sources",
+      "result_source": "history://MapNoiseNegatives"
+    }
+  },
+  "recommended_next_features": [
+    "duplicate_of",
+    "path_role",
+    "kind",
+    "is_routing_anchor",
+    "under_test_or_fixture",
+    "has_contract_structure",
+    "enumerate_density",
+    "agent_relevance",
+    "label_confidence",
+    "label_source"
+  ],
+  "residual_risks": [
+    "Curated labels are reducer outputs from sampled map-worker audits, not a gold human-labeled dataset.",
+    "SNR is directional only: wire-format specs and tool docs can look noisy because enumerations are useful contract content.",
+    "Vault paths are machine-local; records should preserve root provenance and not assume cross-machine path stability.",
+    "Duplicate skills/docs should be deduplicated by content_sha256 before training to avoid frequency bias."
+  ],
+  "map_reducer_decision_count": 37,
+  "label_change_count": 36
+}

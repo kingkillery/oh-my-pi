@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-07-02T15:22:22.666631+00:00",
+  "record_count": 300,
+  "by_root": {
+    "repo": 261,
+    "vault": 39
+  },
+  "by_label": {
+    "high_signal": 138,
+    "mixed_signal": 92,
+    "low_signal_or_noise": 70
+  },
+  "by_selector": {
+    "project_docs": 170,
+    "skills": 76,
+    "agent_rules": 2,
+    "known_noise": 53,
+    "wikis": 19
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-07-02T15:22:22.662395+00:00",
+  "roots": [
+    "C:\\dev\\Desktop-Projects\\oh-my-pi-fork\\.worktrees\\feat\\context-map-reduce-filter",
+    "C:\\dev\\Desktop-Projects\\Helpful-Docs-Prompts\\VAULTS-OBSIDIAN\\designandbuilding-vault"
+  ],
+  "selectors": [
+    {
+      "id": "agent_rules",
+      "include": [
+        "**/AGENTS.md"
+      ],
+      "why": "Project and subproject agent instructions are high-signal routing and constraint sources."
+    },
+    {
+      "id": "skills",
+      "include": [
+        "**/SKILL.md",
+        "**/skills/**/*.md"
+      ],
+      "why": "Skills encode reusable procedures, tool rules, and task routing anchors."
+    },
+    {
+      "id": "project_docs",
+      "include": [
+        "README.md",
+        "**/README.md",
+        "docs/**/*.md",
+        "**/docs/**/*.md"
+      ],
+      "why": "Project docs and package docs describe architecture, commands, APIs, and operations."
+    },
+    {
+      "id": "wikis",
+      "include": [
+        "**/wiki/**/*.md",
+        "**/wikis/**/*.md",
+        "Projects/**/*.md"
+      ],
+      "why": "Wiki/project-vault notes preserve decisions, context maps, operations, and project-specific knowledge."
+    },
+    {
+      "id": "known_noise",
+      "include": [
+        "**/CHANGELOG.md",
+        "**/test/**/*.md",
+        "**/fixtures/**/*.md",
+        "Notes/README_v*.md",
+        "Notes/*Template*.md"
+      ],
+      "why": "Changelogs, fixtures, duplicates, and templates are useful negative/low-signal examples."
+    }
+  ],
+  "exclude_parts": [
+    ".git",
+    ".next",
+    "__pycache__",
+    "build",
+    "coverage",
+    "dist",
+    "node_modules",
+    "target",
+    "vendor"
+  ]
+}
