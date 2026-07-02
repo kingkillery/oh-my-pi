@@ -1,0 +1,4 @@
+interface:
+  display_name: High-Signal Docs Research
+  short_description: MCP docs search plus AI-Q synthesis.
+  default_prompt: Use high-signal docs research to produce a concise cited brief.
