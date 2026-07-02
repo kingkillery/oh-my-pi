@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "aiq-deploy": {
+      "source": "NVIDIA/skills",
+      "sourceType": "github",
+      "skillPath": "skills/aiq-deploy/SKILL.md",
+      "computedHash": "d3b5cf955e192a4247857a6456cd7311d4344b163415ee3f7c7ffe4196d83116"
+    },
+    "aiq-research": {
+      "source": "NVIDIA/skills",
+      "sourceType": "github",
+      "skillPath": "skills/aiq-research/SKILL.md",
+      "computedHash": "693dedbb702065013baae02828857b0c6ce0490d4e0861df35b0e2e577d4c391"
+    }
+  }
+}
