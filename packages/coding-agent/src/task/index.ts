@@ -21,6 +21,7 @@ import type { Usage } from "@pk-nerdsaver-ai/pi-ai";
 import { $env, logger, prompt, Snowflake } from "@pk-nerdsaver-ai/pi-utils";
 import type { ToolSession } from "..";
 import { resolveAgentModelPatterns } from "../config/model-resolver";
+import { mergeSubagentModelAliases, resolveSubagentModelAlias } from "../config/subagent-model-aliases";
 import { MCPManager } from "../mcp/manager";
 import type { Theme } from "../modes/theme/theme";
 import planModeSubagentPrompt from "../prompts/system/plan-mode-subagent.md" with { type: "text" };
@@ -357,7 +358,15 @@ function resolveSpawnItems(params: TaskParams): TaskItem[] {
 	if (Array.isArray(params.tasks) && params.tasks.length > 0) {
 		return params.tasks;
 	}
-	return [{ id: params.id, description: params.description, role: params.role, assignment: params.assignment }];
+	return [
+		{
+			id: params.id,
+			description: params.description,
+			role: params.role,
+			model: params.model,
+			assignment: params.assignment,
+		},
+	];
 }
 
 /**
@@ -372,6 +381,7 @@ function spawnParamsFor(params: TaskParams, item: TaskItem): TaskParams {
 	if (item.id !== undefined) spawn.id = item.id;
 	if (item.description !== undefined) spawn.description = item.description;
 	if (item.role !== undefined) spawn.role = item.role;
+	if (item.model !== undefined) spawn.model = item.model;
 	if (item.assignment !== undefined) spawn.assignment = item.assignment;
 	if (params.context !== undefined) spawn.context = params.context;
 	if (item.isolated !== undefined) {
@@ -1153,17 +1163,38 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
 				}
 			: agent;
 
-		// Apply per-agent model override from settings (highest priority)
+		// Apply explicit per-spawn model first, then per-agent settings override, then agent defaults.
 		const agentModelOverrides = this.session.settings.get("task.agentModelOverrides");
 		const settingsModelOverride = agentModelOverrides[agentName];
+		const explicitModelSelector = params.model?.trim();
+		let explicitModelOverride: string | undefined;
+		if (explicitModelSelector) {
+			const aliases = mergeSubagentModelAliases(this.session.settings.get("subagent.modelAliases"));
+			explicitModelOverride = this.session.modelRegistry
+				? (resolveSubagentModelAlias(explicitModelSelector, aliases, this.session.modelRegistry) ?? undefined)
+				: explicitModelSelector;
+			if (!explicitModelOverride) {
+				return {
+					content: [
+						{
+							type: "text",
+							text: `Model "${explicitModelSelector}" not found for task spawn. Configure subagent.modelAliases or use a concrete catalog selector.`,
+						},
+					],
+					details: { projectAgentsDir, results: [], totalDurationMs: Date.now() - startTime },
+				};
+			}
+		}
 		const parentActiveModelPattern = this.session.getActiveModelString?.();
-		const modelOverride = resolveAgentModelPatterns({
-			settingsOverride: settingsModelOverride,
-			agentModel: effectiveAgent.model,
-			settings: this.session.settings,
-			activeModelPattern: parentActiveModelPattern,
-			fallbackModelPattern: this.session.getModelString?.(),
-		});
+		const modelOverride = explicitModelOverride
+			? [explicitModelOverride]
+			: resolveAgentModelPatterns({
+					settingsOverride: settingsModelOverride,
+					agentModel: effectiveAgent.model,
+					settings: this.session.settings,
+					activeModelPattern: parentActiveModelPattern,
+					fallbackModelPattern: this.session.getModelString?.(),
+				});
 		const thinkingLevelOverride = effectiveAgent.thinkingLevel;
 
 		// Output schema priority: agent frontmatter > inherited parent session.

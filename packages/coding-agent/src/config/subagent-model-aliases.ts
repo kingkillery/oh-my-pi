@@ -31,6 +31,7 @@ export type SubagentAliasRegistry = Pick<ModelRegistry, "getAvailable"> &
 
 export const BUILTIN_SUBAGENT_MODEL_ALIASES: Record<string, string> = {
 	"minimax-code": "minimax-code/MiniMax-M3",
+	"kimi-code": "kimi-code/kimi-for-coding",
 	"minimax m3": "minimax/MiniMax-M3",
 	"browser-fast": "google/gemini-2.5-flash-lite",
 };

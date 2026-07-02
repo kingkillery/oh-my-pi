@@ -15,7 +15,9 @@
  *    runtime for internal callers.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
+import type { Api, Model } from "@pk-nerdsaver-ai/pi-ai";
 import { toolWireSchema } from "@pk-nerdsaver-ai/pi-ai/utils/schema";
+import { buildModel } from "@pk-nerdsaver-ai/pi-catalog/build";
 import { AsyncJobManager } from "@pk-nerdsaver-ai/pi-coding-agent/async/job-manager";
 import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
 import { AgentLifecycleManager } from "@pk-nerdsaver-ai/pi-coding-agent/registry/agent-lifecycle";
@@ -34,7 +36,12 @@ const taskAgent: AgentDefinition = {
 };
 
 function createSession(
-	options: { manager?: AsyncJobManager; settings?: Record<string, unknown>; agentId?: string } = {},
+	options: {
+		manager?: AsyncJobManager;
+		settings?: Record<string, unknown>;
+		agentId?: string;
+		modelRegistry?: { getAvailable: () => readonly Model<Api>[] };
+	} = {},
 ): ToolSession {
 	return {
 		cwd: "/tmp",
@@ -44,6 +51,7 @@ function createSession(
 		getSessionSpawns: () => "*",
 		getAgentId: () => options.agentId ?? null,
 		asyncJobManager: options.manager,
+		modelRegistry: options.modelRegistry,
 	} as unknown as ToolSession;
 }
 
@@ -76,6 +84,24 @@ function makeResult(id: string, overrides: Partial<SingleResult> = {}): SingleRe
 	};
 }
 
+function makeModel(provider: string, id: string): Model<Api> {
+	return buildModel({
+		id,
+		name: id,
+		api: "anthropic-messages",
+		provider,
+		baseUrl: `https://${provider}.example.test`,
+		reasoning: false,
+		input: ["text"],
+		cost: { input: 1, output: 2, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 128_000,
+		maxTokens: 8192,
+	});
+}
+
+function makeModelRegistry(models: readonly Model<Api>[]): { getAvailable: () => readonly Model<Api>[] } {
+	return { getAvailable: () => models };
+}
 function mockDiscovery(): void {
 	vi.spyOn(discoveryModule, "discoverAgents").mockResolvedValue({
 		agents: [taskAgent],
@@ -97,6 +123,7 @@ describe("task.batch schema gating", () => {
 		expect(offProperties.context).toBeUndefined();
 		expect(offProperties.assignment).toBeDefined();
 		expect(offProperties.id).toBeDefined();
+		expect(offProperties.model).toBeDefined();
 
 		const on = await TaskTool.create(createSession({ settings: { "task.batch": true } }));
 		const onProperties = getSchemaProperties(on);
@@ -110,6 +137,7 @@ describe("task.batch schema gating", () => {
 		const items = (onProperties.tasks as { items?: { properties?: Record<string, unknown> } }).items;
 		expect(items?.properties?.assignment).toBeDefined();
 		expect(items?.properties?.id).toBeDefined();
+		expect(items?.properties?.model).toBeDefined();
 	});
 
 	it("places isolated per item in the batch shape when isolation is enabled", async () => {
@@ -330,6 +358,60 @@ describe("task.batch spawning", () => {
 		const job = manager.getJob(result.details!.async!.jobId)!;
 		await job.promise;
 		expect(job.status).toBe("completed");
+	});
+
+	it("resolves explicit flat and batch model selectors before agent defaults", async () => {
+		mockDiscovery();
+		const seen: Array<{ id?: string; modelOverride?: string | string[] }> = [];
+		vi.spyOn(executorModule, "runSubprocess").mockImplementation(async options => {
+			seen.push({ id: options.id, modelOverride: options.modelOverride });
+			return makeResult(options.id ?? "?");
+		});
+		const modelRegistry = makeModelRegistry([
+			makeModel("minimax-code", "MiniMax-M3"),
+			makeModel("clinepass", "deepseek"),
+		]);
+
+		const manager = createManager();
+		const tool = await TaskTool.create(
+			createSession({ manager, modelRegistry, settings: { "async.enabled": true, "task.batch": true } }),
+		);
+
+		await tool.execute("tc-models", {
+			agent: "task",
+			context: "Shared notes.",
+			tasks: [
+				{ id: "Mini", model: "minimax-code", assignment: "Do A." },
+				{ id: "Deep", model: "clinepass/deepseek", assignment: "Do B." },
+			],
+		} as TaskParams);
+		await manager.getJob("Mini")!.promise;
+		await manager.getJob("Deep")!.promise;
+
+		expect(seen.sort((left, right) => (left.id ?? "").localeCompare(right.id ?? ""))).toEqual([
+			{ id: "Deep", modelOverride: ["clinepass/deepseek"] },
+			{ id: "Mini", modelOverride: ["minimax-code/MiniMax-M3"] },
+		]);
+	});
+
+	it("rejects an explicit model selector that does not resolve", async () => {
+		mockDiscovery();
+		const runSpy = vi.spyOn(executorModule, "runSubprocess");
+		const tool = await TaskTool.create(
+			createSession({
+				modelRegistry: makeModelRegistry([makeModel("minimax-code", "MiniMax-M3")]),
+				settings: { "task.batch": false },
+			}),
+		);
+
+		const result = await tool.execute("tc-bad-model", {
+			agent: "task",
+			model: "not-a-real-model",
+			assignment: "Do the thing.",
+		} as TaskParams);
+
+		expect(getFirstText(result)).toContain('Model "not-a-real-model" not found');
+		expect(runSpy).not.toHaveBeenCalled();
 	});
 
 	it("blocks batch execution when async.enabled is false even with a job manager", async () => {

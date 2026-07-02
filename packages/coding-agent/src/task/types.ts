@@ -85,6 +85,7 @@ export const taskItemSchema = type({
 	"id?": "string",
 	"description?": "string",
 	"role?": ROLE_INPUT_SCHEMA,
+	"model?": "string",
 	assignment: "string",
 	"cwd?": "string",
 	"+": "delete",
@@ -94,6 +95,7 @@ const taskItemSchemaIsolated = type({
 	"description?": "string",
 	"role?": ROLE_INPUT_SCHEMA,
 	assignment: "string",
+	"model?": "string",
 	"isolated?": "boolean",
 	"cwd?": "string",
 	"+": "delete",
@@ -107,6 +109,8 @@ export interface TaskItem {
 	description?: string;
 	/** Specialist role/expertise this subagent embodies; shapes its system-prompt identity and display name. */
 	role?: string;
+	/** Explicit model selector for this spawn; resolves through subagent aliases/catalog before agent defaults. */
+	model?: string;
 	/** The work; required by the schema. */
 	assignment?: string;
 	/** Run this spawn in an isolated worktree (batch form; flat form carries it top-level). */
@@ -120,6 +124,7 @@ export const taskSchema = type({
 	"id?": "string",
 	"description?": "string",
 	"role?": ROLE_INPUT_SCHEMA,
+	"model?": "string",
 	assignment: "string",
 	"isolated?": "boolean",
 	"cwd?": "string",
@@ -130,6 +135,7 @@ const taskSchemaNoIsolation = type({
 	"id?": "string",
 	"description?": "string",
 	"role?": ROLE_INPUT_SCHEMA,
+	"model?": "string",
 	assignment: "string",
 	"cwd?": "string",
 	"+": "delete",
@@ -175,6 +181,8 @@ export interface TaskParams {
 	description?: string;
 	/** Specialist role/expertise this subagent embodies; shapes its system-prompt identity and display name. */
 	role?: string;
+	/** Explicit model selector for this spawn; resolves through subagent aliases/catalog before agent defaults. */
+	model?: string;
 	/** The work (flat form). */
 	assignment?: string;
 	/** Batch form (`task.batch`): one subagent per item. */

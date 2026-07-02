@@ -21,6 +21,7 @@
   - `id`: stable agent id, CamelCase, ≤32 chars; generated when omitted
   - `description`: UI label only — subagent never sees it
   - `role`: specialist identity this subagent embodies (e.g. "Auth-flow security reviewer") — sets its system-prompt persona and roster display name; tailor every spawn rather than cloning a generic worker
+  - `model`: optional explicit model selector for this spawn; if the user names a real model/alias for a subagent, set it here (aliases and concrete catalog selectors are resolved before agent defaults)
   - `cwd`: working directory override for this spawn (relative paths resolve against parent cwd); defaults to parent session cwd
 {{#if isolationEnabled}}
   - `isolated`: run this spawn in an isolated env; returns patches. Isolated agents are torn down at completion — not addressable afterwards
@@ -29,6 +30,7 @@
 - `id`: stable agent id, CamelCase, ≤32 chars; generated when omitted
 - `description`: UI label only — subagent never sees it
 - `role`: specialist identity this subagent embodies (e.g. "Auth-flow security reviewer") — sets its system-prompt persona and roster display name; tailor every spawn rather than cloning a generic worker
+- `model`: optional explicit model selector for this spawn; if the user names a real model/alias for a subagent, set it here (aliases and concrete catalog selectors are resolved before agent defaults)
 - `assignment`: complete self-contained instructions; one-liners and missing acceptance criteria are PROHIBITED
 - `cwd`: working directory override for this spawn (relative paths resolve against parent cwd); defaults to parent session cwd
 {{#if isolationEnabled}}
