@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import { Settings } from "@pk-nerdsaver-ai/pi-coding-agent/config/settings";
-import { WelcomeComponent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/welcome";
+import { PK_LOGO, WelcomeComponent } from "@pk-nerdsaver-ai/pi-coding-agent/modes/components/welcome";
 import { initTheme, theme } from "@pk-nerdsaver-ai/pi-coding-agent/modes/theme/theme";
 
 describe("WelcomeComponent tips", () => {
@@ -61,5 +61,11 @@ describe("WelcomeComponent tips", () => {
 		// uniform selection domain than any single ordinary tip.
 		expect(newMax).toBeGreaterThan(0);
 		expect(newMax).toBeGreaterThan(ordinaryMax);
+	});
+});
+
+describe("PK_LOGO", () => {
+	it("renders a complete PK mark", () => {
+		expect(PK_LOGO).toEqual(["████▄ ██  ██", "██ ██ ██ ██ ", "████▀ ████  ", "██    ██ ██ ", "██    ██  ██"]);
 	});
 });

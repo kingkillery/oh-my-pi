@@ -21,6 +21,8 @@
 
 ### Fixed
 
+- Fixed the terminal PK logo so the K renders as a complete full-block letter instead of broken half-block strokes.
+
 - Fixed subagent budget compounding across retry attempts (issue #5): when the Fusion sidekick model-request cap (`maxModelRequestsPerRun`) is hit, the agent loop now emits a distinguishable budget-exceeded signal (`onModelRequestBudgetExceeded` config callback, surfaced as `Agent.modelRequestBudgetExceeded`), and `driveSessionToYield` breaks its yield-reminder loop on it instead of re-prompting — each reminder previously restarted the per-run counter, letting a capped run spend up to ~4× the configured budget. Budget-cut runs that never yielded now fail with an explicit "Sidekick model-request budget exhausted" error.
 - Fixed `oh-my-pk update` to check the fork distribution endpoint before npm, so pushed fork binaries become visible immediately while npm remains the fallback when the distribution endpoint is unavailable.
 
