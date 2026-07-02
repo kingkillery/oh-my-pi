@@ -8957,7 +8957,8 @@ export class AgentSession {
 
 			const dynamicRouting = this.settings.get("fusion.dynamicRouting") === true;
 			// Tiered pool (tier 1 = most powerful … 5 = least intelligent), managed
-			// via /fusion-pool. Only meaningful with dynamic routing and 2+ tiers.
+			// via /fusion pool (legacy alias: /fusion-pool). Only meaningful with
+			// dynamic routing and 2+ tiers.
 			const pool = dynamicRouting ? parseFusionPoolEntries(this.settings.get("fusion.modelPool") ?? []) : [];
 			const poolMode = pool.length >= 2;
 

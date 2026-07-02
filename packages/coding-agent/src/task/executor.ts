@@ -282,6 +282,8 @@ export interface ExecutorOptions {
 	 * {@link SubagentLifecyclePayload.detached}.
 	 */
 	detached?: boolean;
+	/** Internal marker for the persistent Fusion warm sidekick spawn. */
+	fusionSidekick?: boolean;
 	modelOverride?: string | string[];
 	/**
 	 * Active model selector of the parent session, used as an auth-aware fallback
@@ -1712,6 +1714,7 @@ export async function runSubprocess(options: ExecutorOptions): Promise<SingleRes
 		task,
 		assignment,
 		index,
+		fusionSidekick,
 		id,
 		worktree,
 		modelOverride,
@@ -2022,13 +2025,14 @@ export async function runSubprocess(options: ExecutorOptions): Promise<SingleRes
 					toAgent: subagentAgentIdentity,
 				});
 			}
-
 			const { normalized: normalizedOutputSchema } = normalizeSchema(outputSchema);
 
-			// Fusion cost mode bounds each delegated subagent turn (including reused
-			// IRC-woken turns) to `fusion.sidekickRequestBudget` model requests; 0 = unlimited.
+			// Fusion cost mode bounds only the persistent warm sidekick's turns
+			// (including reused IRC-woken turns) to `fusion.sidekickRequestBudget`
+			// model requests; 0 = unlimited. Ordinary subagents remain governed by
+			// the generic task budget even when Fusion is enabled.
 			const fusionRequestBudget =
-				settings.get("fusion.enabled") === true && settings.get("fusion.mode") !== "off"
+				fusionSidekick && settings.get("fusion.enabled") === true && settings.get("fusion.mode") !== "off"
 					? settings.get("fusion.sidekickRequestBudget")
 					: 0;
 			const maxModelRequestsPerRun = fusionRequestBudget > 0 ? fusionRequestBudget : undefined;
@@ -2156,6 +2160,8 @@ export async function runSubprocess(options: ExecutorOptions): Promise<SingleRes
 				tools: session.getActiveToolNames(),
 				spawns: spawnsEnv,
 				readSummarize: agent.readSummarize,
+				fusionSidekick,
+				maxModelRequestsPerRun,
 				outputSchema,
 			});
 

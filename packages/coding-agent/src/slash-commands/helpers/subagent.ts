@@ -52,6 +52,13 @@ export interface SubagentWizardState {
 	name?: string;
 	color?: ThemeColor;
 	task: string;
+	/**
+	 * Marks this spawn as the Fusion warm sidekick (set only by
+	 * `ensureFusionSidekick`). Gates `fusion.sidekickRequestBudget` — the cap
+	 * applies to the sidekick's delegated turns only, never to ordinary
+	 * subagents spawned while fusion happens to be enabled.
+	 */
+	fusionSidekick?: boolean;
 }
 
 const SUBAGENT_COLOR_OPTIONS: readonly ThemeColor[] = [
@@ -266,6 +273,7 @@ export async function spawnSubagent(
 		index: spawnIndex,
 		id,
 		detached: true,
+		fusionSidekick: state.fusionSidekick,
 		modelOverride: state.modelOverride,
 		parentActiveModelPattern: ctx.session.model ? formatModelString(ctx.session.model as Model<Api>) : undefined,
 		thinkingLevel: state.thinkingLevel,

@@ -53,6 +53,7 @@ import { reset as resetCapabilities } from "../capability";
 import type { CollabGuestLink } from "../collab/guest";
 import type { CollabHost } from "../collab/host";
 import { KeybindingsManager } from "../config/keybindings";
+import { getModelMatchPreferences, resolveModelRoleValue } from "../config/model-resolver";
 import { isSettingsInitialized, onStatusLineSessionAccentChanged, Settings, settings } from "../config/settings";
 import { clearClaudePluginRootsCache } from "../discovery/helpers";
 import type {
@@ -82,6 +83,8 @@ import planModeApprovedPrompt from "../prompts/system/plan-mode-approved.md" wit
 import planModeCompactInstructionsPrompt from "../prompts/system/plan-mode-compact-instructions.md" with {
 	type: "text",
 };
+import { AgentLifecycleManager } from "../registry/agent-lifecycle";
+import { AgentRegistry } from "../registry/agent-registry";
 import type { AgentSession, AgentSessionEvent, ResolvedRoleModel } from "../session/agent-session";
 import type { CompactMode } from "../session/compact-modes";
 import { HistoryStorage } from "../session/history-storage";
@@ -693,13 +696,15 @@ export class InteractiveMode implements InteractiveModeContext {
 	/**
 	 * Fusion cost mode: spawn one persistent, IRC-addressable "Sidekick" subagent on
 	 * the configured cheap model so the main agent can delegate mechanical work to a
-	 * warm context via `irc send to:"Sidekick"`. Idempotent (once per launch); the
-	 * sidekick's reused IRC-woken turns are bounded by `fusion.sidekickRequestBudget`
-	 * (enforced in the agent loop, wired through executor.ts buildSubagentSessionOptions).
-	 * Best-effort: failures only warn, and the delegation prompt keeps a fresh-`task`
-	 * fallback so delegation still works if the sidekick is unavailable.
+	 * warm context via `irc send to:"Sidekick"`. Idempotent while a spawn succeeded
+	 * (once per launch); a failed or empty spawn resets the guard so a later call
+	 * (e.g. `/fusion on` mid-session) can retry. The sidekick's reused IRC-woken
+	 * turns are bounded by `fusion.sidekickRequestBudget` (enforced in the agent
+	 * loop, wired through executor.ts buildSubagentSessionOptions). Best-effort:
+	 * failures only warn, and the delegation prompt keeps a fresh-`task` fallback
+	 * so delegation still works if the sidekick is unavailable.
 	 */
-	async #ensureFusionSidekick(): Promise<void> {
+	async ensureFusionSidekick(): Promise<void> {
 		try {
 			if (this.#fusionSidekickSpawned) return;
 			if (this.session.settings.get("fusion.enabled") !== true) return;
@@ -717,15 +722,77 @@ export class InteractiveMode implements InteractiveModeContext {
 					thinkingLevel: ThinkingLevel.Inherit,
 					name: "Sidekick",
 					task: fusionSidekickBootstrapPrompt.trim(),
+					fusionSidekick: true,
 				},
 				"task",
 			);
 			// Record the actual allocated id (may be "Sidekick-2" on a resumed session) so the
 			// delegation prompt addresses the live peer and the cost meter reads its real spend.
-			if (sidekickId) this.session.setFusionSidekickId(sidekickId);
+			// `spawnSubagent` returns "" (no throw) when the agent type is unavailable — treat
+			// that as a failed spawn so the guard resets and a later call can retry.
+			if (sidekickId) {
+				this.session.setFusionSidekickId(sidekickId);
+			} else {
+				this.#fusionSidekickSpawned = false;
+			}
 		} catch (err) {
+			this.#fusionSidekickSpawned = false;
 			logger.warn("Fusion sidekick spawn failed", { error: String(err) });
 		}
+	}
+
+	/**
+	 * Reconcile a changed `fusion.sidekickModel` with the tracked sidekick:
+	 * a live idle sidekick is retargeted in place (non-ephemeral, so it
+	 * survives park/revive, preserving its warm context — the compaction-route
+	 * re-tiering below uses the same mechanism but stays ephemeral); a
+	 * parked or dead one is replaced by a fresh spawn on the new model; a
+	 * mid-turn one is left alone so the switch never perturbs an in-flight
+	 * run. Returns a user-facing note describing what actually happened.
+	 */
+	async reconcileFusionSidekickModel(): Promise<string> {
+		const cfg = this.session.settings;
+		if (cfg.get("fusion.enabled") !== true || cfg.get("fusion.mode") === "off") return "";
+		const id = this.session.getFusionSidekickId();
+		const live = id ? AgentRegistry.global().get(id)?.session : undefined;
+		if (live) {
+			const selector = cfg.get("fusion.sidekickModel") || "pi/smol";
+			const target = resolveModelRoleValue(selector, this.session.modelRegistry.getAvailable(), {
+				settings: cfg,
+				matchPreferences: getModelMatchPreferences(cfg),
+				modelRegistry: this.session.modelRegistry,
+			}).model;
+			if (!target) return "Live sidekick unchanged: selector does not resolve to an available model.";
+			if (live.model && modelsAreEqual(target, live.model)) return "Live sidekick is already on this model.";
+			if (!this.session.modelRegistry.hasConfiguredAuth(target)) {
+				return "Live sidekick unchanged: no configured auth for the target model.";
+			}
+			if (live.isStreaming) {
+				return "Sidekick is mid-turn; it keeps its current model — the new one applies on its next spawn or route.";
+			}
+			// Deliberately NOT ephemeral: an explicit user reassignment is the
+			// sidekick's new identity and must survive park/revive (ephemeral
+			// changes restore the spawn model). The compaction-route re-tiering
+			// in #applyFusionSidekickRoute stays ephemeral by design.
+			await live.setModelTemporary(target);
+			return "Live sidekick retargeted in place (warm context preserved).";
+		}
+		// Parked or dead: don't revive just to change models — release the stale
+		// ref (so Agent Hub doesn't accumulate Sidekick-2, -3, …) and replace it
+		// with a fresh spawn that picks up the new setting.
+		if (id && AgentRegistry.global().get(id)) {
+			try {
+				await AgentLifecycleManager.global().release(id);
+			} catch (error) {
+				logger.warn("Fusion sidekick release failed", { id, error: String(error) });
+			}
+		}
+		this.session.setFusionSidekickId(undefined);
+		this.#fusionSidekickSpawned = false;
+		await this.ensureFusionSidekick();
+		return this.session.getFusionSidekickId()
+			? "Started a fresh sidekick on the new model (previous one was parked or gone)."
+			: "Sidekick spawn is pending; the new model applies when it comes up.";
 	}
 
 	async init(options: InteractiveModeInitOptions = {}): Promise<void> {
@@ -861,7 +928,7 @@ export class InteractiveMode implements InteractiveModeContext {
 		await this.initHooksAndCustomTools();
 
 		// Fusion cost mode: bring up the persistent warm sidekick (best-effort, non-blocking).
-		void this.#ensureFusionSidekick();
+		void this.ensureFusionSidekick();
 
 		// Restore mode from session (e.g. plan mode on resume)
 		this.session.setSessionSwitchReconciler?.(() => this.#reconcileModeFromSession({ preserveActiveGoal: true }));

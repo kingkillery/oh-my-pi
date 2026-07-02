@@ -1267,6 +1267,8 @@ export class SessionManager {
 		outputSchema?: unknown;
 		spawns?: string;
 		readSummarize?: boolean;
+		fusionSidekick?: boolean;
+		maxModelRequestsPerRun?: number;
 	}): string {
 		const entry: SessionInitEntry = { type: "session_init", ...this.#freshEntryFields(), ...init };
 		this.#recordEntry(entry);
@@ -1681,6 +1683,8 @@ export class SessionManager {
 			outputSchema?: unknown;
 			spawns?: string;
 			readSummarize?: boolean;
+			fusionSidekick?: boolean;
+			maxModelRequestsPerRun?: number;
 		} | null;
 	} | null> {
 		let loaded: FileEntry[];
@@ -1699,6 +1703,8 @@ export class SessionManager {
 			outputSchema?: unknown;
 			spawns?: string;
 			readSummarize?: boolean;
+			fusionSidekick?: boolean;
+			maxModelRequestsPerRun?: number;
 		} | null = null;
 		for (let index = loaded.length - 1; index >= 0; index--) {
 			const entry = loaded[index];
@@ -1710,6 +1716,8 @@ export class SessionManager {
 					outputSchema: entry.outputSchema,
 					readSummarize: entry.readSummarize,
 					spawns: entry.spawns,
+					fusionSidekick: entry.fusionSidekick,
+					maxModelRequestsPerRun: entry.maxModelRequestsPerRun,
 				};
 				break;
 			}

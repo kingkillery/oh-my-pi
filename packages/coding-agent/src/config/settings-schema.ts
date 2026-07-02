@@ -880,7 +880,8 @@ export const SETTINGS_SCHEMA = {
 		},
 	},
 
-	// Tiered routing pool managed via /fusion-pool. Entries are "<tier>=<selector>"
+	// Tiered routing pool managed via /fusion pool (legacy alias: /fusion-pool).
+	// Entries are "<tier>=<selector>"
 	// with tier 1 = most powerful … 5 = least intelligent. With 2+ entries and
 	// dynamic routing on, the compaction classifier picks a tier from this pool
 	// instead of the binary compactModel/frontier choice.

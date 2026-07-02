@@ -335,6 +335,18 @@ export interface InteractiveModeContext {
 	showDebugSelector(): Promise<void>;
 	showAgentHub(options?: { requireContent?: boolean }): void;
 	resetObserverRegistry(): void;
+	/**
+	 * Fusion cost mode: spawn (or retry spawning) the persistent warm Sidekick
+	 * subagent. Idempotent while a sidekick is live; safe to call mid-session
+	 * after fusion settings change (e.g. from `/fusion on`).
+	 */
+	ensureFusionSidekick(): Promise<void>;
+	/**
+	 * Reconcile a changed `fusion.sidekickModel` with the tracked sidekick
+	 * (retarget live in place, respawn parked/dead). Resolves to a user-facing
+	 * note describing what happened ("" when fusion is off).
+	 */
+	reconcileFusionSidekickModel(): Promise<string>;
 
 	// Input handling
 	handleCtrlC(): void;

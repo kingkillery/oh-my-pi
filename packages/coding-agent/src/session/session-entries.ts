@@ -143,6 +143,10 @@ export interface SessionInitEntry extends SessionEntryBase {
 	spawns?: string;
 	/** The agent's `readSummarize` setting (`false` = read summarization disabled); absent uses the session default. */
 	readSummarize?: boolean;
+	/** True only for the persistent Fusion warm sidekick spawn. */
+	fusionSidekick?: boolean;
+	/** Persisted per-run model-request cap for revived Fusion sidekick sessions. */
+	maxModelRequestsPerRun?: number;
 }
 
 /** Mode change entry - tracks agent mode transitions (e.g. plan mode). */

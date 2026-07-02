@@ -20,7 +20,10 @@ import { runSubprocess } from "@pk-nerdsaver-ai/pi-coding-agent/task/executor";
 import type { AgentDefinition } from "@pk-nerdsaver-ai/pi-coding-agent/task/types";
 import { EventBus } from "@pk-nerdsaver-ai/pi-coding-agent/utils/event-bus";
 
-function createMockSession(onPrompt: (params: { emit: (event: AgentSessionEvent) => void }) => void): AgentSession {
+function createMockSession(
+	onPrompt: (params: { emit: (event: AgentSessionEvent) => void }) => void,
+	onSessionInit: (init: { maxModelRequestsPerRun?: number; fusionSidekick?: boolean }) => void = () => {},
+): AgentSession {
 	const listeners: Array<(event: AgentSessionEvent) => void> = [];
 	const emit = (event: AgentSessionEvent) => {
 		for (const listener of listeners) listener(event);
@@ -30,7 +33,7 @@ function createMockSession(onPrompt: (params: { emit: (event: AgentSessionEvent)
 		agent: { state: { systemPrompt: ["test"] } },
 		model: undefined,
 		extensionRunner: undefined,
-		sessionManager: { appendSessionInit: () => {} },
+		sessionManager: { appendSessionInit: onSessionInit },
 		getActiveToolNames: () => ["read", "yield"],
 		setActiveToolsByName: async (_toolNames: string[]) => {},
 		subscribe: (listener: (event: AgentSessionEvent) => void) => {
@@ -51,7 +54,9 @@ function createMockSession(onPrompt: (params: { emit: (event: AgentSessionEvent)
 	return session as unknown as AgentSession;
 }
 
-function yieldEmittingSession(): AgentSession {
+function yieldEmittingSession(
+	onSessionInit?: (init: { maxModelRequestsPerRun?: number; fusionSidekick?: boolean }) => void,
+): AgentSession {
 	return createMockSession(({ emit }) => {
 		emit({
 			type: "tool_execution_end",
@@ -63,7 +68,7 @@ function yieldEmittingSession(): AgentSession {
 			},
 			isError: false,
 		});
-	});
+	}, onSessionInit);
 }
 
 function createSessionResult(session: AgentSession): CreateAgentSessionResult {
@@ -155,5 +160,36 @@ describe("runSubprocess parent-discovery pass-through (issue #2190)", () => {
 		expect(forwarded?.parentAgentId).toBe("SpawnerAgent");
 		expect(forwarded?.agentId).toBe("ChildAgent");
 		expect(forwarded?.parentTaskPrefix).toBe("ChildAgent");
+	});
+
+	it("applies fusion.sidekickRequestBudget only to the explicit Fusion sidekick spawn", async () => {
+		const settings = Settings.isolated();
+		settings.set("fusion.enabled", true);
+		settings.set("fusion.mode", "escalate");
+		settings.set("fusion.sidekickRequestBudget", 3);
+		const normalInits: Array<{ maxModelRequestsPerRun?: number; fusionSidekick?: boolean }> = [];
+		const sidekickInits: Array<{ maxModelRequestsPerRun?: number; fusionSidekick?: boolean }> = [];
+		const normalSession = yieldEmittingSession(init => normalInits.push(init));
+		const sidekickSession = yieldEmittingSession(init => sidekickInits.push(init));
+		const spy = vi
+			.spyOn(sdkModule, "createAgentSession")
+			.mockResolvedValueOnce(createSessionResult(normalSession))
+			.mockResolvedValueOnce(createSessionResult(sidekickSession));
+
+		const normal = await runSubprocess({ ...baseOptions, settings, id: "Sidekick" });
+		const sidekick = await runSubprocess({ ...baseOptions, settings, id: "Sidekick", fusionSidekick: true });
+
+		expect(normal.exitCode).toBe(0);
+		expect(sidekick.exitCode).toBe(0);
+		const normalOptions = spy.mock.calls[0]?.[0];
+		const sidekickOptions = spy.mock.calls[1]?.[0];
+		expect(normalOptions).toBeDefined();
+		expect(sidekickOptions).toBeDefined();
+		expect(normalOptions?.maxModelRequestsPerRun).toBeUndefined();
+		expect(sidekickOptions?.maxModelRequestsPerRun).toBe(3);
+		expect(normalInits[0]?.fusionSidekick).toBeUndefined();
+		expect(normalInits[0]?.maxModelRequestsPerRun).toBeUndefined();
+		expect(sidekickInits[0]?.fusionSidekick).toBe(true);
+		expect(sidekickInits[0]?.maxModelRequestsPerRun).toBe(3);
 	});
 });

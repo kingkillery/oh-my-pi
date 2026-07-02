@@ -8,7 +8,6 @@ import { $which, APP_NAME, setProjectDir } from "@pk-nerdsaver-ai/pi-utils";
 import { COLLAB_GUEST_ALLOWED_COMMANDS, CollabGuestLink } from "../collab/guest";
 import { CollabHost } from "../collab/host";
 import { writeCollabLinkFile } from "../collab/link-file";
-import { getModelMatchPreferences, resolveModelRoleValue } from "../config/model-resolver";
 import type { SettingPath, SettingValue } from "../config/settings";
 import { settings } from "../config/settings";
 import {
@@ -30,12 +29,6 @@ import { theme } from "../modes/theme/theme";
 import type { InteractiveModeContext } from "../modes/types";
 import type { AgentSession, FreshSessionResult } from "../session/agent-session";
 import { COMPACT_MODES, parseCompactArgs } from "../session/compact-modes";
-import {
-	FUSION_POOL_MAX_TIER,
-	FUSION_POOL_MIN_TIER,
-	formatFusionPoolEntries,
-	parseFusionPoolEntries,
-} from "../session/fusion-router";
 import { formatShakeSummary, type ShakeMode } from "../session/shake-types";
 import { urlHyperlinkAlways } from "../tui";
 import { getChangelogPath, parseChangelog } from "../utils/changelog";
@@ -43,6 +36,7 @@ import { CollabQrCodeComponent } from "./helpers/collab-qrcode";
 import { buildContextReportText } from "./helpers/context-report";
 import { handleDelegateSlashCommand } from "./helpers/delegate";
 import { formatDuration } from "./helpers/format";
+import { handleFusionCommand, handleFusionCommandTui, handleFusionPoolArgs, showFusionMenu } from "./helpers/fusion";
 import { createMarketplaceManager } from "./helpers/marketplace-manager";
 import { handleMcpAcp } from "./helpers/mcp";
 import { handleOkfSlashCommand } from "./helpers/okf";
@@ -548,10 +542,36 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 		},
 	},
 	{
+		name: "fusion",
+		description: "Fusion cost mode: menu, toggle, model assignments, and routing pool",
+		acpDescription: "Manage Fusion cost mode (toggle, models, routing pool)",
+		acpInputHint: "[on|off|status|mode <m>|routing <on|off>|sidekick <model>|strong <model>|compact <model>|pool …]",
+		subcommands: [
+			{ name: "on", description: "Enable fusion (spawns the sidekick)" },
+			{ name: "off", description: "Disable fusion" },
+			{ name: "status", description: "Show fusion status and assignments" },
+			{ name: "mode", description: "Set fusion mode", usage: "<off|delegate|escalate>" },
+			{ name: "routing", description: "Toggle dynamic routing", usage: "<on|off>" },
+			{ name: "sidekick", description: "Assign the sidekick model", usage: "<model-or-alias>" },
+			{ name: "strong", description: "Assign the strong sidekick model", usage: "<model-or-alias|clear>" },
+			{ name: "compact", description: "Assign the compaction downgrade model", usage: "<model-or-alias|clear>" },
+			{ name: "pool", description: "Manage the routing pool", usage: "[list|set <1-5> <model>|remove <1-5>|clear]" },
+		],
+		allowArgs: true,
+		handle: handleFusionCommand,
+		handleTui: async (command, runtime) => {
+			if (!command.args.trim()) {
+				await showFusionMenu(runtime.ctx);
+				runtime.ctx.editor.setText("");
+				return;
+			}
+			return handleFusionCommandTui(command, runtime.ctx);
+		},
+	},
+	{
 		name: "fusion-pool",
-		description:
-			"Manage the Fusion routing pool: assign models to tiers 1-5 (1 = most powerful, 5 = least intelligent)",
-		acpDescription: "Manage the Fusion model routing pool",
+		description: "Manage the Fusion routing pool (alias of /fusion pool)",
+		acpDescription: "Manage the Fusion model routing pool (alias of /fusion pool)",
 		acpInputHint: "[list|set <1-5> <model>|remove <1-5>|clear]",
 		subcommands: [
 			{ name: "list", description: "Show the current tier assignments" },
@@ -560,93 +580,7 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 			{ name: "clear", description: "Remove all tier assignments" },
 		],
 		allowArgs: true,
-		handle: async (command, runtime) => {
-			const { verb, rest } = parseSubcommand(command.args);
-			const pool = parseFusionPoolEntries(runtime.settings.get("fusion.modelPool") ?? []);
-			const describePool = (): string => {
-				if (pool.length === 0) {
-					return "Fusion pool is empty. Assign tiers with /fusion-pool set <1-5> <model> (1 = most powerful, 5 = least intelligent).";
-				}
-				const lines = [];
-				for (let tier = FUSION_POOL_MIN_TIER; tier <= FUSION_POOL_MAX_TIER; tier++) {
-					const entry = pool.find(t => t.tier === tier);
-					lines.push(`  ${tier}. ${entry ? entry.selector : "(unassigned)"}`);
-				}
-				const status =
-					pool.length >= 2
-						? runtime.settings.get("fusion.dynamicRouting") === true &&
-							runtime.settings.get("fusion.enabled") === true
-							? "active"
-							: "configured, but needs fusion.enabled + fusion.dynamicRouting to route"
-						: "needs at least 2 tiers to route";
-				return `Fusion routing pool (1 = most powerful … 5 = least intelligent) — ${status}:\n${lines.join("\n")}`;
-			};
-			if (!verb || verb === "list" || verb === "status") {
-				await runtime.output(describePool());
-				return commandConsumed();
-			}
-			if (verb === "clear") {
-				runtime.settings.set("fusion.modelPool", []);
-				await runtime.output("Fusion pool cleared.");
-				return commandConsumed();
-			}
-			if (verb === "set") {
-				const { verb: tierArg, rest: selector } = parseSubcommand(rest);
-				const tier = Number.parseInt(tierArg, 10);
-				if (
-					!Number.isInteger(tier) ||
-					tier < FUSION_POOL_MIN_TIER ||
-					tier > FUSION_POOL_MAX_TIER ||
-					!selector.trim()
-				) {
-					return usage(
-						"Usage: /fusion-pool set <1-5> <model-or-alias>  (1 = most powerful, 5 = least intelligent)",
-						runtime,
-					);
-				}
-				const trimmedSelector = selector.trim();
-				const next = formatFusionPoolEntries([
-					...pool.filter(t => t.tier !== tier),
-					{ tier, selector: trimmedSelector },
-				]);
-				runtime.settings.set("fusion.modelPool", next);
-				// Best-effort resolution check so typos surface immediately.
-				const resolved = resolveModelRoleValue(trimmedSelector, runtime.session.modelRegistry.getAvailable(), {
-					settings: runtime.settings,
-					matchPreferences: getModelMatchPreferences(runtime.settings),
-					modelRegistry: runtime.session.modelRegistry,
-				}).model;
-				const note = resolved
-					? ` (resolves to ${resolved.provider}/${resolved.id})`
-					: " (warning: does not resolve to an available model right now)";
-				const poolSize = next.length;
-				const inactive: string[] = [];
-				if (runtime.settings.get("fusion.enabled") !== true) inactive.push("fusion.enabled");
-				if (runtime.settings.get("fusion.dynamicRouting") !== true) inactive.push("fusion.dynamicRouting");
-				const activation =
-					poolSize < 2
-						? "\nPool needs at least 2 assigned tiers before routing kicks in."
-						: inactive.length > 0
-							? `\nConfigured but inactive until ${inactive.join(" and ")} ${inactive.length > 1 ? "are" : "is"} enabled.`
-							: "";
-				await runtime.output(`Tier ${tier} → ${trimmedSelector}${note}${activation}`);
-				return commandConsumed();
-			}
-			if (verb === "remove" || verb === "rm") {
-				const tier = Number.parseInt(rest.trim(), 10);
-				if (!Number.isInteger(tier) || tier < FUSION_POOL_MIN_TIER || tier > FUSION_POOL_MAX_TIER) {
-					return usage("Usage: /fusion-pool remove <1-5>", runtime);
-				}
-				if (!pool.some(t => t.tier === tier)) {
-					await runtime.output(`Tier ${tier} is not assigned.`);
-					return commandConsumed();
-				}
-				runtime.settings.set("fusion.modelPool", formatFusionPoolEntries(pool.filter(t => t.tier !== tier)));
-				await runtime.output(`Tier ${tier} unassigned.`);
-				return commandConsumed();
-			}
-			return usage("Usage: /fusion-pool [list|set <1-5> <model>|remove <1-5>|clear]", runtime);
-		},
+		handle: (command, runtime) => handleFusionPoolArgs(command.args, runtime, "/fusion-pool"),
 	},
 	{
 		name: "advisor",

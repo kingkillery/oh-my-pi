@@ -100,6 +100,7 @@ export function createPersistedSubagentReviverFactory(
 				toolNames: init.tools,
 				outputSchema: init.outputSchema,
 				requireYieldTool: true,
+				maxModelRequestsPerRun: init.fusionSidekick ? init.maxModelRequestsPerRun : undefined,
 				systemPrompt: () => [init.systemPrompt],
 				// Old files predate persisted spawns: deny re-spawning rather than let
 				// createAgentSession default to wildcard ("*").
