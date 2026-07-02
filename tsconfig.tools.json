@@ -6,6 +6,20 @@
 		"emitDeclarationOnly": false,
 		"allowImportingTsExtensions": true
 	},
-	"include": ["scripts", "packages/natives/scripts/gen-npm-packages.ts"],
-	"exclude": ["node_modules"]
+	// Root scripts import package source directly (e.g. scripts/claude-trace.ts
+	// -> packages/coding-agent/src, scripts/ci-release-publish.ts ->
+	// packages/natives/scripts). A composite project must list every file it
+	// typechecks (TS6307), and workspace imports cascade across packages, so the
+	// closure is scripts + all package source trees.
+	// Browser/React packages (JSX, DOM globals) carry their own compiler
+	// settings and are not reachable from root scripts, so they stay out.
+	"include": ["scripts", "packages/*/src", "packages/natives/scripts"],
+	"exclude": [
+		"node_modules",
+		"packages/*/node_modules",
+		"packages/*/dist",
+		"packages/stats/src",
+		"packages/collab-web/src",
+		"**/*.tsx"
+	]
 }

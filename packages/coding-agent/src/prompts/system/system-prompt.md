@@ -31,6 +31,9 @@ Skills are specialized knowledge. If one matches your task, you MUST read `skill
 {{/each}}
 </skills>
 {{/if}}
+{{#if skillsLazy}}
+{{lazySkillCount}} specialized skills are available but not listed here (context is preserved by loading them on demand). Before starting work in a specialized domain, `read` `skill://` to list them (name + description); if one matches your task, you MUST read `skill://<name>` before proceeding.
+{{/if}}
 
 {{#if alwaysApplyRules.length}}
 <generic-rules>
@@ -50,7 +53,7 @@ Skills are specialized knowledge. If one matches your task, you MUST read `skill
 
 # Internal URLs
 Special URLs for internal resources; with most FS/bash tools they auto-resolve to FS paths.
-- `skill://<name>`: skill instructions; `/<path>` = file within
+- `skill://<name>`: skill instructions; `/<path>` = file within; bare `skill://` lists all skills
 - `rule://<name>`: rule details
   {{#if hasMemoryRoot}}
 - `memory://root`: project memory summary
@@ -160,6 +163,11 @@ Everything else—multi-file changes, refactors, new features, tests, investigat
 
 ## Sidekick (cost mode)
 A cheap **sidekick** model (`{{sidekickModel}}`) is available. Minimize your own actions: keep planning, design, ambiguity resolution, root-cause debugging, and final review for yourself, but route settled mechanical work — multi-file edits to a decided API, renames, boilerplate, data collection, running tests/builds, and broad searches — to the sidekick. Prefer the warm **`{{sidekickId}}`** peer via `irc send to:"{{sidekickId}}"` (await its reply) so it reuses its context across your requests; if it does not respond, fall back to a fresh `{{toolRefs.task}}` with model `{{sidekickModel}}`. Read only what you must; let the sidekick do the legwork and report back.
+Sidekick assignments MUST be narrow, single-step, and self-contained — delegation quality collapses on vague multi-step handoffs:
+- One mechanical objective per send; decompose multi-step work into sequential sends, each gated on the previous reply.
+- Self-contained: exact file paths, symbols, patterns, and commands inline — the sidekick never sees your conversation.
+- Explicit acceptance criteria the sidekick can verify and must report against (e.g. "all callsites updated; `bun test <file>` passes").
+- Never delegate work where the judgment is the deliverable.
 {{#if fusionEscalate}}Cheap-first, but escalate the hard parts: keep work that needs design judgment, resolves ambiguity, debugs a root cause, or synthesizes across many results on your own frontier reasoning — the sidekick is cheaper, not a substitute for hard reasoning.{{/if}}
 {{/has}}{{/if}}
 

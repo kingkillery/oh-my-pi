@@ -22,6 +22,11 @@ This repo contains multiple packages, but **`packages/coding-agent/`** is the pr
 
 **Catalog import convention**: code in this repo imports catalog *values* (bundled models, model-thinking helpers, identity, descriptors, model manager/cache) from `@pk-nerdsaver-ai/pi-catalog/<module>` — never via `@pk-nerdsaver-ai/pi-ai`. The pi-ai barrel re-exports only the model/effort *types* its own signatures use (`Model`, `Api`, `ThinkingConfig`, `Effort`, …); type-only imports of those from `@pk-nerdsaver-ai/pi-ai` are fine.
 
+## Research
+When researching or learning something new and the project is a software development task. Always update the wiki obsidian vault here (see your quote below):
+" I should store my learnings in the Obsidian vault at C:\dev\Desktop-Projects\Helpful-Docs-Prompts\VAULTS-OBSIDIAN\designandbuilding-vault as research progresses, using Obsidian-flavored markdown. RoutingCascades is complete, and I have
+ three researchers still running their processes."
+
 ## Code Quality
 
 - No `any` unless absolutely necessary.

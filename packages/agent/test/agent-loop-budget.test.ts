@@ -90,13 +90,57 @@ describe("agentLoop maxModelRequestsPerRun (Fusion sidekick budget)", () => {
 	});
 });
 
+describe("agentLoop onModelRequestBudgetExceeded signal", () => {
+	it("fires the callback when the run ends on the budget cut", async () => {
+		const context: AgentContext = { systemPrompt: [""], messages: [], tools: [noopTool] };
+		const mock = createMockModel({ responses: toolForever() });
+		let fired = 0;
+		const config: AgentLoopConfig = {
+			model: mock.model,
+			convertToLlm: identityConverter,
+			maxModelRequestsPerRun: 2,
+			onModelRequestBudgetExceeded: () => {
+				fired++;
+			},
+		};
+
+		await agentLoop([createUserMessage("go")], context, config, undefined, mock.stream).result();
+		expect(mock.calls).toHaveLength(2);
+		expect(fired).toBe(1);
+	});
+
+	it("does not fire on a run that ends normally under the cap", async () => {
+		const context: AgentContext = { systemPrompt: [""], messages: [], tools: [noopTool] };
+		const mock = createMockModel({
+			responses: [
+				{ content: [{ type: "toolCall", id: "t-1", name: "noop", arguments: {} }] },
+				{ content: ["done"] },
+			],
+		});
+		let fired = 0;
+		const config: AgentLoopConfig = {
+			model: mock.model,
+			convertToLlm: identityConverter,
+			maxModelRequestsPerRun: 10,
+			onModelRequestBudgetExceeded: () => {
+				fired++;
+			},
+		};
+
+		await agentLoop([createUserMessage("go")], context, config, undefined, mock.stream).result();
+		expect(mock.calls).toHaveLength(2);
+		expect(fired).toBe(0);
+	});
+});
+
 describe("agentLoop maxModelRequestsPerRun per-prompt reset", () => {
 	// Regression for #5 (Fusion sidekick budget compounding): the cap is
 	// enforced at the top of each `runLoop` iteration and resets across
 	// `session.prompt()` calls. Callers driving multiple prompts in one
-	// assignment (e.g. the executor's yield-reminder loop) MUST consult the
-	// configured cap alongside their own counter — otherwise the budget
-	// compounds by N reminders.
+	// assignment (e.g. the executor's yield-reminder loop) must break on the
+	// `onModelRequestBudgetExceeded` signal (surfaced as
+	// `Agent.modelRequestBudgetExceeded`) — otherwise the budget compounds
+	// by N reminders.
 	it("resets the counter across separate prompt() invocations on the same session", async () => {
 		const context: AgentContext = { systemPrompt: [""], messages: [], tools: [noopTool] };
 		const mock = createMockModel({ responses: toolForever() });

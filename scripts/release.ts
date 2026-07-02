@@ -51,11 +51,10 @@ async function watchCI(): Promise<boolean> {
 
 		// Check job-level status for in-progress runs (fail fast on first job failure)
 		const failedJobs: Array<{ workflow: string; job: string; jobId: number; conclusion: string }> = [];
-		const inProgressRuns = runs.filter((r) => r.status === "in_progress" || r.status === "queued");
+		const inProgressRuns = runs.filter(r => r.status === "in_progress" || r.status === "queued");
 
 		for (const run of inProgressRuns) {
-			const jobsOutput =
-				await $`gh run view ${run.databaseId} --json jobs`.quiet().nothrow().text();
+			const jobsOutput = await $`gh run view ${run.databaseId} --json jobs`.quiet().nothrow().text();
 			try {
 				const { jobs } = JSON.parse(jobsOutput) as {
 					jobs: Array<{ name: string; databaseId: number; status: string; conclusion: string | null }>;
@@ -91,9 +90,9 @@ async function watchCI(): Promise<boolean> {
 		}
 
 		// Check workflow-level status
-		const pending = runs.filter((r) => r.status !== "completed");
-		const failed = runs.filter((r) => r.status === "completed" && r.conclusion !== "success");
-		const passed = runs.filter((r) => r.status === "completed" && r.conclusion === "success");
+		const pending = runs.filter(r => r.status !== "completed");
+		const failed = runs.filter(r => r.status === "completed" && r.conclusion !== "success");
+		const passed = runs.filter(r => r.status === "completed" && r.conclusion === "success");
 
 		console.log(`  ${passed.length} passed, ${pending.length} pending, ${failed.length} failed`);
 
@@ -250,10 +249,7 @@ async function cmdRelease(version: string): Promise<void> {
 	// Update @pk-nerdsaver-ai/* catalog entries in root package.json
 	console.log("Updating root catalog versions...");
 	let rootPkgRaw = await Bun.file("package.json").text();
-	rootPkgRaw = rootPkgRaw.replace(
-		/("@pk-nerdsaver-ai\/[^"]+":\s*)"[^"]+"/g,
-		`$1"${version}"`,
-	);
+	rootPkgRaw = rootPkgRaw.replace(/("@pk-nerdsaver-ai\/[^"]+":\s*)"[^"]+"/g, `$1"${version}"`);
 	await Bun.write("package.json", rootPkgRaw);
 	console.log("  Updated root catalog @pk-nerdsaver-ai/* entries");
 
@@ -365,13 +361,7 @@ async function cmdRelease(version: string): Promise<void> {
 	const tagRef = `v${version}`;
 	const sha = (await git(["rev-parse", "HEAD"]).text()).trim();
 	await git(["tag", "-f", tagRef]);
-	await git([
-		"push",
-		"--atomic",
-		"origin",
-		"refs/heads/main:refs/heads/main",
-		`${sha}:refs/tags/${tagRef}`,
-	]);
+	await git(["push", "--atomic", "origin", "refs/heads/main:refs/heads/main", `${sha}:refs/tags/${tagRef}`]);
 	console.log();
 
 	// 9. Publish. With Actions enabled, CI builds binaries + publishes npm on the
@@ -380,8 +370,10 @@ async function cmdRelease(version: string): Promise<void> {
 	if (!(await actionsEnabled())) {
 		console.log("GitHub Actions are disabled (.github/workflows/ci.yml.disabled) — skipping CI watch.\n");
 		console.log("Tagged and pushed. Finish the release locally with:");
-		console.log(`  bun scripts/release-local.ts ${version} --publish`);
-		console.log("(builds host-platform binaries → Hugging Face + npm publish; darwin binaries need a Mac).\n");
+		console.log(`  bun scripts/release-local.ts ${version}`);
+		console.log(
+			"(builds host-platform binaries → Hugging Face; pass --npm to publish npm too; darwin binaries need a Mac).\n",
+		);
 		console.log(`=== Tagged v${version} (local publish pending) ===`);
 		return;
 	}

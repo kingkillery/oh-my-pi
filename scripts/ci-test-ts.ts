@@ -159,13 +159,7 @@ const codingAgentUiContentMarkers = [
 	"renderToString",
 ];
 
-const codingAgentRuntimeContentMarkers = [
-	"AgentSession",
-	"SessionManager",
-	"AuthStorage",
-	"Bun.sleep",
-	"setTimeout(",
-];
+const codingAgentRuntimeContentMarkers = ["AgentSession", "SessionManager", "AuthStorage", "Bun.sleep", "setTimeout("];
 
 let codingAgentTestPartitionPromise: Promise<CodingAgentTestPartition> | null = null;
 
@@ -221,10 +215,7 @@ function classifyCodingAgentTest(testFile: string, content: string): CodingAgent
 	) {
 		return "native";
 	}
-	if (
-		matchesAnyPath(testFile, codingAgentUiPathPatterns) ||
-		hasAnyMarker(content, codingAgentUiContentMarkers)
-	) {
+	if (matchesAnyPath(testFile, codingAgentUiPathPatterns) || hasAnyMarker(content, codingAgentUiContentMarkers)) {
 		return "ui";
 	}
 	if (

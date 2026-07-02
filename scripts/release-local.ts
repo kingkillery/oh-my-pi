@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import * as path from "node:path";
 /**
  * One-command local release for this fork.
  *
@@ -25,13 +26,13 @@
  *   bun scripts/release-local.ts 16.1.10 --npm                 # also npm publish
  *   bun scripts/release-local.ts 16.1.10 --skip-tag            # already bumped/tagged; just publish
  *   bun scripts/release-local.ts 16.1.10 --skip-tag --targets darwin-arm64,darwin-x64   # on a Mac: fill in darwin
+ *   bun scripts/release-local.ts 16.1.10 --force-build          # rebuild/re-upload binaries already present on HF
  *   bun scripts/release-local.ts 16.1.10 --dry-run
  *
  * Env: HF_TOKEN (write-scoped Hugging Face token) for step 2; npm auth (see
  * `npm whoami`) for --npm.
  */
 import { $ } from "bun";
-import * as path from "node:path";
 
 const repoRoot = path.join(import.meta.dir, "..");
 const version = process.argv[2];
@@ -46,7 +47,7 @@ function flagValue(flag: string): string | undefined {
 
 if (!version || !/^\d+\.\d+\.\d+/.test(version)) {
 	console.error(
-		"Usage: bun scripts/release-local.ts <version> [--npm] [--skip-tag] [--skip-binaries] [--targets a,b] [--dry-run]",
+		"Usage: bun scripts/release-local.ts <version> [--npm] [--skip-tag] [--skip-binaries] [--targets a,b] [--force-build] [--dry-run]",
 	);
 	process.exit(1);
 }
@@ -56,6 +57,7 @@ const isDryRun = hasFlag("--dry-run");
 const doNpm = hasFlag("--npm");
 const skipTag = hasFlag("--skip-tag");
 const skipBinaries = hasFlag("--skip-binaries");
+const forceBuild = hasFlag("--force-build");
 const targets = flagValue("--targets");
 
 async function run(cmd: string[]): Promise<void> {
@@ -99,6 +101,7 @@ if (skipBinaries) {
 	console.log("\nStep 2: build host binary -> Hugging Face...");
 	const cmd = ["bun", "scripts/publish-binaries-hf.ts", "--tag", tag];
 	if (targets) cmd.push("--targets", targets);
+	if (forceBuild) cmd.push("--force-build");
 	if (isDryRun) cmd.push("--dry-run");
 	await run(cmd);
 }

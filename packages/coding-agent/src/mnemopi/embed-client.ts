@@ -26,6 +26,16 @@ type PendingRequest =
 // is slow on contended CI runners; the probe only proves the worker spawns and
 // ponges, so a generous bound removes flakes without weakening the check.
 const SMOKE_TEST_TIMEOUT_MS = 30_000;
+const DEFAULT_IDLE_TERMINATE_MS = 5 * 60 * 1000;
+const IDLE_TERMINATE_ENV = "OMP_MNEMOPI_EMBED_IDLE_TIMEOUT_MS";
+
+function resolveIdleTerminateMs(overrideMs: number | undefined): number {
+	if (overrideMs !== undefined) return overrideMs;
+	const raw = Bun.env[IDLE_TERMINATE_ENV];
+	if (raw === undefined || raw.trim() === "") return DEFAULT_IDLE_TERMINATE_MS;
+	const parsed = Number(raw);
+	return Number.isFinite(parsed) ? parsed : DEFAULT_IDLE_TERMINATE_MS;
+}
 
 /**
  * Hidden subcommand on the main CLI that boots the mnemopi embeddings worker
@@ -224,8 +234,15 @@ export class MnemopiEmbedClient {
 	#nextRequestId = 0;
 	#spawnWorker: () => MnemopiEmbedWorkerHandle;
 
-	constructor(spawnWorker: () => MnemopiEmbedWorkerHandle = spawnMnemopiEmbedWorker) {
+	#idleTerminateMs: number;
+	#idleTimer: Timer | null = null;
+
+	constructor(
+		spawnWorker: () => MnemopiEmbedWorkerHandle = spawnMnemopiEmbedWorker,
+		options: { idleTimeoutMs?: number } = {},
+	) {
 		this.#spawnWorker = spawnWorker;
+		this.#idleTerminateMs = resolveIdleTerminateMs(options.idleTimeoutMs);
 	}
 
 	/**
@@ -246,7 +263,7 @@ export class MnemopiEmbedClient {
 			const { promise, resolve } = Promise.withResolvers<boolean>();
 			this.#pending.set(id, { kind: "init", model, resolve });
 			try {
-				worker.send({ type: "init", id, model, cacheDir });
+				this.#send(worker, { type: "init", id, model, cacheDir });
 				const ok = await promise;
 				if (!ok) return null;
 			} finally {
@@ -263,6 +280,7 @@ export class MnemopiEmbedClient {
 	}
 
 	async terminate(): Promise<void> {
+		this.#clearIdleTimer();
 		const worker = this.#worker;
 		this.#worker = null;
 		this.#unsubscribeMessage?.();
@@ -297,7 +315,7 @@ export class MnemopiEmbedClient {
 			// `LocalEmbeddingModel` handle would otherwise hit a fresh
 			// worker's "embed before init" guard. Worker `ensureLoaded` is
 			// idempotent so steady-state embeds pay no extra cost.
-			worker.send({ type: "embed", id, model, cacheDir, texts, batchSize });
+			this.#send(worker, { type: "embed", id, model, cacheDir, texts, batchSize });
 			const result = await promise;
 			if (result instanceof Error) throw result;
 			return result;
@@ -329,7 +347,29 @@ export class MnemopiEmbedClient {
 		return worker;
 	}
 
+	#send(worker: MnemopiEmbedWorkerHandle, message: MnemopiEmbedWorkerInbound): void {
+		worker.send(message);
+		this.#armIdleTimer();
+	}
+
+	#clearIdleTimer(): void {
+		if (!this.#idleTimer) return;
+		clearTimeout(this.#idleTimer);
+		this.#idleTimer = null;
+	}
+
+	#armIdleTimer(): void {
+		if (this.#idleTerminateMs <= 0 || !this.#worker) return;
+		this.#clearIdleTimer();
+		this.#idleTimer = setTimeout(() => {
+			this.#idleTimer = null;
+			if (!this.#worker || this.#pending.size !== 0) return;
+			void this.terminate();
+		}, this.#idleTerminateMs);
+		this.#idleTimer.unref?.();
+	}
 	#handleMessage(message: MnemopiEmbedWorkerOutbound): void {
+		this.#armIdleTimer();
 		if (message.type === "log") {
 			logWorkerMessage(message);
 			return;

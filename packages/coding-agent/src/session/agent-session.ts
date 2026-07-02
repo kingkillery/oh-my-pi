@@ -288,6 +288,15 @@ import {
 } from "./codex-auto-reset";
 import { findCompactMode } from "./compact-modes";
 import {
+	classifyFusionRoute,
+	type FusionPoolTier,
+	type FusionRoute,
+	parseFusionPoolEntries,
+	resolveEffectiveFusionRoute,
+	resolveSidekickRoute,
+	shouldRunFusionCompactionSwitch,
+} from "./fusion-router";
+import {
 	type BashExecutionMessage,
 	type CustomMessage,
 	convertToLlm,
@@ -1168,6 +1177,14 @@ export class AgentSession {
 	#goalRuntime: GoalRuntime;
 	#fusionSidekickId: string | undefined;
 	#fusionCompactionSwitched = false;
+	/** Original frontier model captured before the first automated Fusion switch (dynamic routing). */
+	#fusionBaseModel: Model | undefined;
+	/** Model last set by automated Fusion routing; a mismatch with the live model means the user switched manually. */
+	#fusionLastAutoModel: Model | undefined;
+	/** Latched off once the user manually overrides an automated Fusion switch. */
+	#fusionRoutingDisabled = false;
+	/** Consecutive failed tool results on this session; fuels the Fusion failure-streak escalation. */
+	#fusionToolFailureStreak = 0;
 	#advisorRuntime?: AdvisorRuntime;
 	#advisorEnabled = false;
 	/** The advisor's own agent, retained so `/dump advisor` can serialize its transcript. Undefined when no advisor is active. */
@@ -2707,6 +2724,15 @@ export class AgentSession {
 				// productive work in response to the prior nudge, so the next text-only stop
 				// is allowed to escalate to the next reminder if todos remain incomplete.
 				this.#todoReminderAwaitingProgress = false;
+				// Fusion failure-streak escalation: consecutive failed tool calls on a
+				// downgraded main model force an early tier-up back to the frontier
+				// baseline without waiting for the next compaction boundary.
+				if (isError) {
+					this.#fusionToolFailureStreak++;
+					await this.#maybeEscalateFusionOnFailureStreak();
+				} else {
+					this.#fusionToolFailureStreak = 0;
+				}
 				// Invalidate streaming edit cache when edit tool completes to prevent stale data
 				if (toolName === "edit" && details?.path) {
 					this.#invalidateFileCacheForPath(details.path);
@@ -7937,7 +7963,7 @@ export class AgentSession {
 			}
 
 			// Fusion cost mode: ramp the main model down at the manual /compact boundary too.
-			await this.#applyFusionCompactionSwitch();
+			await this.#applyFusionCompactionSwitch(summary);
 			const compactionResult: CompactionResult = {
 				summary,
 				shortSummary,
@@ -8927,43 +8953,206 @@ export class AgentSession {
 	/**
 	 * Fusion cost mode: at a compaction boundary the provider/KV cache has already
 	 * been invalidated by the history rewrite, so switching the main model here is
-	 * "free" (no extra cache miss beyond the one compaction already paid). When
-	 * `fusion.compactModel` is configured, ramp the main model down to that cheaper
-	 * tier for the post-compaction stretch. Opt-in (empty selector = disabled),
-	 * ephemeral (never written to settings), and a no-op when the target is
-	 * unavailable, unauthed, or already active. Mirrors {@link #promoteContextModel}.
+	 * marginal-cost: the messages-segment miss is already paid, and only the
+	 * tools/system segment re-prefills for the new model.
+	 *
+	 * Static mode (`fusion.dynamicRouting` off): when `fusion.compactModel` is
+	 * configured, ramp the main model down to that cheaper tier once per session.
+	 *
+	 * Dynamic mode (`fusion.dynamicRouting` on): at EVERY compaction a lightweight
+	 * classifier reads the compaction summary and picks the tier for the next
+	 * stretch — `cheap` (compactModel) for settled mechanical work, `frontier`
+	 * (the original model) when the work needs strong reasoning. Automated routing
+	 * latches off permanently the moment the user manually switches models.
+	 *
+	 * Always opt-in (empty selector = disabled), ephemeral (never written to
+	 * settings), and a no-op when the target is unavailable, unauthed, or already
+	 * active. Mirrors {@link #promoteContextModel}.
 	 */
-	async #applyFusionCompactionSwitch(): Promise<void> {
+	async #applyFusionCompactionSwitch(summary?: string): Promise<void> {
 		// Whole body guarded: this runs inside the compaction commit path, so an
 		// unexpected throw from model resolution/auth lookup must never mark a
 		// committed compaction as failed or stall auto-continue.
 		try {
 			if (this.settings.get("fusion.enabled") !== true) return;
 			if (this.settings.get("fusion.mode") === "off") return;
-			// Switch at most once per session so a later compaction never clobbers a model
-			// the user manually chose after the first downgrade.
-			if (this.#fusionCompactionSwitched) return;
-			const selector = this.settings.get("fusion.compactModel")?.trim();
-			if (!selector) return;
 			const currentModel = this.model;
 			if (!currentModel) return;
 			const availableModels = this.#modelRegistry.getAvailable();
 			if (availableModels.length === 0) return;
-			const target = resolveModelRoleValue(selector, availableModels, {
-				settings: this.settings,
-				matchPreferences: getModelMatchPreferences(this.settings),
-				modelRegistry: this.#modelRegistry,
-			}).model;
-			if (!target || modelsAreEqual(target, currentModel)) return;
+			const resolveSelector = (sel: string): Model | undefined =>
+				resolveModelRoleValue(sel, availableModels, {
+					settings: this.settings,
+					matchPreferences: getModelMatchPreferences(this.settings),
+					modelRegistry: this.#modelRegistry,
+				}).model;
+
+			const dynamicRouting = this.settings.get("fusion.dynamicRouting") === true;
+			// Tiered pool (tier 1 = most powerful … 5 = least intelligent), managed
+			// via /fusion-pool. Only meaningful with dynamic routing and 2+ tiers.
+			const pool = dynamicRouting ? parseFusionPoolEntries(this.settings.get("fusion.modelPool") ?? []) : [];
+			const poolMode = pool.length >= 2;
+
+			const selector = this.settings.get("fusion.compactModel")?.trim();
+			const sidekickStrongSelector = this.settings.get("fusion.sidekickStrongModel")?.trim() ?? "";
+			if (
+				!shouldRunFusionCompactionSwitch({
+					hasCompactSelector: !!selector,
+					poolMode,
+					dynamicRouting,
+					hasSidekickStrongSelector: !!sidekickStrongSelector,
+					pool,
+				})
+			) {
+				return;
+			}
+			const cheapModel = selector ? resolveSelector(selector) : undefined;
+
+			if (!dynamicRouting) {
+				// Static: switch at most once per session so a later compaction never
+				// clobbers a model the user manually chose after the first downgrade.
+				if (!cheapModel) return;
+				if (this.#fusionCompactionSwitched) return;
+				if (modelsAreEqual(cheapModel, currentModel)) return;
+				if (!this.#modelRegistry.hasConfiguredAuth(cheapModel)) return;
+				// Capture the frontier baseline and auto-switch marker so the
+				// failure-streak escalation (and its manual-override detection)
+				// also works in static mode.
+				this.#fusionBaseModel ??= currentModel;
+				await this.setModelTemporary(cheapModel, undefined, { ephemeral: true });
+				this.#fusionLastAutoModel = this.model ?? cheapModel;
+				this.#fusionCompactionSwitched = true;
+				logger.debug("Fusion compaction switch", {
+					from: `${currentModel.provider}/${currentModel.id}`,
+					to: `${cheapModel.provider}/${cheapModel.id}`,
+				});
+				return;
+			}
+
+			// Dynamic routing: respect a manual model choice forever after.
+			if (this.#fusionRoutingDisabled) return;
+			if (this.#fusionLastAutoModel && !modelsAreEqual(this.#fusionLastAutoModel, currentModel)) {
+				this.#fusionRoutingDisabled = true;
+				logger.debug("Fusion dynamic routing disabled after manual model switch");
+				return;
+			}
+			const baseModel = this.#fusionBaseModel ?? currentModel;
+
+			const route = await classifyFusionRoute(
+				summary ?? "",
+				this.#modelRegistry,
+				this.settings,
+				this.sessionId,
+				poolMode ? pool : undefined,
+			);
+			// Binary mode falls back to the static one-shot ramp-down when the
+			// classifier is unavailable; pool mode is classifier-driven and does not.
+			const effectiveRoute = resolveEffectiveFusionRoute(route, {
+				alreadySwitched: this.#fusionCompactionSwitched,
+				pool,
+			});
+			if (effectiveRoute === undefined) return;
+
+			// Decoupled sidekick tier routing (Devin-Fusion refinement): the same
+			// verdict also re-tiers the warm sidekick, independently of whether the
+			// main model switches below.
+			await this.#applyFusionSidekickRoute(effectiveRoute, pool, resolveSelector);
+			let target: Model | undefined;
+			if (typeof effectiveRoute === "number") {
+				const tierSelector = pool.find(t => t.tier === effectiveRoute)?.selector;
+				target = tierSelector ? resolveSelector(tierSelector) : undefined;
+			} else {
+				target = effectiveRoute === "cheap" ? cheapModel : baseModel;
+			}
+			if (!target) return;
+			if (modelsAreEqual(target, currentModel)) return;
 			if (!this.#modelRegistry.hasConfiguredAuth(target)) return;
+			// Capture the frontier baseline before the first downgrade so `frontier`
+			// routes can restore it on a later compaction.
+			this.#fusionBaseModel = baseModel;
 			await this.setModelTemporary(target, undefined, { ephemeral: true });
+			this.#fusionLastAutoModel = this.model ?? target;
 			this.#fusionCompactionSwitched = true;
-			logger.debug("Fusion compaction switch", {
+			logger.debug("Fusion dynamic route", {
+				route: route ?? `${effectiveRoute} (static fallback)`,
 				from: `${currentModel.provider}/${currentModel.id}`,
 				to: `${target.provider}/${target.id}`,
 			});
 		} catch (error) {
 			logger.warn("Fusion compaction switch failed", { error: String(error) });
+		}
+	}
+
+	/**
+	 * Fusion dynamic routing: re-tier the warm sidekick from the same compaction
+	 * verdict that routes the main model — hard stretches upgrade it to
+	 * `fusion.sidekickStrongModel`, settled stretches return it to the base
+	 * `fusion.sidekickModel`. Decoupled from the main switch: either can change
+	 * without the other. Best-effort — the sidekick may be parked or absent, and
+	 * its (small) context re-prefills on its next warm turn.
+	 */
+	async #applyFusionSidekickRoute(
+		route: FusionRoute,
+		pool: readonly FusionPoolTier[],
+		resolveSelector: (sel: string) => Model | undefined,
+	): Promise<void> {
+		try {
+			const strongSelector = this.settings.get("fusion.sidekickStrongModel")?.trim();
+			if (!strongSelector) return;
+			const sidekick = this.#fusionSidekickId ? AgentRegistry.global().get(this.#fusionSidekickId)?.session : undefined;
+			if (!sidekick) return;
+			const tier = resolveSidekickRoute(route, pool);
+			const selector = tier === "strong" ? strongSelector : this.settings.get("fusion.sidekickModel") || "pi/smol";
+			const target = resolveSelector(selector);
+			if (!target) return;
+			const current = sidekick.model;
+			if (current && modelsAreEqual(target, current)) return;
+			if (!this.#modelRegistry.hasConfiguredAuth(target)) return;
+			await sidekick.setModelTemporary(target, undefined, { ephemeral: true });
+			logger.debug("Fusion sidekick route", { tier, to: `${target.provider}/${target.id}` });
+		} catch (error) {
+			logger.warn("Fusion sidekick route failed", { error: String(error) });
+		}
+	}
+
+	/**
+	 * Fusion cost mode: between compaction boundaries, a streak of consecutive
+	 * failed tool calls on a downgraded main model is the cheapest reliable
+	 * "this stretch turned hard" signal — no extra model request, verification-
+	 * grade evidence. Force an early tier-up back to the frontier baseline
+	 * instead of waiting for the next compaction. The mid-stretch switch
+	 * deliberately pays one full-price prefill; that is the cost of escalating
+	 * quality early. Guard structure mirrors {@link #applyFusionCompactionSwitch}.
+	 */
+	async #maybeEscalateFusionOnFailureStreak(): Promise<void> {
+		try {
+			const threshold = this.settings.get("fusion.escalateFailureStreak");
+			if (typeof threshold !== "number" || threshold <= 0) return;
+			if (this.#fusionToolFailureStreak < threshold) return;
+			if (this.settings.get("fusion.enabled") !== true) return;
+			if (this.settings.get("fusion.mode") === "off") return;
+			if (this.#fusionRoutingDisabled) return;
+			const baseModel = this.#fusionBaseModel;
+			if (!baseModel) return; // never downgraded — nothing to escalate to
+			const currentModel = this.model;
+			if (!currentModel || modelsAreEqual(baseModel, currentModel)) return;
+			// Respect a manual model choice, exactly like the compaction path.
+			if (this.#fusionLastAutoModel && !modelsAreEqual(this.#fusionLastAutoModel, currentModel)) {
+				this.#fusionRoutingDisabled = true;
+				logger.debug("Fusion dynamic routing disabled after manual model switch");
+				return;
+			}
+			if (!this.#modelRegistry.hasConfiguredAuth(baseModel)) return;
+			this.#fusionToolFailureStreak = 0;
+			await this.setModelTemporary(baseModel, undefined, { ephemeral: true });
+			this.#fusionLastAutoModel = this.model ?? baseModel;
+			logger.debug("Fusion failure-streak escalation", {
+				threshold,
+				from: `${currentModel.provider}/${currentModel.id}`,
+				to: `${baseModel.provider}/${baseModel.id}`,
+			});
+		} catch (error) {
+			logger.warn("Fusion failure-streak escalation failed", { error: String(error) });
 		}
 	}
 
@@ -9885,7 +10074,7 @@ export class AgentSession {
 			};
 			// Fusion cost mode: ramp the main model down to the configured cheaper
 			// tier now that the history rewrite has already invalidated the cache.
-			await this.#applyFusionCompactionSwitch();
+			await this.#applyFusionCompactionSwitch(summary);
 			await this.#emitSessionEvent({ type: "auto_compaction_end", action, result, aborted: false, willRetry });
 
 			let continuationScheduled = false;

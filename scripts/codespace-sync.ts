@@ -31,6 +31,7 @@ interface SyncOptions {
 interface PlanResult {
 	ok: true;
 	direction: Direction;
+	sshTarget: string;
 	remoteDir: string;
 	localRepo: string;
 	branch: string;
@@ -134,7 +135,6 @@ function toWinPath(p: string): string {
 	return (out || p).replace(/\\/g, "/");
 }
 
-
 async function gitCurrentBranch(cwd: string): Promise<string> {
 	const r = await direct(["git", "symbolic-ref", "--short", "HEAD"], { cwd });
 	if (r.code === 0) return r.stdout.trim();
@@ -184,6 +184,7 @@ async function makePlan(opts: SyncOptions): Promise<PlanResult> {
 	return {
 		ok: true,
 		direction: opts.direction,
+		sshTarget: opts.sshTarget,
 		remoteDir: opts.remoteDir,
 		localRepo,
 		branch,
@@ -234,7 +235,7 @@ async function buildBundle(localRepo: string, destDir: string): Promise<BundleRe
 // Push the working tree as a tar over ssh. Windows OpenSSH rsync on this box
 // is broken (exits 53 silently); tar-over-ssh is portable and dependency-free.
 async function rsyncPush(localRepo: string, sshTarget: string, remoteDir: string): Promise<void> {
-	const tarArgs = ["tar", "-cf", "-", ...RSYNC_EXCLUDES.flatMap((e) => ["--exclude", e]), "-C", localRepo, "."];
+	const tarArgs = ["tar", "-cf", "-", ...RSYNC_EXCLUDES.flatMap(e => ["--exclude", e]), "-C", localRepo, "."];
 	const sshArgs = [...sshArgv(), sshTarget, `tar -xf - -C ${remoteDir} --no-same-owner`];
 	const tar = Bun.spawn({ cmd: tarArgs, stdout: "pipe", stderr: "pipe" });
 	const ssh = Bun.spawn({ cmd: sshArgs, stdin: tar.stdout, stdout: "pipe", stderr: "pipe" });
@@ -254,8 +255,12 @@ async function scpFile(localPath: string, sshTarget: string, remoteDir: string):
 	const r = await direct([
 		"scp",
 		...(key ? ["-i", key] : []),
-		"-P", port,
-		"-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=NUL",
+		"-P",
+		port,
+		"-o",
+		"StrictHostKeyChecking=no",
+		"-o",
+		"UserKnownHostsFile=NUL",
 		localPath,
 		`${sshTarget}:${remoteDir}/`,
 	]);
@@ -319,18 +324,23 @@ async function pull(opts: SyncOptions, plan: PlanResult): Promise<void> {
 	// modifications / deletions to tracked files block the pull.
 	const status = await direct(["git", "status", "--porcelain", "--untracked-files=no"]);
 	if (status.stdout.trim().length > 0) {
-		throw new Error(
-			`local working tree is dirty — refusing to overwrite. Commit/stash first.\n${status.stdout}`,
-		);
+		throw new Error(`local working tree is dirty — refusing to overwrite. Commit/stash first.\n${status.stdout}`);
 	}
 
 	const remoteBundle = `${opts.sshTarget}:${opts.remoteDir}/.codespace-sync.bundle`;
 	const key = process.env.CODESPACE_SYNC_KEY ? toWinPath(process.env.CODESPACE_SYNC_KEY) : null;
 	const port = process.env.CODESPACE_SYNC_PORT ?? "22";
 	const r = await direct([
-		"scp", ...(key ? ["-i", key] : []), "-P", port,
-		"-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=NUL",
-		remoteBundle, `${plan.localRepo}/.codespace-sync.bundle`,
+		"scp",
+		...(key ? ["-i", key] : []),
+		"-P",
+		port,
+		"-o",
+		"StrictHostKeyChecking=no",
+		"-o",
+		"UserKnownHostsFile=NUL",
+		remoteBundle,
+		`${plan.localRepo}/.codespace-sync.bundle`,
 	]);
 	if (r.code !== 0) throw new Error(`scp remote bundle failed:\n${r.stderr}`);
 
@@ -344,11 +354,13 @@ async function pull(opts: SyncOptions, plan: PlanResult): Promise<void> {
 	await fs.mkdir(localTmp, { recursive: true });
 	const ssh = Bun.spawn({
 		cmd: [...sshArgv(), opts.sshTarget, `tar -cf - -C ${opts.remoteDir} .`],
-		stdout: "pipe", stderr: "pipe",
+		stdout: "pipe",
+		stderr: "pipe",
 	});
 	const untar = Bun.spawn({
 		cmd: ["tar", "-xf", "-", "-C", localTmp],
-		stdin: ssh.stdout, stderr: "pipe",
+		stdin: ssh.stdout,
+		stderr: "pipe",
 	});
 	const [sshCode, untarCode, sshErr, untarErr] = await Promise.all([
 		ssh.exited,

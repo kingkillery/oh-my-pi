@@ -53,7 +53,9 @@ bun scripts/release-local.ts 16.1.10 --dry-run
 
 `release-local.ts` runs three steps and is **idempotent** — re-running with a
 version that is already bumped+tagged skips the bump and goes straight to
-publishing (use `--skip-tag` to force that).
+publishing (use `--skip-tag` to force that). Binary publishing is idempotent too:
+targets already present under the release tag in Hugging Face are skipped before
+local compilation.
 
 ## The cross-platform reality (two hosts cover all five)
 
@@ -109,7 +111,8 @@ bun scripts/publish-binaries-hf.ts --tag v16.1.10 --targets linux-x64,linux-arm6
 
 Escape hatches on `publish-binaries-hf.ts`: `--force-version` flips `VERSION`
 even if platforms are missing (only when you intend a partial release);
-`--no-version` uploads binaries without ever touching `VERSION`.
+`--no-version` uploads binaries without ever touching `VERSION`; `--force-build`
+rebuilds/re-uploads requested targets even when they already exist under the tag.
 
 ## Manual fallback (what each step is)
 

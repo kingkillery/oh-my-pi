@@ -4,11 +4,12 @@
  * Resolves skill names to their SKILL.md files or relative paths within skill directories.
  *
  * URL forms:
+ * - skill:// - Lists available skills (name + description)
  * - skill://<name> - Reads SKILL.md
  * - skill://<name>/<path> - Reads relative path within skill's baseDir
  */
 import * as path from "node:path";
-import { getActiveSkills } from "../extensibility/skills";
+import { getActiveSkills, type Skill } from "../extensibility/skills";
 import type { InternalResource, InternalUrl, ProtocolHandler, UrlCompletion } from "./types";
 
 function getContentType(filePath: string): InternalResource["contentType"] {
@@ -31,6 +32,30 @@ export function validateRelativePath(relativePath: string): void {
 	}
 }
 
+/** Markdown listing of skills for bare `skill://` reads. Hidden skills stay opt-in. */
+function listSkillsResource(href: string, skills: readonly Skill[]): InternalResource {
+	const listed = skills.filter(skill => skill.hide !== true);
+	const lines =
+		listed.length > 0
+			? listed.map(skill => `- ${skill.name}: ${skill.description || "(no description)"}`)
+			: ["(no skills available)"];
+	const content = [
+		`# Skills (${listed.length})`,
+		"",
+		"Read `skill://<name>` for a skill's full instructions.",
+		"",
+		...lines,
+		"",
+	].join("\n");
+	return {
+		url: href,
+		content,
+		contentType: "text/markdown",
+		size: Buffer.byteLength(content, "utf-8"),
+		notes: [],
+	};
+}
+
 /**
  * Handler for skill:// URLs.
  */
@@ -43,7 +68,7 @@ export class SkillProtocolHandler implements ProtocolHandler {
 
 		const skillName = url.rawHost || url.hostname;
 		if (!skillName) {
-			throw new Error("skill:// URL requires a skill name: skill://<name>");
+			return listSkillsResource(url.href, skills);
 		}
 
 		const skill = skills.find(s => s.name === skillName);

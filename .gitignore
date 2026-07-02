@@ -85,6 +85,11 @@ packages/coding-agent/bench/boot-baseline.json
 # Local bun standalone-build artifacts and OMC orchestration state
 *.bun-build
 .omc/
+# Local mnemopi + omp-config runtime state (agent subprocess writes these at runtime)
+packages/coding-agent/memories-runtime-*/
+packages/coding-agent/omp-config-cli-*/
+# Local research/scratch (ultraresearch passes, diff snapshots)
+.omo/
 
 # Local CodeGraph index (per-machine, not source)
 .codegraph/

@@ -13,6 +13,7 @@ export const STATUS_LINE_PRESETS: Record<StatusLinePreset, PresetDef> = {
 			"pr",
 			"context_pct",
 			"cost",
+			"fusion",
 			"fusion_savings",
 		],
 		rightSegments: ["session_name"],

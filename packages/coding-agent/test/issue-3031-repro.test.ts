@@ -22,11 +22,57 @@ import {
 	MNEMOPI_EMBED_WORKER_ARG,
 	MnemopiEmbedClient,
 	type MnemopiEmbedWorkerHandle,
+	type MnemopiSubprocessEmbeddingModel,
 } from "@pk-nerdsaver-ai/pi-coding-agent/mnemopi/embed-client";
 import type {
 	MnemopiEmbedWorkerInbound,
 	MnemopiEmbedWorkerOutbound,
 } from "@pk-nerdsaver-ai/pi-coding-agent/mnemopi/embed-protocol";
+
+type FakeEmbedWorker = MnemopiEmbedWorkerHandle & {
+	readonly sent: MnemopiEmbedWorkerInbound[];
+	readonly terminated: { value: number };
+	emit(message: MnemopiEmbedWorkerOutbound): void;
+};
+
+function createFakeEmbedWorker(
+	respond: (message: MnemopiEmbedWorkerInbound, worker: FakeEmbedWorker) => void,
+): FakeEmbedWorker {
+	let messageHandler: ((message: MnemopiEmbedWorkerOutbound) => void) | undefined;
+	const sent: MnemopiEmbedWorkerInbound[] = [];
+	const terminated = { value: 0 };
+	const worker: FakeEmbedWorker = {
+		sent,
+		terminated,
+		send(message) {
+			sent.push(message);
+			respond(message, worker);
+		},
+		onMessage(handler) {
+			messageHandler = handler;
+			return () => {
+				if (messageHandler === handler) messageHandler = undefined;
+			};
+		},
+		onError() {
+			return () => {};
+		},
+		async terminate() {
+			terminated.value += 1;
+			messageHandler = undefined;
+		},
+		emit(message) {
+			messageHandler?.(message);
+		},
+	};
+	return worker;
+}
+
+async function drainEmbed(model: MnemopiSubprocessEmbeddingModel, text: string): Promise<number[][]> {
+	let vectors: number[][] = [];
+	for await (const batch of model.embed([text])) vectors = batch;
+	return vectors;
+}
 
 describe("issue #3031 — mnemopi embeddings live in an isolated subprocess", () => {
 	it("ping/pongs through the spawned worker subprocess and tears it down cleanly", async () => {
@@ -170,17 +216,17 @@ describe("issue #3031 — mnemopi embeddings live in an isolated subprocess", ()
 
 		const client = new MnemopiEmbedClient(spawn);
 		const wrapper = await client.initialize("fast-bge-base-en-v1.5", "/tmp/cache");
-		expect(wrapper).not.toBeNull();
+		if (!wrapper) throw new Error("expected mnemopi embed wrapper");
 
 		// Drain the wrapper once normally and snapshot the embed message.
-		for await (const _ of wrapper!.embed(["hello"])) {
+		for await (const _ of wrapper.embed(["hello"])) {
 			/* drain */
 		}
 		// Tear down the worker as the session-dispose path does, then drive
 		// the SAME cached wrapper again — the client must re-spawn and the
 		// embed message must still carry (model, cacheDir).
 		await client.terminate();
-		for await (const _ of wrapper!.embed(["world"])) {
+		for await (const _ of wrapper.embed(["world"])) {
 			/* drain */
 		}
 
@@ -195,5 +241,109 @@ describe("issue #3031 — mnemopi embeddings live in an isolated subprocess", ()
 		}
 
 		await client.terminate();
+	});
+
+	it("terminates the embed worker after the idle window", async () => {
+		let spawned: FakeEmbedWorker | undefined;
+		const client = new MnemopiEmbedClient(
+			() => {
+				spawned = createFakeEmbedWorker((message, worker) => {
+					queueMicrotask(() => {
+						if (message.type === "init") worker.emit({ type: "ready", id: message.id });
+					});
+				});
+				return spawned;
+			},
+			{ idleTimeoutMs: 20 },
+		);
+
+		const wrapper = await client.initialize("fast-bge-base-en-v1.5", undefined);
+		expect(wrapper).not.toBeNull();
+		await Bun.sleep(50);
+
+		expect(spawned?.terminated.value).toBe(1);
+		await client.terminate();
+	});
+
+	it("does not terminate while an embed request is in flight", async () => {
+		let spawned: FakeEmbedWorker | undefined;
+		const client = new MnemopiEmbedClient(
+			() => {
+				spawned = createFakeEmbedWorker((message, worker) => {
+					if (message.type === "init") {
+						queueMicrotask(() => worker.emit({ type: "ready", id: message.id }));
+						return;
+					}
+					if (message.type === "embed") {
+						setTimeout(() => worker.emit({ type: "vectors", id: message.id, vectors: [[1, 2, 3]] }), 60);
+					}
+				});
+				return spawned;
+			},
+			{ idleTimeoutMs: 20 },
+		);
+
+		const wrapper = await client.initialize("fast-bge-base-en-v1.5", undefined);
+		if (!wrapper) throw new Error("expected mnemopi embed wrapper");
+		const embedPromise = drainEmbed(wrapper, "slow");
+		await Bun.sleep(35);
+		expect(spawned?.terminated.value).toBe(0);
+
+		expect(await embedPromise).toEqual([[1, 2, 3]]);
+		await Bun.sleep(45);
+		expect(spawned?.terminated.value).toBe(1);
+		await client.terminate();
+	});
+
+	it("respawns on the next embed after an idle termination", async () => {
+		const workers: FakeEmbedWorker[] = [];
+		const client = new MnemopiEmbedClient(
+			() => {
+				const worker = createFakeEmbedWorker((message, activeWorker) => {
+					queueMicrotask(() => {
+						if (message.type === "init") activeWorker.emit({ type: "ready", id: message.id });
+						else if (message.type === "embed")
+							activeWorker.emit({ type: "vectors", id: message.id, vectors: [[workers.length]] });
+					});
+				});
+				workers.push(worker);
+				return worker;
+			},
+			{ idleTimeoutMs: 20 },
+		);
+
+		const wrapper = await client.initialize("fast-bge-base-en-v1.5", "/tmp/cache");
+		if (!wrapper) throw new Error("expected mnemopi embed wrapper");
+		expect(await drainEmbed(wrapper, "first")).toEqual([[1]]);
+		await Bun.sleep(50);
+		expect(workers[0]?.terminated.value).toBe(1);
+
+		expect(await drainEmbed(wrapper, "second")).toEqual([[2]]);
+		expect(workers.length).toBe(2);
+		expect(workers[1]?.sent.some(message => message.type === "embed")).toBe(true);
+		await client.terminate();
+	});
+
+	it("leaves the worker alive when the idle timer is disabled", async () => {
+		let spawned: FakeEmbedWorker | undefined;
+		const client = new MnemopiEmbedClient(
+			() => {
+				spawned = createFakeEmbedWorker((message, worker) => {
+					queueMicrotask(() => {
+						if (message.type === "init") worker.emit({ type: "ready", id: message.id });
+					});
+				});
+				return spawned;
+			},
+			{ idleTimeoutMs: 0 },
+		);
+
+		const wrapper = await client.initialize("fast-bge-base-en-v1.5", undefined);
+		expect(wrapper).not.toBeNull();
+		await Bun.sleep(50);
+
+		expect(spawned?.terminated.value).toBe(0);
+		await client.terminate();
+		expect(spawned?.terminated.value).toBe(1);
 	});
 });

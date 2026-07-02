@@ -8,6 +8,7 @@ import { $which, APP_NAME, setProjectDir } from "@pk-nerdsaver-ai/pi-utils";
 import { COLLAB_GUEST_ALLOWED_COMMANDS, CollabGuestLink } from "../collab/guest";
 import { CollabHost } from "../collab/host";
 import { writeCollabLinkFile } from "../collab/link-file";
+import { getModelMatchPreferences, resolveModelRoleValue } from "../config/model-resolver";
 import type { SettingPath, SettingValue } from "../config/settings";
 import { settings } from "../config/settings";
 import {
@@ -29,6 +30,12 @@ import { theme } from "../modes/theme/theme";
 import type { InteractiveModeContext } from "../modes/types";
 import type { AgentSession, FreshSessionResult } from "../session/agent-session";
 import { COMPACT_MODES, parseCompactArgs } from "../session/compact-modes";
+import {
+	FUSION_POOL_MAX_TIER,
+	FUSION_POOL_MIN_TIER,
+	formatFusionPoolEntries,
+	parseFusionPoolEntries,
+} from "../session/fusion-router";
 import { formatShakeSummary, type ShakeMode } from "../session/shake-types";
 import { urlHyperlinkAlways } from "../tui";
 import { getChangelogPath, parseChangelog } from "../utils/changelog";
@@ -38,6 +45,7 @@ import { handleDelegateSlashCommand } from "./helpers/delegate";
 import { formatDuration } from "./helpers/format";
 import { createMarketplaceManager } from "./helpers/marketplace-manager";
 import { handleMcpAcp } from "./helpers/mcp";
+import { handleOkfSlashCommand } from "./helpers/okf";
 import { commandConsumed, errorMessage, parseSlashCommand, parseSubcommand, usage } from "./helpers/parse";
 import { describeRedeemOutcome, type ResetUsageAccount, toResetUsageAccounts } from "./helpers/reset-usage";
 import { handleSshAcp } from "./helpers/ssh";
@@ -537,6 +545,107 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 			}
 			runtime.ctx.showStatus("Usage: /fast [on|off|status]");
 			runtime.ctx.editor.setText("");
+		},
+	},
+	{
+		name: "fusion-pool",
+		description:
+			"Manage the Fusion routing pool: assign models to tiers 1-5 (1 = most powerful, 5 = least intelligent)",
+		acpDescription: "Manage the Fusion model routing pool",
+		acpInputHint: "[list|set <1-5> <model>|remove <1-5>|clear]",
+		subcommands: [
+			{ name: "list", description: "Show the current tier assignments" },
+			{ name: "set", description: "Assign a model to a tier", usage: "<1-5> <model-or-alias>" },
+			{ name: "remove", description: "Unassign a tier", usage: "<1-5>" },
+			{ name: "clear", description: "Remove all tier assignments" },
+		],
+		allowArgs: true,
+		handle: async (command, runtime) => {
+			const { verb, rest } = parseSubcommand(command.args);
+			const pool = parseFusionPoolEntries(runtime.settings.get("fusion.modelPool") ?? []);
+			const describePool = (): string => {
+				if (pool.length === 0) {
+					return "Fusion pool is empty. Assign tiers with /fusion-pool set <1-5> <model> (1 = most powerful, 5 = least intelligent).";
+				}
+				const lines = [];
+				for (let tier = FUSION_POOL_MIN_TIER; tier <= FUSION_POOL_MAX_TIER; tier++) {
+					const entry = pool.find(t => t.tier === tier);
+					lines.push(`  ${tier}. ${entry ? entry.selector : "(unassigned)"}`);
+				}
+				const status =
+					pool.length >= 2
+						? runtime.settings.get("fusion.dynamicRouting") === true &&
+							runtime.settings.get("fusion.enabled") === true
+							? "active"
+							: "configured, but needs fusion.enabled + fusion.dynamicRouting to route"
+						: "needs at least 2 tiers to route";
+				return `Fusion routing pool (1 = most powerful … 5 = least intelligent) — ${status}:\n${lines.join("\n")}`;
+			};
+			if (!verb || verb === "list" || verb === "status") {
+				await runtime.output(describePool());
+				return commandConsumed();
+			}
+			if (verb === "clear") {
+				runtime.settings.set("fusion.modelPool", []);
+				await runtime.output("Fusion pool cleared.");
+				return commandConsumed();
+			}
+			if (verb === "set") {
+				const { verb: tierArg, rest: selector } = parseSubcommand(rest);
+				const tier = Number.parseInt(tierArg, 10);
+				if (
+					!Number.isInteger(tier) ||
+					tier < FUSION_POOL_MIN_TIER ||
+					tier > FUSION_POOL_MAX_TIER ||
+					!selector.trim()
+				) {
+					return usage(
+						"Usage: /fusion-pool set <1-5> <model-or-alias>  (1 = most powerful, 5 = least intelligent)",
+						runtime,
+					);
+				}
+				const trimmedSelector = selector.trim();
+				const next = formatFusionPoolEntries([
+					...pool.filter(t => t.tier !== tier),
+					{ tier, selector: trimmedSelector },
+				]);
+				runtime.settings.set("fusion.modelPool", next);
+				// Best-effort resolution check so typos surface immediately.
+				const resolved = resolveModelRoleValue(trimmedSelector, runtime.session.modelRegistry.getAvailable(), {
+					settings: runtime.settings,
+					matchPreferences: getModelMatchPreferences(runtime.settings),
+					modelRegistry: runtime.session.modelRegistry,
+				}).model;
+				const note = resolved
+					? ` (resolves to ${resolved.provider}/${resolved.id})`
+					: " (warning: does not resolve to an available model right now)";
+				const poolSize = next.length;
+				const inactive: string[] = [];
+				if (runtime.settings.get("fusion.enabled") !== true) inactive.push("fusion.enabled");
+				if (runtime.settings.get("fusion.dynamicRouting") !== true) inactive.push("fusion.dynamicRouting");
+				const activation =
+					poolSize < 2
+						? "\nPool needs at least 2 assigned tiers before routing kicks in."
+						: inactive.length > 0
+							? `\nConfigured but inactive until ${inactive.join(" and ")} ${inactive.length > 1 ? "are" : "is"} enabled.`
+							: "";
+				await runtime.output(`Tier ${tier} → ${trimmedSelector}${note}${activation}`);
+				return commandConsumed();
+			}
+			if (verb === "remove" || verb === "rm") {
+				const tier = Number.parseInt(rest.trim(), 10);
+				if (!Number.isInteger(tier) || tier < FUSION_POOL_MIN_TIER || tier > FUSION_POOL_MAX_TIER) {
+					return usage("Usage: /fusion-pool remove <1-5>", runtime);
+				}
+				if (!pool.some(t => t.tier === tier)) {
+					await runtime.output(`Tier ${tier} is not assigned.`);
+					return commandConsumed();
+				}
+				runtime.settings.set("fusion.modelPool", formatFusionPoolEntries(pool.filter(t => t.tier !== tier)));
+				await runtime.output(`Tier ${tier} unassigned.`);
+				return commandConsumed();
+			}
+			return usage("Usage: /fusion-pool [list|set <1-5> <model>|remove <1-5>|clear]", runtime);
 		},
 	},
 	{
@@ -1163,6 +1272,22 @@ const BUILTIN_SLASH_COMMAND_REGISTRY: ReadonlyArray<SlashCommandSpec> = [
 			const showFull = command.args.split(/\s+/).filter(Boolean).includes("full");
 			await runtime.ctx.handleChangelogCommand(showFull);
 			runtime.ctx.editor.setText("");
+		},
+	},
+	{
+		name: "okf",
+		description: "Inspect and validate the OKF (Open Knowledge Format) knowledge bundle",
+		acpDescription: "Inspect the OKF knowledge bundle",
+		acpInputHint: "[list|show <id>|lint]",
+		subcommands: [
+			{ name: "list", description: "List every discovered concept" },
+			{ name: "show", description: "Show one concept's frontmatter and body", usage: "<id>" },
+			{ name: "lint", description: "Validate concepts against OKF v0.1 conformance rules" },
+		],
+		allowArgs: true,
+		handle: async (command, runtime) => {
+			await handleOkfSlashCommand(command.args, runtime);
+			return commandConsumed();
 		},
 	},
 	{

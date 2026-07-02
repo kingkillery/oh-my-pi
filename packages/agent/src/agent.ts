@@ -327,6 +327,7 @@ export class Agent {
 	#sessionId?: string;
 	#deadline?: number;
 	#maxModelRequestsPerRun?: number;
+	#modelRequestBudgetExceeded = false;
 	#promptCacheKey?: string;
 	#metadata?: Record<string, unknown>;
 	#metadataResolver?: (provider: string) => Record<string, unknown> | undefined;
@@ -644,6 +645,15 @@ export class Agent {
 
 	get state(): AgentState {
 		return this.#state;
+	}
+
+	/**
+	 * True when the most recent run stopped because `maxModelRequestsPerRun`
+	 * was reached. Resets at the start of each run, so a host retry loop can
+	 * break instead of re-prompting with a fresh budget.
+	 */
+	get modelRequestBudgetExceeded(): boolean {
+		return this.#modelRequestBudgetExceeded;
 	}
 
 	get appendOnlyContext(): AppendOnlyContextManager | undefined {
@@ -994,6 +1004,7 @@ export class Agent {
 		this.#state.isStreaming = true;
 		this.#state.streamMessage = null;
 		this.#state.error = undefined;
+		this.#modelRequestBudgetExceeded = false;
 
 		// Clear Cursor tool result buffer at start of each run
 		this.#cursorToolResultBuffer = [];
@@ -1055,6 +1066,9 @@ export class Agent {
 			sessionId: this.#sessionId,
 			deadline: this.#deadline,
 			maxModelRequestsPerRun: this.#maxModelRequestsPerRun,
+			onModelRequestBudgetExceeded: () => {
+				this.#modelRequestBudgetExceeded = true;
+			},
 			promptCacheKey: this.#promptCacheKey,
 			metadata: this.#metadataResolver ? undefined : this.#metadata,
 			metadataResolver: this.#metadataResolver,

@@ -16,13 +16,17 @@
 
 import * as os from "node:os";
 import * as path from "node:path";
-import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+import * as readline from "node:readline/promises";
 import { isEnoent } from "@pk-nerdsaver-ai/pi-utils";
-import { direct, sshArgv, type ExecResult } from "./lib/ssh-exec";
+import { direct, type ExecResult, sshArgv } from "./lib/ssh-exec";
 
 type NodeKind = "local" | "ssh" | "colab";
-interface MeshNode { kind: NodeKind; host?: string; user?: string }
+interface MeshNode {
+	kind: NodeKind;
+	host?: string;
+	user?: string;
+}
 type NodeMap = Record<string, MeshNode>;
 
 const NODES_PATH = path.join(os.homedir(), ".config", "mesh", "nodes.json");
@@ -56,8 +60,6 @@ function colabUnsupported(r: ExecResult): boolean {
 	return /No module named 'fcntl'/i.test(r.stderr) || /fcntl/i.test(r.stderr);
 }
 
-
-
 async function probeLocal(): Promise<string> {
 	return "self";
 }
@@ -72,7 +74,10 @@ async function probeColab(): Promise<string> {
 	const r = await direct(["colab", "sessions"]);
 	if (r.code === 0) {
 		// Heuristic: count non-blank, non-header lines.
-		const lines = r.stdout.split("\n").map((l) => l.trim()).filter(Boolean);
+		const lines = r.stdout
+			.split("\n")
+			.map(l => l.trim())
+			.filter(Boolean);
 		return `online (${Math.max(0, lines.length - 1)} sessions)`;
 	}
 	if (colabUnsupported(r)) return "OFFLINE (cli unsupported on Windows)";
@@ -198,12 +203,18 @@ async function killAll(): Promise<number> {
 	// Heuristic parse: every non-blank line after the header is a session ID/name.
 	// The exact format is build-time-confirmed; we just stop the first whitespace-
 	// separated token of each non-header line.
-	const lines = r.stdout.split("\n").map((l) => l.trim()).filter(Boolean);
+	const lines = r.stdout
+		.split("\n")
+		.map(l => l.trim())
+		.filter(Boolean);
 	if (lines.length <= 1) {
 		console.log("no active colab sessions");
 		return 0;
 	}
-	const ids = lines.slice(1).map((l) => l.split(/\s+/)[0]).filter(Boolean);
+	const ids = lines
+		.slice(1)
+		.map(l => l.split(/\s+/)[0])
+		.filter(Boolean);
 	let stopped = 0;
 	for (const id of ids) {
 		const sr = await direct(["colab", "stop", id]);
@@ -222,11 +233,11 @@ async function init(): Promise<void> {
 		return;
 	}
 	const seed: NodeMap = {
-		"msi-1":   { kind: "local" },
-		mac:       { kind: "ssh", host: "100.109.244.1", user: "jimpizouw" },
-		pi:        { kind: "ssh", host: "100.111.69.99", user: "pk" },
-		hetzner:   { kind: "ssh", host: "100.64.216.11", user: "root" },
-		colab:     { kind: "colab" },
+		"msi-1": { kind: "local" },
+		mac: { kind: "ssh", host: "100.109.244.1", user: "jimpizouw" },
+		pi: { kind: "ssh", host: "100.111.69.99", user: "pk" },
+		hetzner: { kind: "ssh", host: "100.64.216.11", user: "root" },
+		colab: { kind: "colab" },
 	};
 	await Bun.write(NODES_PATH, JSON.stringify(seed, null, 2) + "\n");
 	console.log(`wrote ${NODES_PATH}`);
@@ -287,15 +298,28 @@ async function main(): Promise<void> {
 	const sub = argv[0];
 	const rest = argv.slice(1);
 	switch (sub) {
-		case "status":  await status(); break;
-		case "run":     process.exit(await run(rest)); break;
-		case "warmup":  process.exit(await warmup()); break;
-		case "kill-all": process.exit(await killAll()); break;
-		case "init":    await init(); break;
+		case "status":
+			await status();
+			break;
+		case "run":
+			process.exit(await run(rest));
+			break;
+		case "warmup":
+			process.exit(await warmup());
+			break;
+		case "kill-all":
+			process.exit(await killAll());
+			break;
+		case "init":
+			await init();
+			break;
 		case "-h":
 		case "--help":
-		case "help":    console.log(usage()); break;
-		default:        throw new Error(`unknown subcommand: ${sub}\n${usage()}`);
+		case "help":
+			console.log(usage());
+			break;
+		default:
+			throw new Error(`unknown subcommand: ${sub}\n${usage()}`);
 	}
 }
 

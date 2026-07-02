@@ -140,6 +140,14 @@
 			"types": "./src/capability/*.ts",
 			"import": "./src/capability/*.ts"
 		},
+		"./okf": {
+			"types": "./src/okf/index.ts",
+			"import": "./src/okf/index.ts"
+		},
+		"./okf/*": {
+			"types": "./src/okf/*.ts",
+			"import": "./src/okf/*.ts"
+		},
 		"./cli/*": {
 			"types": "./src/cli/*.ts",
 			"import": "./src/cli/*.ts"

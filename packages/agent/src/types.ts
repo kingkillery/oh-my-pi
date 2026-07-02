@@ -99,6 +99,13 @@ export interface AgentLoopConfig extends SimpleStreamOptions {
 	maxModelRequestsPerRun?: number;
 
 	/**
+	 * Called when a run stops because `maxModelRequestsPerRun` was reached.
+	 * Lets hosts distinguish a budget cut from a normal end-of-turn so retry
+	 * loops don't re-prompt with a fresh budget.
+	 */
+	onModelRequestBudgetExceeded?: () => void;
+
+	/**
 	 * Optional resolver called per LLM request to produce request metadata.
 	 * When set, the agent loop evaluates it **after** `getApiKey` resolves the
 	 * session-sticky credential, ensuring the metadata's `account_uuid` reflects

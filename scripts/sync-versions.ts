@@ -22,8 +22,8 @@ interface PackageInfo {
 
 const packagesDir = join(process.cwd(), "packages");
 const packageDirs = readdirSync(packagesDir, { withFileTypes: true })
-	.filter((dirent) => dirent.isDirectory())
-	.map((dirent) => dirent.name);
+	.filter(dirent => dirent.isDirectory())
+	.map(dirent => dirent.name);
 
 // Read all package.json files and build version map
 const packages: Record<string, PackageInfo> = {};

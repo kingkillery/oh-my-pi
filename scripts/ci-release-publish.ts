@@ -31,9 +31,9 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { $ } from "bun";
 import {
+	type GeneratedLeafPackage,
 	generateNpmPackages,
 	LEAF_TARGETS,
-	type GeneratedLeafPackage,
 } from "../packages/natives/scripts/gen-npm-packages.ts";
 
 export interface PublishPackage {
@@ -53,6 +53,12 @@ export interface PublishPackage {
 	publishBin?: Readonly<Record<string, string>>;
 }
 
+interface PreparedPublishPackage {
+	pkg: PublishPackage;
+	manifest: PackageManifest;
+	name: string;
+}
+
 type JsonValue = string | number | boolean | null | JsonObject | JsonValue[];
 interface JsonObject {
 	[key: string]: JsonValue;
@@ -68,6 +74,7 @@ interface PackageManifest {
 
 const repoRoot = path.join(import.meta.dir, "..");
 const isDryRun = process.argv.includes("--dry-run");
+const defaultPrepareConcurrency = 4;
 
 function nativeLeafTagFromArgs(argv: readonly string[]): string | null {
 	for (let i = 0; i < argv.length; i++) {
@@ -101,7 +108,11 @@ export const packages: PublishPackage[] = [
 		extraTypeConfigs: ["tsconfig.publish.client.json"],
 	},
 	{ dir: "packages/agent", kind: "typescript" },
-	{ dir: "packages/coding-agent", kind: "typescript", publishBin: { "oh-my-pk": "dist/cli.js", ompk: "dist/cli.js", omp: "dist/cli.js" } },
+	{
+		dir: "packages/coding-agent",
+		kind: "typescript",
+		publishBin: { "oh-my-pk": "dist/cli.js", ompk: "dist/cli.js", omp: "dist/cli.js" },
+	},
 ];
 
 function rewriteSrcPath(value: string): string {
@@ -162,6 +173,41 @@ async function preparePackage(pkg: PublishPackage): Promise<PackageManifest> {
 		await $`bun x tsgo -p ${cfg}`.cwd(pkgDir);
 	}
 	return rewriteManifest(pkg, !isDryRun);
+}
+
+function parsePrepareConcurrency(): number {
+	const raw = Bun.env.PUBLISH_PREPARE_CONCURRENCY?.trim();
+	if (!raw) return defaultPrepareConcurrency;
+	const value = Number(raw);
+	if (!Number.isInteger(value) || value < 1) {
+		throw new Error(`PUBLISH_PREPARE_CONCURRENCY must be a positive integer, got ${JSON.stringify(raw)}`);
+	}
+	return value;
+}
+
+async function mapConcurrent<T, U>(
+	items: readonly T[],
+	concurrency: number,
+	mapper: (item: T, index: number) => Promise<U>,
+): Promise<U[]> {
+	const results: Array<{ value: U } | undefined> = new Array(items.length);
+	let nextIndex = 0;
+	const workerCount = Math.min(concurrency, items.length);
+	const workers = Array.from({ length: workerCount }, async () => {
+		for (;;) {
+			const currentIndex = nextIndex;
+			nextIndex += 1;
+			if (currentIndex >= items.length) return;
+			const item = items[currentIndex];
+			if (item === undefined) throw new Error(`Missing work item at index ${currentIndex}`);
+			results[currentIndex] = { value: await mapper(item, currentIndex) };
+		}
+	});
+	await Promise.all(workers);
+	return results.map((result, index) => {
+		if (!result) throw new Error(`Missing concurrent result at index ${index}`);
+		return result.value;
+	});
 }
 
 /**
@@ -271,44 +317,56 @@ async function publishNativeLeafPackage(tag: string): Promise<void> {
 	const pkgDir = path.join(repoRoot, pkg.dir);
 	const coreManifest = (await Bun.file(path.join(pkgDir, "package.json")).json()) as PackageManifest;
 	if (typeof coreManifest.version !== "string") throw new Error(`Missing version in ${pkg.dir}/package.json`);
-	const leaves = await generateNpmPackages({ packageDir: pkgDir, dryRun: isDryRun, version: coreManifest.version, tags: [tag] });
+	const leaves = await generateNpmPackages({
+		packageDir: pkgDir,
+		dryRun: isDryRun,
+		version: coreManifest.version,
+		tags: [tag],
+	});
 	const leaf = leaves[0];
 	if (!leaf) throw new Error(`No native leaf generated for ${tag}`);
 	await publishGeneratedLeafPackage(leaf);
 }
 
-async function publishNativePackage(pkg: PublishPackage): Promise<void> {
-	const pkgDir = path.join(repoRoot, pkg.dir);
-	const manifest = await prepareNativeCorePackage(pkgDir, !isDryRun);
-	const name = manifest.name ?? path.basename(pkg.dir);
-	if (isDryRun) {
-		console.log(`DRY RUN native core manifest rewrite (${pkg.dir})`);
-		console.log(JSON.stringify({ optionalDependencies: manifest.optionalDependencies, files: manifest.files }, null, "\t"));
-	}
-	await packAndPublish(pkgDir, name);
-}
-
-async function publishPackage(pkg: PublishPackage): Promise<void> {
+async function preparePublishPackage(pkg: PublishPackage): Promise<PreparedPublishPackage> {
 	if (pkg.kind === "native") {
-		await publishNativePackage(pkg);
-		return;
+		const pkgDir = path.join(repoRoot, pkg.dir);
+		const manifest = await prepareNativeCorePackage(pkgDir, !isDryRun);
+		const name = manifest.name ?? path.basename(pkg.dir);
+		if (isDryRun) {
+			console.log(`DRY RUN native core manifest rewrite (${pkg.dir})`);
+			console.log(
+				JSON.stringify({ optionalDependencies: manifest.optionalDependencies, files: manifest.files }, null, "\t"),
+			);
+		}
+		return { pkg, manifest, name };
 	}
-	const pkgDir = path.join(repoRoot, pkg.dir);
 	const manifest = await preparePackage(pkg);
 	const name = manifest.name ?? path.basename(pkg.dir);
-	if (manifest.private) {
-		console.log(`Skipping ${name} (private)`);
+	return { pkg, manifest, name };
+}
+
+async function publishPreparedPackage(prepared: PreparedPublishPackage): Promise<void> {
+	if (prepared.manifest.private) {
+		console.log(`Skipping ${prepared.name} (private)`);
 		return;
 	}
-	await packAndPublish(pkgDir, name);
+	await packAndPublish(path.join(repoRoot, prepared.pkg.dir), prepared.name);
+}
+
+async function publishAllPackages(): Promise<void> {
+	const concurrency = parsePrepareConcurrency();
+	console.log(`Preparing ${packages.length} package manifests/types (concurrency=${concurrency})...`);
+	const prepared = await mapConcurrent(packages, concurrency, pkg => preparePublishPackage(pkg));
+	for (const entry of prepared) {
+		await publishPreparedPackage(entry);
+	}
 }
 
 if (import.meta.main) {
 	if (nativeLeafTag) {
 		await publishNativeLeafPackage(nativeLeafTag);
 	} else {
-		for (const pkg of packages) {
-			await publishPackage(pkg);
-		}
+		await publishAllPackages();
 	}
 }

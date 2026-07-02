@@ -46,6 +46,10 @@ build host(s) ── publish-binaries-hf.ts ──▶ private HF repo ──▶ 
    # macOS host (only a Mac can build darwin):
    HF_TOKEN=hf_write_xxx bun scripts/publish-binaries-hf.ts --targets darwin-arm64,darwin-x64
    ```
+   Reruns are idempotent: targets already uploaded under the release tag are
+   skipped before local compilation. Pass `--force-build` to rebuild/re-upload a
+   target anyway.
+
    The last `publish-binaries-hf.ts` run for a tag refreshes the `VERSION` pointer,
    so run the platforms you have; installs resolve whatever is uploaded for that tag.
    Use `--dry-run` to preview without building or uploading.

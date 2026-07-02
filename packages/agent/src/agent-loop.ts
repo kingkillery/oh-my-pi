@@ -761,6 +761,7 @@ async function runLoopBody(
 				// the persistent session config, so it bounds the initial spawn run AND
 				// every later IRC-woken turn (which the executor's per-run monitor misses).
 				if (config.maxModelRequestsPerRun !== undefined && stepCounter.count >= config.maxModelRequestsPerRun) {
+					config.onModelRequestBudgetExceeded?.();
 					endAgentStream(stream, newMessages, telemetry, stepCounter.count);
 					return;
 				}

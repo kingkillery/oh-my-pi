@@ -101,6 +101,9 @@ function parseWmicTable(output: string, header: string): string | null {
 
 const SYSTEM_PROMPT_PREP_TIMEOUT_MS = 5000;
 
+/** `skills.discoveryMode: "auto"` stops injecting the skill listing past this many skills. */
+export const SKILLS_LAZY_AUTO_THRESHOLD = 20;
+
 async function getGpuModel(): Promise<string | null> {
 	switch (process.platform) {
 		case "win32": {
@@ -638,7 +641,16 @@ export async function buildSystemPrompt(options: BuildSystemPromptOptions = {}):
 	// - require the `read` tool so the model can actually fetch skill content;
 	// - drop skills with frontmatter `hide: true` (still loadable via skill:// and /skill:<name>).
 	const hasRead = tools?.has("read");
-	const filteredSkills = hasRead ? skills.filter(skill => skill.hide !== true) : [];
+	const visibleSkills = hasRead ? skills.filter(skill => skill.hide !== true) : [];
+	// Lazy skill discovery: with `skills.discoveryMode` "lazy" (or "auto" past the
+	// threshold), keep the listing out of the prompt to preserve context — the model
+	// lists skills on demand via `read skill://` instead.
+	const skillDiscoveryMode = skillsSettings?.discoveryMode ?? "auto";
+	const skillsLazy =
+		visibleSkills.length > 0 &&
+		(skillDiscoveryMode === "lazy" ||
+			(skillDiscoveryMode === "auto" && visibleSkills.length > SKILLS_LAZY_AUTO_THRESHOLD));
+	const filteredSkills = skillsLazy ? [] : visibleSkills;
 
 	const effectiveSystemPromptCustomization = dedupePromptSource(systemPromptCustomization, [
 		resolvedCustomPrompt,
@@ -669,6 +681,8 @@ export async function buildSystemPrompt(options: BuildSystemPromptOptions = {}):
 		agentsMdSearch: { files: agentsMdFiles },
 		workspaceTree,
 		skills: filteredSkills,
+		skillsLazy,
+		lazySkillCount: visibleSkills.length,
 		rules: rules ?? [],
 		alwaysApplyRules: injectedAlwaysApplyRules,
 		date,

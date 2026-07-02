@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import * as path from "node:path";
 /**
  * Build release binaries and publish them to the PRIVATE Hugging Face repo that
  * backs the install endpoint (oh-my-pi.pkking.computer) — no GitHub Actions, no
@@ -21,10 +22,10 @@
  * Usage:
  *   HF_TOKEN=hf_xxx bun scripts/publish-binaries-hf.ts                 # host platform, version from package.json
  *   HF_TOKEN=hf_xxx bun scripts/publish-binaries-hf.ts --targets linux-x64,linux-arm64 --tag v16.1.8
+ *   HF_TOKEN=hf_xxx bun scripts/publish-binaries-hf.ts --force-build   # rebuild/re-upload even if the target already exists
  *   bun scripts/publish-binaries-hf.ts --dry-run
  */
 import { $ } from "bun";
-import * as path from "node:path";
 
 const repoRoot = path.join(import.meta.dir, "..");
 const binariesDir = path.join(repoRoot, "packages", "coding-agent", "binaries");
@@ -32,6 +33,19 @@ const binariesDir = path.join(repoRoot, "packages", "coding-agent", "binaries");
 const isDryRun = process.argv.includes("--dry-run");
 const hfRepo = Bun.env.HF_REPO ?? "pkkidking/oh-my-pi-binaries";
 const hfRepoType = Bun.env.HF_REPO_TYPE ?? "model";
+
+export interface RequestedBinaryTarget {
+	id: string;
+	file: string;
+}
+
+export interface BinaryPublishPlan {
+	requested: RequestedBinaryTarget[];
+	toBuild: RequestedBinaryTarget[];
+	skippedExisting: RequestedBinaryTarget[];
+	presentAfterBuild: Set<string>;
+	missingRequiredAfterBuild: string[];
+}
 
 function arg(flag: string): string | undefined {
 	const i = process.argv.indexOf(flag);
@@ -109,6 +123,36 @@ const TARGET_FILE: Record<string, string> = {
 	"win32-x64": "omp-windows-x64.exe",
 };
 
+export function parseRequestedBinaryTargets(targets: string): RequestedBinaryTarget[] {
+	return targets
+		.split(",")
+		.map(t => t.trim())
+		.filter(Boolean)
+		.map(id => {
+			const file = TARGET_FILE[id];
+			if (!file) throw new Error(`Unknown target "${id}". Known: ${Object.keys(TARGET_FILE).join(", ")}`);
+			return { id, file };
+		});
+}
+
+export function planBinaryPublish(
+	targets: string,
+	existingFiles: ReadonlySet<string>,
+	forceBuild: boolean,
+): BinaryPublishPlan {
+	const requested = parseRequestedBinaryTargets(targets);
+	const toBuild = forceBuild ? requested : requested.filter(target => !existingFiles.has(target.file));
+	const skippedExisting = forceBuild ? [] : requested.filter(target => existingFiles.has(target.file));
+	const presentAfterBuild = new Set<string>([...existingFiles, ...toBuild.map(target => target.file)]);
+	return {
+		requested,
+		toBuild,
+		skippedExisting,
+		presentAfterBuild,
+		missingRequiredAfterBuild: REQUIRED_BINARIES.filter(file => !presentAfterBuild.has(file)),
+	};
+}
+
 async function resolveTag(): Promise<string> {
 	const explicit = arg("--tag");
 	if (explicit) return explicit.startsWith("v") ? explicit : `v${explicit}`;
@@ -119,6 +163,7 @@ async function resolveTag(): Promise<string> {
 async function main(): Promise<void> {
 	const tag = await resolveTag();
 	const targets = arg("--targets") ?? hostTargetId();
+	const forceBuild = hasFlag("--force-build");
 
 	if (!isDryRun && !Bun.env.HF_TOKEN) {
 		throw new Error("HF_TOKEN is required (write-scoped Hugging Face token). See script header.");
@@ -128,15 +173,29 @@ async function main(): Promise<void> {
 	console.log(`  repo:    ${hfRepo} (${hfRepoType}, private)`);
 	console.log(`  tag:     ${tag}`);
 	console.log(`  targets: ${targets}`);
+	if (forceBuild) console.log("  force:   rebuild/re-upload existing targets");
 	console.log();
+
+	const existingBeforeBuild = await existingBinariesForTag(tag);
+	const plan = planBinaryPublish(targets, existingBeforeBuild, forceBuild);
+	if (plan.skippedExisting.length > 0) {
+		console.log(`Already present on ${hfRepo} under ${tag}/; skipping build/upload:`);
+		for (const target of plan.skippedExisting) console.log(`  ${target.id} (${target.file})`);
+		console.log();
+	}
 
 	// 1. Build the requested binaries. ci-release-build-binaries.ts writes them to
 	//    packages/coding-agent/binaries/ and leaves them there (its reset only
 	//    touches embedded-native/bundle source placeholders).
-	console.log("Building binaries...");
-	const buildArgs = ["scripts/ci-release-build-binaries.ts", "--targets", targets];
-	if (isDryRun) buildArgs.push("--dry-run");
-	await $`bun ${buildArgs}`.cwd(repoRoot);
+	if (plan.toBuild.length === 0) {
+		console.log("All requested binaries already exist in the distribution repo; skipping local build.");
+	} else {
+		const buildTargets = plan.toBuild.map(target => target.id).join(",");
+		console.log(`Building binaries: ${buildTargets}`);
+		const buildArgs = ["scripts/ci-release-build-binaries.ts", "--targets", buildTargets];
+		if (isDryRun) buildArgs.push("--dry-run");
+		await $`bun ${buildArgs}`.cwd(repoRoot);
+	}
 
 	// 2. Stage a VERSION pointer next to the binaries.
 	const versionFile = path.join(binariesDir, "VERSION");
@@ -146,20 +205,11 @@ async function main(): Promise<void> {
 	// readdir of binariesDir, which also picks up stale binaries from earlier
 	// releases and would wrongly mark the tag complete or upload an old binary
 	// under the new tag.
-	const requestedFiles = targets
-		.split(",")
-		.map(t => t.trim())
-		.filter(Boolean)
-		.map(t => {
-			const file = TARGET_FILE[t];
-			if (!file) throw new Error(`Unknown target "${t}". Known: ${Object.keys(TARGET_FILE).join(", ")}`);
-			return file;
-		});
 	const built: string[] = [];
-	for (const f of requestedFiles) {
-		if (await Bun.file(path.join(binariesDir, f)).exists()) built.push(f);
-		else if (isDryRun) built.push(f);
-		else throw new Error(`Expected ${f} after building "${targets}", but it was not produced.`);
+	for (const target of plan.toBuild) {
+		if (await Bun.file(path.join(binariesDir, target.file)).exists()) built.push(target.file);
+		else if (isDryRun) built.push(target.file);
+		else throw new Error(`Expected ${target.file} after building "${target.id}", but it was not produced.`);
 	}
 	console.log(`\nBuilt: ${built.join(", ") || "(none)"}`);
 
@@ -169,7 +219,7 @@ async function main(): Promise<void> {
 	if (isDryRun) {
 		console.log(`\nDRY RUN — would upload:`);
 		for (const f of built) console.log(`  ${binariesDir}/${f} -> ${hfRepo}:${tag}/${f}`);
-		const present = new Set<string>([...(await existingBinariesForTag(tag)), ...built]);
+		const present = new Set<string>([...existingBeforeBuild, ...built]);
 		const missing = REQUIRED_BINARIES.filter(f => !present.has(f));
 		if (skipVersion) console.log(`  VERSION left unchanged (--no-version)`);
 		else if (missing.length === 0 || forceVersion)
@@ -180,9 +230,15 @@ async function main(): Promise<void> {
 
 	// 3. Upload the built binaries under <tag>/. `hf upload` handles LFS for the
 	//    large binaries; HF_TOKEN is read from the env.
-	console.log(`\nUploading to ${hfRepo} ...`);
-	for (const f of built) {
-		await $`hf upload ${hfRepo} ${path.join(binariesDir, f)} ${`${tag}/${f}`} --repo-type ${hfRepoType}`.cwd(repoRoot);
+	if (built.length > 0) {
+		console.log(`\nUploading to ${hfRepo} ...`);
+		for (const f of built) {
+			await $`hf upload ${hfRepo} ${path.join(binariesDir, f)} ${`${tag}/${f}`} --repo-type ${hfRepoType}`.cwd(
+				repoRoot,
+			);
+		}
+	} else {
+		console.log(`\nNo binary uploads needed.`);
 	}
 
 	// 4. Flip the VERSION pointer ONLY when every platform binary exists for this
@@ -190,7 +246,7 @@ async function main(): Promise<void> {
 	//    (darwin needs a Mac), so flipping after a partial upload 404s the missing
 	//    platforms; leave installs on the last complete tag until the rest land.
 	//    `--force-version` overrides; `--no-version` never flips.
-	const present = new Set<string>([...(await existingBinariesForTag(tag)), ...built]);
+	const present = new Set<string>([...existingBeforeBuild, ...built]);
 	const missing = REQUIRED_BINARIES.filter(f => !present.has(f));
 
 	if (skipVersion) {
@@ -211,4 +267,6 @@ async function main(): Promise<void> {
 	}
 }
 
-await main();
+if (import.meta.main) {
+	await main();
+}

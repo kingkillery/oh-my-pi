@@ -12,6 +12,10 @@
 		"noEmit": true,
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
+		// TS1149/TS1261 on Windows means the shell cwd casing doesn't match the
+		// on-disk path. The canonical checkout is C:\dev\Desktop-Projects\...
+		// (capital D, capital P) — cd there before running typechecks; do not
+		// relax this flag to hide the mismatch.
 		"forceConsistentCasingInFileNames": true,
 		"types": ["bun", "assets"],
 		"typeRoots": ["./types", "./node_modules/@types"]

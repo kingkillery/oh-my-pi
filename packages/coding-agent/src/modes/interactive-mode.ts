@@ -77,6 +77,7 @@ import {
 	resolveApprovedPlan,
 	resolvePlanTitle,
 } from "../plan-mode/approved-plan";
+import fusionSidekickBootstrapPrompt from "../prompts/fusion/sidekick-bootstrap.md" with { type: "text" };
 import planModeApprovedPrompt from "../prompts/system/plan-mode-approved.md" with { type: "text" };
 import planModeCompactInstructionsPrompt from "../prompts/system/plan-mode-compact-instructions.md" with {
 	type: "text",
@@ -715,7 +716,7 @@ export class InteractiveMode implements InteractiveModeContext {
 					modelOverride: sidekickModel,
 					thinkingLevel: ThinkingLevel.Inherit,
 					name: "Sidekick",
-					task: "You are the reusable Fusion sidekick for this session. Reply with a one-line 'ready' and yield immediately. After that, handle the settled mechanical/bulk tasks the main agent delegates to you over IRC — multi-file edits to a decided API, renames, boilerplate, data collection, running tests/builds, and broad searches — and report back concisely. Do not make design decisions or re-delegate.",
+					task: fusionSidekickBootstrapPrompt.trim(),
 				},
 				"task",
 			);

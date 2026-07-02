@@ -10,6 +10,12 @@ describe("fusion settings schema", () => {
 		expect(SETTINGS_SCHEMA["fusion.compactModel"].default).toBe("");
 		expect(SETTINGS_SCHEMA["fusion.sidekickRequestBudget"].default).toBe(0);
 		expect(SETTINGS_SCHEMA["fusion.showSavings"].default).toBe(true);
+		// Dynamic routing and the tier pool are opt-in.
+		expect(SETTINGS_SCHEMA["fusion.dynamicRouting"].default).toBe(false);
+		expect(SETTINGS_SCHEMA["fusion.modelPool"].default).toEqual([]);
+		// Decoupled sidekick tier routing and failure-streak escalation are opt-in.
+		expect(SETTINGS_SCHEMA["fusion.sidekickStrongModel"].default).toBe("");
+		expect(SETTINGS_SCHEMA["fusion.escalateFailureStreak"].default).toBe(3);
 	});
 
 	it("exposes off/delegate/escalate modes", () => {
@@ -23,6 +29,9 @@ describe("fusion settings schema", () => {
 			"fusion.compactModel",
 			"fusion.sidekickRequestBudget",
 			"fusion.showSavings",
+			"fusion.dynamicRouting",
+			"fusion.sidekickStrongModel",
+			"fusion.escalateFailureStreak",
 		] as const) {
 			expect(SETTINGS_SCHEMA[key].ui?.condition).toBe("fusionEnabled");
 		}

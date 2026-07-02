@@ -592,6 +592,22 @@ const moaSegment: StatusLineSegment = {
 	},
 };
 
+const fusionSegment: StatusLineSegment = {
+	id: "fusion",
+	render(ctx) {
+		if (ctx.session.settings?.get("fusion.enabled") !== true) return { content: "", visible: false };
+		const mode = ctx.session.settings?.get("fusion.mode");
+		if (mode === "off") return { content: "", visible: false };
+		// Budget-fusion: a nonzero sidekick request budget hard-caps each sidekick
+		// run, so surface the cap alongside the mode.
+		const budget = ctx.session.settings?.get("fusion.sidekickRequestBudget");
+		const summary =
+			typeof budget === "number" && budget > 0 ? `fusion ${mode}${theme.sep.dot}cap ${budget}` : `fusion ${mode}`;
+		const content = withIcon(theme.icon.agents, summary);
+		return { content: theme.fg("accent", content), visible: true };
+	},
+};
+
 const fusionSavingsSegment: StatusLineSegment = {
 	id: "fusion_savings",
 	render(ctx) {
@@ -647,6 +663,7 @@ export const SEGMENTS: Record<StatusLineSegmentId, StatusLineSegment> = {
 	usage: usageSegment,
 	collab: collabSegment,
 	moa: moaSegment,
+	fusion: fusionSegment,
 	fusion_savings: fusionSavingsSegment,
 };
 

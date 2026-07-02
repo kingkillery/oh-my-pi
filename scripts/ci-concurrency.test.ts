@@ -7,9 +7,16 @@
 // flag for every event shape we care about.
 
 import { describe, expect, it } from "bun:test";
+import * as fs from "node:fs";
 import * as path from "node:path";
 
-const WORKFLOW_PATH = path.resolve(import.meta.dir, "..", ".github", "workflows", "ci.yml");
+// This fork keeps GitHub workflows parked as `*.yml.disabled` (see
+// .github/workflows/README.md). The concurrency contract must hold for the
+// file that would be re-enabled, so fall back to the disabled copy when the
+// live workflow is absent.
+const WORKFLOW_DIR = path.resolve(import.meta.dir, "..", ".github", "workflows");
+const WORKFLOW_CANDIDATES = ["ci.yml", "ci.yml.disabled"].map(name => path.join(WORKFLOW_DIR, name));
+const WORKFLOW_PATH = WORKFLOW_CANDIDATES.find(p => fs.existsSync(p)) ?? WORKFLOW_CANDIDATES[0]!;
 
 type Value = string | boolean | null;
 
@@ -237,12 +244,9 @@ const workflowYaml = await Bun.file(WORKFLOW_PATH).text();
 const concurrencySection = workflowYaml.slice(workflowYaml.indexOf("\nconcurrency:") + 1);
 const groupRaw = /^\s*group:\s*(\S.*?)\s*$/m.exec(concurrencySection)?.[1];
 const cancelRaw = /^\s*cancel-in-progress:\s*(\S.*?)\s*$/m.exec(concurrencySection)?.[1];
-const groupTemplate =
-	groupRaw && groupRaw.startsWith('"') && groupRaw.endsWith('"') ? groupRaw.slice(1, -1) : groupRaw;
+const groupTemplate = groupRaw && groupRaw.startsWith('"') && groupRaw.endsWith('"') ? groupRaw.slice(1, -1) : groupRaw;
 const cancelTemplate =
-	cancelRaw && cancelRaw.startsWith('"') && cancelRaw.endsWith('"')
-		? cancelRaw.slice(1, -1)
-		: cancelRaw;
+	cancelRaw && cancelRaw.startsWith('"') && cancelRaw.endsWith('"') ? cancelRaw.slice(1, -1) : cancelRaw;
 if (!groupTemplate || !cancelTemplate) {
 	throw new Error("could not locate concurrency.group / cancel-in-progress in ci.yml");
 }

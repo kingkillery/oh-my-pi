@@ -1449,7 +1449,15 @@ async function driveSessionToYield(
 		const reminderToolChoice = buildNamedToolChoice("yield", session.model);
 
 		let retryCount = 0;
-		while (!monitor.yieldCalled() && retryCount < MAX_YIELD_RETRIES && !abortSignal.aborted) {
+		// The budget flag reflects the most recent run and each re-prompt starts a
+		// fresh `maxModelRequestsPerRun` counter, so retrying after a budget cut
+		// would let the run spend a multiple of the configured cap.
+		while (
+			!monitor.yieldCalled() &&
+			retryCount < MAX_YIELD_RETRIES &&
+			!abortSignal.aborted &&
+			!session.agent.modelRequestBudgetExceeded
+		) {
 			// Skip reminders when the model returned a terminal error (e.g.
 			// rate-limit cap hit, auth failure). Re-prompting would just
 			// hit the same wall, multiplying the failure noise without
@@ -1488,6 +1496,11 @@ async function driveSessionToYield(
 		}
 
 		await awaitAbortable(session.waitForIdle());
+
+		if (session.agent.modelRequestBudgetExceeded && !monitor.yieldCalled()) {
+			exitCode = 1;
+			error ??= "Sidekick model-request budget exhausted (fusion.sidekickRequestBudget)";
+		}
 
 		const lastAssistant = session.getLastAssistantMessage();
 		if (lastAssistant) {

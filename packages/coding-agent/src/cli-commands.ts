@@ -36,6 +36,7 @@ export const commands: CommandEntry[] = [
 	{ name: "install", load: () => import("./commands/install").then(m => m.default) },
 	{ name: "join", load: () => import("./commands/join").then(m => m.default) },
 	{ name: "models", load: () => import("./commands/models").then(m => m.default) },
+	{ name: "okf", load: () => import("./commands/okf").then(m => m.default) },
 	{ name: "plugin", load: () => import("./commands/plugin").then(m => m.default) },
 	{ name: "say", load: () => import("./commands/say").then(m => m.default) },
 	{ name: "setup", load: () => import("./commands/setup").then(m => m.default) },

@@ -62,7 +62,7 @@ function parseRequestedTargets(): Set<string> | null {
 	const flagValue =
 		flagIndex >= 0
 			? process.argv[flagIndex + 1]
-			: process.argv.find(arg => arg.startsWith("--targets="))?.split("=", 2)[1] ?? Bun.env.RELEASE_TARGETS;
+			: (process.argv.find(arg => arg.startsWith("--targets="))?.split("=", 2)[1] ?? Bun.env.RELEASE_TARGETS);
 
 	if (!flagValue) {
 		return null;
@@ -110,13 +110,13 @@ async function buildBinary(target: BinaryTarget): Promise<void> {
 	console.log(`Building ${target.outfile}...`);
 	await embedNative(target);
 	if (isDryRun) {
-		console.log(`DRY RUN bun build --compile --no-compile-autoload-bunfig --no-compile-autoload-dotenv --no-compile-autoload-tsconfig --no-compile-autoload-package-json --minify-identifiers --keep-names --define process.env.PI_COMPILED="true" --root . --target=${target.target} ${entrypoint} --outfile ${target.outfile}`);
+		console.log(
+			`DRY RUN bun build --compile --no-compile-autoload-bunfig --no-compile-autoload-dotenv --no-compile-autoload-tsconfig --no-compile-autoload-package-json --minify-identifiers --keep-names --define process.env.PI_COMPILED="true" --root . --target=${target.target} ${entrypoint} --outfile ${target.outfile}`,
+		);
 		return;
 	}
 
-	const buildEnv = shouldAdhocSignDarwinBinary(target)
-		? { ...Bun.env, BUN_NO_CODESIGN_MACHO_BINARY: "1" }
-		: Bun.env;
+	const buildEnv = shouldAdhocSignDarwinBinary(target) ? { ...Bun.env, BUN_NO_CODESIGN_MACHO_BINARY: "1" } : Bun.env;
 	await runCommand(
 		[
 			"bun",
@@ -176,9 +176,7 @@ async function resetArtifacts(): Promise<void> {
 
 async function main(): Promise<void> {
 	const requestedTargets = parseRequestedTargets();
-	const selectedTargets = requestedTargets
-		? targets.filter(target => requestedTargets.has(target.id))
-		: targets;
+	const selectedTargets = requestedTargets ? targets.filter(target => requestedTargets.has(target.id)) : targets;
 
 	if (requestedTargets) {
 		const unknownTargets = [...requestedTargets].filter(

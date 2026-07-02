@@ -166,6 +166,7 @@ export type StatusLineSegmentId =
 	| "usage"
 	| "collab"
 	| "moa"
+	| "fusion"
 	| "fusion_savings";
 
 /** Submenu choice metadata. */
@@ -816,6 +817,21 @@ export const SETTINGS_SCHEMA = {
 		},
 	},
 
+	// Devin-Fusion refinement: the compaction classifier's verdict also re-tiers
+	// the warm sidekick, independently of the main-model switch.
+	"fusion.sidekickStrongModel": {
+		type: "string",
+		default: "",
+		ui: {
+			tab: "interaction",
+			group: "Fusion",
+			label: "Sidekick Strong Model",
+			description:
+				"Optional stronger sidekick tier: with dynamic routing on, each compaction verdict also re-tiers the warm sidekick — hard stretches upgrade it to this model (recommended: `pi/task`), settled stretches return it to the base sidekick model. Empty disables.",
+			condition: "fusionEnabled",
+		},
+	},
+
 	"fusion.compactModel": {
 		type: "string",
 		default: "",
@@ -824,10 +840,51 @@ export const SETTINGS_SCHEMA = {
 			group: "Fusion",
 			label: "Post-Compaction Model",
 			description:
-				"Optional cheaper model to switch the main agent to at each compaction boundary (the cache is already invalidated there, so the switch is free). Empty disables it.",
+				"Optional cheaper model to switch the main agent to at each compaction boundary (the messages cache is already invalidated there, so the switch is marginal-cost). Empty disables it.",
 			condition: "fusionEnabled",
 		},
 	},
+
+	"fusion.dynamicRouting": {
+		type: "boolean",
+		default: false,
+		ui: {
+			tab: "interaction",
+			group: "Fusion",
+			label: "Dynamic Routing",
+			description:
+				"At every compaction boundary, run a lightweight classifier over the compaction summary to pick the main model for the next stretch — ramping down to the post-compaction model for mechanical work and back up to the frontier model when the work turns hard.",
+			condition: "fusionEnabled",
+		},
+	},
+
+	// Between compactions, a streak of consecutive failed tool calls on a
+	// downgraded main model is the cheapest reliable "this stretch turned hard"
+	// signal — force an early tier-up instead of waiting for the next boundary.
+	"fusion.escalateFailureStreak": {
+		type: "number",
+		default: 3,
+		ui: {
+			tab: "interaction",
+			group: "Fusion",
+			label: "Failure-Streak Escalation",
+			description:
+				"Consecutive failed tool calls on a Fusion-downgraded main model that force an early switch back to the frontier model, without waiting for the next compaction (0 = disabled).",
+			options: [
+				{ value: "0", label: "Disabled" },
+				{ value: "2", label: "2 failures" },
+				{ value: "3", label: "3 failures" },
+				{ value: "5", label: "5 failures" },
+			],
+			condition: "fusionEnabled",
+		},
+	},
+
+	// Tiered routing pool managed via /fusion-pool. Entries are "<tier>=<selector>"
+	// with tier 1 = most powerful … 5 = least intelligent. With 2+ entries and
+	// dynamic routing on, the compaction classifier picks a tier from this pool
+	// instead of the binary compactModel/frontier choice.
+	"fusion.modelPool": { type: "array", default: [] as string[] },
 
 	"fusion.sidekickRequestBudget": {
 		type: "number",
@@ -4190,6 +4247,36 @@ export const SETTINGS_SCHEMA = {
 
 	"skills.includeSkills": { type: "array", default: [] as string[] },
 
+	"skills.discoveryMode": {
+		type: "enum",
+		values: ["eager", "auto", "lazy"] as const,
+		default: "auto",
+		ui: {
+			tab: "tasks",
+			group: "Commands & Skills",
+			label: "Skill Prompt Injection",
+			description:
+				"How skill listings enter the system prompt. Eager always lists every skill; lazy never lists them (the agent discovers them on demand via skill://); auto lists them only while the catalog stays small.",
+			options: [
+				{
+					value: "eager",
+					label: "Eager",
+					description: "Always inject the full skill list into the system prompt.",
+				},
+				{
+					value: "auto",
+					label: "Auto",
+					description: "Inject the list only when few skills exist; large catalogs switch to on-demand discovery.",
+				},
+				{
+					value: "lazy",
+					label: "Lazy",
+					description: "Never inject the list; the agent lists skills on demand with `read skill://`.",
+				},
+			],
+		},
+	},
+
 	// Commands
 	"commands.enableClaudeUser": {
 		type: "boolean",
@@ -4950,6 +5037,7 @@ export interface SkillsSettings {
 	ignoredSkills?: string[];
 	includeSkills?: string[];
 	disabledExtensions?: string[];
+	discoveryMode?: "eager" | "auto" | "lazy";
 }
 
 export interface CommitSettings {
