@@ -1,9 +1,7 @@
 <system-reminder>
-Plan mode turn ended without a required tool call.
+Plan mode ended without a required tool call. Choose one now:
+1. Call `{{askToolName}}` for required clarification, or
+2. Call `resolve` with `action: "apply"`, `reason`, and `extra: { title: "<slug>" }`.
 
-You MUST choose exactly one next action now:
-1. Call `{{askToolName}}` to gather required clarification, OR
-2. Call `resolve` with `action: "apply"`, `reason`, and `extra: { title: "<slug>" }` (the slug of your `local://<slug>-plan.md`) to finish planning and request approval
-
-You NEVER output plain text in this turn.
+Do not output plain text.
 </system-reminder>

@@ -134,7 +134,6 @@ describe("SYSTEM.md prompt assembly", () => {
 		const appendMatches = promptText.match(new RegExp(escapeRegExp(appendPrompt), "g")) ?? [];
 		expect(systemPrompt).toHaveLength(2);
 		expect(promptText).toContain("CLI custom prompt");
-		expect(promptText).toContain("<workspace-tree>");
 		expect(promptText).toContain("<dir-context>");
 		expect(promptText).toContain(`current working directory is '${projectDir}'`);
 		expect(appendMatches).toHaveLength(1);

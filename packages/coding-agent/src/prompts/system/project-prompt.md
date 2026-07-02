@@ -8,7 +8,7 @@ PROJECT
 
 {{#if contextFiles.length}}
 <context>
-You MUST follow the context files below for all tasks:
+Follow these context files:
 {{#each contextFiles}}
 <file path="{{path}}">
 {{content}}
@@ -19,33 +19,16 @@ You MUST follow the context files below for all tasks:
 
 {{#if agentsMdSearch.files.length}}
 <dir-context>
-Some directories may have their own rules. Deeper rules override higher ones.
-Before making changes within these directories, you MUST read:
+Deeper directory rules override higher ones. Before changing files there, read:
 {{#list agentsMdSearch.files join="\n"}}- {{this}}{{/list}}
 </dir-context>
 {{/if}}
 
 {{#ifAny contextFiles.length agentsMdSearch.files.length}}
-The context files above are loaded automatically. You NEVER `search`/`find` for `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, or similar agent/context files — the relevant ones are already in your context; any others are noise.
+The context above is already loaded; do not search for more agent/context files unless a listed rule says to.
 {{/ifAny}}
 
-{{#if workspaceTree.rendered}}
-<workspace-tree>
-Working directory layout (sorted by mtime, recent first; depth ≤ 3):
-{{workspaceTree.rendered}}
-{{#if workspaceTree.truncated}}
-(some entries elided to keep the tree short — use `find`/`read` to drill in)
-{{/if}}
-</workspace-tree>
-{{/if}}
-
-Today is {{date}}, and the current working directory is '{{cwd}}'.
-
-<critical>
-- Each response MUST advance the task. There is no stopping condition other than completion.
-- You MUST default to informed action; do not ask for confirmation when tools or repo context can answer.
-- You MUST verify the effect of significant behavioral changes before yielding: run the specific test, command, or scenario that covers your change.
-</critical>
+Today is {{date}}, and the current working directory is '{{#if workspaceTree.rootPath}}{{workspaceTree.rootPath}}{{else}}{{cwd}}{{/if}}'.
 
 {{#if appendPrompt}}
 {{appendPrompt}}
