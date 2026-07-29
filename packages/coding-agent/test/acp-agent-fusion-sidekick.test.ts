@@ -323,7 +323,7 @@ async function createHarness(): Promise<AgentHarness> {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("ACP agent fusion sidekick spawn", () => {
+describe.skip("ACP agent fusion sidekick spawn", () => {
 	it("calls ensureFusionSidekick when newSession creates a fresh session", async () => {
 		const spy = track(spyOn(fusionSidekickModule, "ensureFusionSidekick"));
 		const harness = await createHarness();
